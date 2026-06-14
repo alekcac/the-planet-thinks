@@ -1,5 +1,35 @@
-import { describe, it, expect } from 'vitest';
-import { parseMessage } from '../src/net';
+import { describe, it, expect, vi } from 'vitest';
+import { parseMessage, connect } from '../src/net';
+
+describe('connect referrer handling', () => {
+  it('sends ?ref on first connect and strips it on reconnect', () => {
+    const urls: string[] = [];
+    let lastClose: (() => void) | undefined;
+    class FakeWS {
+      onopen?: () => void;
+      onmessage?: (e: { data: string }) => void;
+      onclose?: () => void;
+      onerror?: () => void;
+      constructor(u: string) {
+        urls.push(u);
+        lastClose = () => this.onclose?.();
+      }
+      close() { this.onclose?.(); }
+    }
+    vi.stubGlobal('WebSocket', FakeWS as unknown as typeof WebSocket);
+    vi.useFakeTimers();
+    try {
+      connect('wss://api.example.com/ws?ref=news.ycombinator.com', () => {}, () => {});
+      lastClose!();            // first connection drops -> schedules a reconnect
+      vi.advanceTimersByTime(1000);
+      expect(urls[0]).toBe('wss://api.example.com/ws?ref=news.ycombinator.com');
+      expect(urls[1]).toBe('wss://api.example.com/ws');
+    } finally {
+      vi.useRealTimers();
+      vi.unstubAllGlobals();
+    }
+  });
+});
 
 describe('parseMessage', () => {
   it('accepts known message types', () => {

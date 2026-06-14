@@ -17,8 +17,13 @@ export function connect(
   onStatus: (connected: boolean) => void,
 ) {
   let delay = 1000;
+  let first = true;
   function open() {
-    const ws = new WebSocket(url);
+    // Send the referrer query only on the first connect; reconnects use the bare URL
+    // so a single visit is counted once, not on every dropped connection.
+    const target = first ? url : url.split('?')[0];
+    first = false;
+    const ws = new WebSocket(target);
     ws.onopen = () => { delay = 1000; onStatus(true); };
     ws.onmessage = ev => {
       const m = parseMessage(String(ev.data));

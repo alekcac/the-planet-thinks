@@ -31,7 +31,12 @@ function resolveWsUrl(): string {
   if (location.hostname.endsWith('theplanetthinks.com')) return 'wss://api.theplanetthinks.com/ws';
   return `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`;
 }
-const WS_URL = resolveWsUrl();
+function referrerTag(): string {
+  try { return document.referrer ? new URL(document.referrer).hostname : 'direct'; }
+  catch { return 'direct'; }
+}
+// Pass where this visit came from once, on the first connect (net.ts drops it on reconnects).
+const WS_URL = `${resolveWsUrl()}?ref=${encodeURIComponent(referrerTag())}`;
 
 connect(
   WS_URL,

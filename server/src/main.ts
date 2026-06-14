@@ -29,10 +29,24 @@ try {
 }
 setInterval(() => fs.writeFile(CACHE_FILE, JSON.stringify(resolver.dump()), () => {}), 5 * 60_000);
 
+// Where visitors came from: counted once per page load (the client sends ?ref on first connect).
+const REF_FILE = path.join(DATA_DIR, 'referrers.json');
+const referrers = new Map<string, number>();
+try {
+  for (const [k, v] of Object.entries(JSON.parse(fs.readFileSync(REF_FILE, 'utf8')))) {
+    referrers.set(k, v as number);
+  }
+} catch { /* start empty */ }
+setInterval(() => fs.writeFile(REF_FILE, JSON.stringify(Object.fromEntries(referrers)), () => {}), 5 * 60_000);
+
 const server = http.createServer((req, res) => {
   if (req.url === '/healthz') {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({ ok: true, clients: wss.clients.size, ...stats.snapshot() }));
+  } else if (req.url === '/referrers') {
+    res.setHeader('content-type', 'application/json');
+    const sorted = [...referrers.entries()].sort((a, b) => b[1] - a[1]);
+    res.end(JSON.stringify(Object.fromEntries(sorted)));
   } else {
     res.statusCode = 404;
     res.end();
@@ -40,8 +54,14 @@ const server = http.createServer((req, res) => {
 });
 
 const wss = new WebSocketServer({ server, path: '/ws' });
-wss.on('connection', ws => {
+wss.on('connection', (ws, req) => {
   if (wss.clients.size > MAX_CLIENTS) { ws.close(1013, 'at capacity'); return; }
+  try {
+    const ref = (new URL(req.url ?? '/', 'http://x').searchParams.get('ref') ?? '').slice(0, 80);
+    if (ref && (referrers.has(ref) || referrers.size < 1000)) {
+      referrers.set(ref, (referrers.get(ref) ?? 0) + 1);
+    }
+  } catch { /* ignore malformed ref */ }
   ws.send(JSON.stringify({ type: 'replay', events: buffer.list() } satisfies ServerMessage));
 });
 
