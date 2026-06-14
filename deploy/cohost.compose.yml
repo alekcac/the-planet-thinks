@@ -1,0 +1,42 @@
+# Co-host the WebSocket server alongside another Docker Compose stack (reusing that
+# stack's existing Caddy for TLS). Runs ONLY this one container — do NOT also run
+# docker-compose.yml, which starts its own Caddy and would clash on ports 80/443.
+#
+# Setup (on the host):
+#   1. Find the other stack's Caddy network name:  docker network ls
+#   2. Create a .env next to this file with:
+#        EXTERNAL_NETWORK=<that network name>
+#        USER_AGENT=the-planet-thinks/1.0 (https://theplanetthinks.com; you@example.com)
+#   3. docker compose -f cohost.compose.yml up -d --build
+#   4. Add to the other stack's Caddyfile, then reload Caddy:
+#        api.theplanetthinks.com {
+#            reverse_proxy earth-server:8080
+#        }
+services:
+  earth-server:
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
+    container_name: earth-server
+    restart: unless-stopped
+    environment:
+      - USER_AGENT=${USER_AGENT}
+      - MAX_CLIENTS=3000
+      - DATA_DIR=/data
+    volumes:
+      - earth-data:/data
+    networks:
+      - shared
+    mem_limit: 512m       # hard cap so a traffic spike can't starve the rest of the host
+    cpus: 1.0
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }   # bound log disk use
+
+networks:
+  shared:
+    external: true
+    name: ${EXTERNAL_NETWORK}
+
+volumes:
+  earth-data:

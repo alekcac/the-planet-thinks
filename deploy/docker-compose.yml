@@ -1,0 +1,26 @@
+services:
+  earth-server:
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
+    restart: unless-stopped
+    environment:
+      - PORT=8080
+      - DATA_DIR=/data
+      - USER_AGENT=${USER_AGENT}
+    volumes:
+      - earth-data:/data
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - API_DOMAIN=${API_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+volumes:
+  earth-data:
+  caddy-data:
