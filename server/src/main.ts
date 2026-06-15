@@ -71,34 +71,56 @@ function broadcast(msg: ServerMessage) {
 }
 setInterval(() => broadcast(stats.snapshot()), 5000);
 
-const es = new EventSource(STREAM_URL, {
-  fetch: (url, init) =>
-    fetch(url, { ...init, headers: { ...(init?.headers ?? {}), 'User-Agent': USER_AGENT } }),
-});
-es.onopen = () => console.log('stream connected');
-es.onerror = err => console.error('stream error', err);
-es.onmessage = async ev => {
-  let rc: unknown;
-  try { rc = JSON.parse(ev.data); } catch { return; }
-  const edit = classify(rc as Parameters<typeof classify>[0]);
-  if (!edit) return;
-  stats.recordTotal();
-  const coords = await resolver.resolve(edit.wiki, edit.title);
-  if (!coords) return;
-  const pulse: Pulse = {
-    type: 'pulse',
-    lat: coords.lat,
-    lon: coords.lon,
-    lang: edit.lang,
-    title: edit.title,
-    url: edit.url,
-    editor_type: edit.editor_type,
-    size_delta: edit.size_delta,
-    ts: edit.ts,
+let es: EventSource | null = null;
+let lastEventAt = Date.now();
+
+function startStream() {
+  es?.close();
+  es = new EventSource(STREAM_URL, {
+    fetch: (url, init) =>
+      fetch(url, { ...init, headers: { ...(init?.headers ?? {}), 'User-Agent': USER_AGENT } }),
+  });
+  es.onopen = () => console.log('stream connected');
+  es.onerror = err => console.error('stream error', err);
+  es.onmessage = async ev => {
+    lastEventAt = Date.now(); // any raw event (not just geo-located ones) proves the feed is alive
+    let rc: unknown;
+    try { rc = JSON.parse(ev.data); } catch { return; }
+    const edit = classify(rc as Parameters<typeof classify>[0]);
+    if (!edit) return;
+    stats.recordTotal();
+    const coords = await resolver.resolve(edit.wiki, edit.title);
+    if (!coords) return;
+    const pulse: Pulse = {
+      type: 'pulse',
+      lat: coords.lat,
+      lon: coords.lon,
+      lang: edit.lang,
+      title: edit.title,
+      url: edit.url,
+      editor_type: edit.editor_type,
+      size_delta: edit.size_delta,
+      ts: edit.ts,
+    };
+    buffer.push(pulse);
+    stats.recordGeo(pulse.lang);
+    broadcast(pulse);
   };
-  buffer.push(pulse);
-  stats.recordGeo(pulse.lang);
-  broadcast(pulse);
-};
+}
+
+startStream();
+
+// The upstream SSE feed occasionally drops (or goes silent) and the client library doesn't
+// always recover — leaving the server up but starved of events. If nothing arrives for a
+// while, rebuild the connection from scratch so the globe never goes permanently dark.
+const STREAM_STALE_MS = Number(process.env.STREAM_STALE_MS ?? 60_000);
+setInterval(() => {
+  const idle = Date.now() - lastEventAt;
+  if (idle > STREAM_STALE_MS) {
+    console.warn(`no stream events for ${Math.round(idle / 1000)}s — restarting stream`);
+    lastEventAt = Date.now(); // give the fresh connection time to warm up before re-checking
+    startStream();
+  }
+}, 15_000);
 
 server.listen(PORT, () => console.log(`listening on :${PORT}`));
