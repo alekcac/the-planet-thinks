@@ -172,4 +172,10 @@ setInterval(() => {
   }
 }, 15_000);
 
+// Behind Caddy's reverse proxy, keep idle upstream connections alive longer than the proxy does,
+// so Node never closes one just as Caddy reuses it (that race surfaces as occasional empty
+// responses). headersTimeout must stay above keepAliveTimeout.
+server.keepAliveTimeout = 75_000;
+server.headersTimeout = 80_000;
+
 server.listen(PORT, () => console.log(`listening on :${PORT}`));
