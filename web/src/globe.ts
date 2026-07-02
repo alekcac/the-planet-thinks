@@ -1,7 +1,7 @@
 import Globe from 'globe.gl';
 import * as THREE from 'three';
 import { colorFor, radiusFor, hslColor } from './visuals';
-import { sunDirection } from './sun';
+import { sunDirection, subsolarPoint } from './sun';
 import { angularDistanceDeg } from './geo';
 import { createSpace } from './space';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
@@ -95,12 +95,23 @@ function easeOutCubic(k: number): number {
   return 1 - Math.pow(1 - k, 3);
 }
 
+function easeInOutCubic(k: number): number {
+  return k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+}
+
+/** Normalize a longitude to [-180, 180]. */
+function normLng(lng: number): number {
+  return ((lng + 540) % 360) - 180;
+}
+
 const DEFAULT_ALTITUDE = 2.4; // camera distance the tour always settles back to
 
 export function createGlobe(el: HTMLElement, q: Quality, onPick: (p: Pulse) => void): GlobeHandle {
   const loader = new THREE.TextureLoader();
-  const dayTexture = loader.load('/earth-day.jpg');
-  const nightTexture = loader.load('/earth-night.jpg');
+  let texturesLoaded = 0;
+  const onTexture = () => { texturesLoaded++; };
+  const dayTexture = loader.load('/earth-day.jpg', onTexture);
+  const nightTexture = loader.load('/earth-night.jpg', onTexture);
   dayTexture.colorSpace = THREE.SRGBColorSpace;
   nightTexture.colorSpace = THREE.SRGBColorSpace;
 
@@ -114,13 +125,22 @@ export function createGlobe(el: HTMLElement, q: Quality, onPick: (p: Pulse) => v
     fragmentShader: DAY_NIGHT_FRAG,
   });
 
-  const globe = new Globe(el)
+  // Sunrise intro: open close to the night limb and glide across the terminator into the
+  // sunlit side. Users who prefer reduced motion get the settled view immediately.
+  const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const sunNow = subsolarPoint(new Date());
+  const INTRO_MS = 5200;
+  const INTRO_SWEEP_DEG = 150; // how far past the terminator, into the night, we start
+  const introStart = { lat: sunNow.lat, lng: normLng(sunNow.lon + INTRO_SWEEP_DEG), altitude: 0.8 };
+  const introEnd = { lat: 25, lng: sunNow.lon, altitude: DEFAULT_ALTITUDE };
+
+  const globe = new Globe(el, { animateIn: false }) // no built-in zoom-in: the camera must sit at the intro start from frame one
     .backgroundColor('#01020a')
     .globeMaterial(material)
     .showAtmosphere(true)
     .atmosphereColor('#3a6fff')
     .atmosphereAltitude(0.18)
-    .pointOfView({ lat: 25, lng: 0, altitude: DEFAULT_ALTITUDE })
+    .pointOfView(REDUCED_MOTION ? introEnd : introStart)
     .ringsData([])
     .ringMaxRadius((d: object) => (d as RingDatum).maxR)
     .ringPropagationSpeed(2.2)
@@ -168,7 +188,7 @@ export function createGlobe(el: HTMLElement, q: Quality, onPick: (p: Pulse) => v
   // Clamp zoom so the planet stays a sensible size and the camera never leaves the starfield.
   controls.minDistance = 130;
   controls.maxDistance = 500;
-  controls.addEventListener('start', () => { interacting = true; });
+  controls.addEventListener('start', () => { interacting = true; finishIntro(); });
   controls.addEventListener('end', () => { interacting = false; lastInteraction = Date.now(); });
 
   // ---- glowing markers: soft sprites that pop in and accumulate up to a cap ----
@@ -354,7 +374,61 @@ export function createGlobe(el: HTMLElement, q: Quality, onPick: (p: Pulse) => v
 
     tourTimer = setTimeout(runTour, flyMs + DWELL_MS);
   }
-  tourTimer = setTimeout(runTour, DWELL_MS);
+  // ---- sunrise intro: hold on the dark limb, then one eased sweep across the sunset
+  // terminator into daylight. Any user gesture ends it instantly and hands over control.
+  // A black curtain covers the canvas until our flight actually starts, so nothing of the
+  // scene setup (initial camera placement, texture pop-in) is ever visible.
+  let introActive = false;
+
+  function liftCurtain() {
+    const c = document.getElementById('curtain');
+    if (c) { c.classList.add('lift'); setTimeout(() => c.remove(), 1600); }
+  }
+
+  function finishIntro() {
+    if (!introActive) return;
+    introActive = false;
+    flying = false;
+    liftCurtain(); // in case a user gesture ends the intro while it's still dark
+    document.body.classList.remove('intro'); // the HUD fades in
+    tourTimer = setTimeout(runTour, DWELL_MS);
+  }
+
+  function runIntro() {
+    flying = true; // keep the idle drift out of the way
+    liftCurtain(); // first thing the user sees: the night limb fading in from black
+    const t0 = performance.now();
+    const frame = () => {
+      if (!introActive) return; // a user gesture already finished it
+      const k = Math.min(1, (performance.now() - t0) / INTRO_MS);
+      const e = easeInOutCubic(k);
+      globe.pointOfView({
+        lat: introStart.lat + (introEnd.lat - introStart.lat) * e,
+        lng: normLng(sunNow.lon + INTRO_SWEEP_DEG * (1 - e)),
+        altitude: introStart.altitude + (introEnd.altitude - introStart.altitude) * e,
+      }, 0);
+      if (k < 1) requestAnimationFrame(frame);
+      else finishIntro();
+    };
+    requestAnimationFrame(frame);
+  }
+
+  if (REDUCED_MOTION) {
+    liftCurtain();
+    document.body.classList.remove('intro');
+    tourTimer = setTimeout(runTour, DWELL_MS);
+  } else {
+    introActive = true;
+    // Wait for the Earth textures before lifting off (short deadline so a slow
+    // network never leaves the page stuck on the dark limb).
+    const deadline = performance.now() + 2500;
+    const waitForTextures = () => {
+      if (!introActive) return;
+      if (texturesLoaded >= 2 || performance.now() > deadline) runIntro();
+      else setTimeout(waitForTextures, 100);
+    };
+    waitForTextures();
+  }
 
   const rings: RingDatum[] = [];
 

@@ -81,6 +81,11 @@
     .controls label { cursor: pointer; display: flex; gap: 5px; align-items: center; }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: #e0564b; display: inline-block; }
     .dot.ok { background: #4be08a; }
+    .hud, #card { transition: opacity .8s ease; }
+    body.intro .hud, body.intro #card { opacity: 0; pointer-events: none; }
+    #curtain { position: fixed; inset: 0; background: #01020a; z-index: 50;
+               pointer-events: none; transition: opacity 1.4s ease; }
+    #curtain.lift { opacity: 0; }
     body.cinematic .hud, body.cinematic #card { opacity: 0; pointer-events: none; transition: opacity .5s ease; }
     body.cinematic.reveal .hud, body.cinematic.reveal #card { opacity: 1; pointer-events: auto; }
     body.cinematic { cursor: none; }
@@ -103,7 +108,8 @@
     }
   </style>
 </head>
-<body>
+<body class="intro">
+  <div id="curtain"></div>
   <div id="app"></div>
   <div class="vignette"></div>
 
