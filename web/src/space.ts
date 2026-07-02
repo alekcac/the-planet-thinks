@@ -18,6 +18,50 @@ export function createSpace(scene: THREE.Scene, loader: THREE.TextureLoader): Sp
   );
   scene.add(stars);
 
+  // A sparse layer of individually twinkling stars in front of the static texture —
+  // each has its own phase and rate, so the sky feels alive rather than printed.
+  const TWINKLE_COUNT = 420;
+  const pos = new Float32Array(TWINKLE_COUNT * 3);
+  const phase = new Float32Array(TWINKLE_COUNT);
+  const mag = new Float32Array(TWINKLE_COUNT);
+  const v = new THREE.Vector3();
+  for (let i = 0; i < TWINKLE_COUNT; i++) {
+    v.randomDirection().multiplyScalar(650 + Math.random() * 450);
+    pos.set([v.x, v.y, v.z], i * 3);
+    phase[i] = Math.random() * Math.PI * 2;
+    mag[i] = Math.random();
+  }
+  const twinkleGeom = new THREE.BufferGeometry();
+  twinkleGeom.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  twinkleGeom.setAttribute('phase', new THREE.BufferAttribute(phase, 1));
+  twinkleGeom.setAttribute('mag', new THREE.BufferAttribute(mag, 1));
+  const twinkleMat = new THREE.ShaderMaterial({
+    uniforms: { time: { value: 0 } },
+    vertexShader: `
+      attribute float phase;
+      attribute float mag;
+      uniform float time;
+      varying float vA;
+      void main() {
+        vA = 0.35 + 0.65 * (0.5 + 0.5 * sin(time * (0.6 + mag * 1.6) + phase));
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = (1.4 + mag * 2.4) * (420.0 / -mv.z);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `
+      varying float vA;
+      void main() {
+        float d = length(gl_PointCoord - 0.5);
+        float a = smoothstep(0.5, 0.05, d) * vA;
+        gl_FragColor = vec4(0.82, 0.88, 1.0, a);
+      }`,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+  const twinkles = new THREE.Points(twinkleGeom, twinkleMat);
+  scene.add(twinkles);
+
   // meteors: short additive streaks that shoot across the starfield now and then
   const meteorMat = new THREE.LineBasicMaterial({
     color: 0xffffff,
@@ -41,6 +85,9 @@ export function createSpace(scene: THREE.Scene, loader: THREE.TextureLoader): Sp
 
   function update() {
     stars.rotation.y += 0.00002;
+    stars.rotation.x += 0.000004; // a second, slower axis so the drift never reads as a loop
+    twinkles.rotation.y -= 0.000008; // counter-drift for parallax depth
+    twinkleMat.uniforms.time.value = performance.now() / 1000;
 
     const now = Date.now();
     if (now >= nextMeteor) {

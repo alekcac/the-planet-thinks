@@ -31,11 +31,14 @@ export interface GlobeHandle {
 
 const DAY_NIGHT_VERT = `
   varying vec3 vWorldNormal;
+  varying vec3 vWorldPos;
   varying vec2 vUv;
   void main() {
     vUv = uv;
     vWorldNormal = normalize(mat3(modelMatrix) * normal);
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    vec4 wp = modelMatrix * vec4(position, 1.0);
+    vWorldPos = wp.xyz;
+    gl_Position = projectionMatrix * viewMatrix * wp;
   }
 `;
 
@@ -44,13 +47,29 @@ const DAY_NIGHT_FRAG = `
   uniform sampler2D nightTexture;
   uniform vec3 sunDirection;
   varying vec3 vWorldNormal;
+  varying vec3 vWorldPos;
   varying vec2 vUv;
   void main() {
-    float intensity = dot(normalize(vWorldNormal), normalize(sunDirection));
+    vec3 n = normalize(vWorldNormal);
+    vec3 s = normalize(sunDirection);
+    float intensity = dot(n, s);
     float blend = smoothstep(-0.15, 0.18, intensity);
     vec3 day = texture2D(dayTexture, vUv).rgb;
-    vec3 night = texture2D(nightTexture, vUv).rgb * 1.5;
-    gl_FragColor = vec4(mix(night, day, blend), 1.0);
+    vec3 night = texture2D(nightTexture, vUv).rgb * vec3(1.7, 1.5, 1.2);
+    vec3 color = mix(night, day, blend);
+
+    // Warm band along the terminator: the planet gets a ring of sunset where day meets night.
+    float twilight = smoothstep(0.22, 0.0, abs(intensity));
+    color += vec3(1.0, 0.34, 0.10) * twilight * twilight * 0.32 * (0.35 + 0.65 * blend);
+
+    // Sun glint on water: a specular highlight gated to blue-dominant (ocean) day pixels.
+    vec3 dg = pow(day, vec3(0.4545));
+    float water = smoothstep(0.02, 0.14, dg.b - max(dg.r, dg.g) + 0.02);
+    vec3 viewDir = normalize(cameraPosition - vWorldPos);
+    float spec = pow(max(dot(viewDir, reflect(-s, n)), 0.0), 48.0);
+    color += vec3(1.0, 0.86, 0.62) * spec * water * max(intensity, 0.0) * 0.55;
+
+    gl_FragColor = vec4(color, 1.0);
   }
 `;
 
@@ -157,8 +176,10 @@ export function createGlobe(el: HTMLElement, q: Quality, onPick: (p: Pulse) => v
   const markerGroup = new THREE.Group();
   globe.scene().add(markerGroup);
   const markers: Marker[] = [];
-  const POP_MS = 450;   // grow-in time
-  const FADE_MS = 700;  // fade-out time once evicted
+  const POP_MS = 450;    // grow-in time
+  const FADE_MS = 700;   // fade-out time once evicted
+  const EMBER_MS = 14000; // after the pop, cool down to a dim lingering ember
+  const EMBER_LEVEL = 0.38; // opacity an old marker settles at (fresh ones pop at 0.95)
 
   // Great-circle arcs traced as the tour glides from one edit to the next.
   const arcGroup = new THREE.Group();
@@ -228,10 +249,19 @@ export function createGlobe(el: HTMLElement, q: Quality, onPick: (p: Pulse) => v
       const m = markers[i];
       const mat = m.sprite.material as THREE.SpriteMaterial;
       if (m.dead === null) {
-        const k = Math.min(1, (t - m.born) / POP_MS);
-        const overshoot = 1 + Math.sin(k * Math.PI) * 0.22;
-        m.sprite.scale.setScalar(m.size * easeOutCubic(k) * overshoot);
-        mat.opacity = 0.95 * Math.min(1, k * 1.4);
+        const age = t - m.born;
+        if (age < POP_MS) {
+          const k = age / POP_MS;
+          const overshoot = 1 + Math.sin(k * Math.PI) * 0.22;
+          m.sprite.scale.setScalar(m.size * easeOutCubic(k) * overshoot);
+          mat.opacity = 0.95 * Math.min(1, k * 1.4);
+        } else {
+          // Cool from the bright pop down to an ember, so fresh edits stand out while
+          // older ones accumulate into a dim glowing map of recent activity.
+          const e = Math.min(1, (age - POP_MS) / EMBER_MS);
+          mat.opacity = 0.95 - (0.95 - EMBER_LEVEL) * e;
+          m.sprite.scale.setScalar(m.size * (1 - 0.25 * e));
+        }
       } else {
         const f = (t - m.dead) / FADE_MS;
         if (f >= 1) {
@@ -240,8 +270,8 @@ export function createGlobe(el: HTMLElement, q: Quality, onPick: (p: Pulse) => v
           markers.splice(i, 1);
           continue;
         }
-        mat.opacity = 0.95 * (1 - f);
-        m.sprite.scale.setScalar(m.size * (1 - 0.2 * f));
+        mat.opacity = EMBER_LEVEL * (1 - f); // evicted markers are old embers, so fade from there
+        m.sprite.scale.setScalar(m.size * 0.75 * (1 - 0.2 * f));
       }
     }
     for (let i = arcs.length - 1; i >= 0; i--) {
