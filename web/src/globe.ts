@@ -110,8 +110,8 @@ export function createGlobe(el: HTMLElement, q: Quality, onPick: (p: Pulse) => v
   const loader = new THREE.TextureLoader();
   let texturesLoaded = 0;
   const onTexture = () => { texturesLoaded++; };
-  const dayTexture = loader.load('/earth-day.jpg', onTexture);
-  const nightTexture = loader.load('/earth-night.jpg', onTexture);
+  const dayTexture = loader.load('/earth-day.webp', onTexture);
+  const nightTexture = loader.load('/earth-night.webp', onTexture);
   dayTexture.colorSpace = THREE.SRGBColorSpace;
   nightTexture.colorSpace = THREE.SRGBColorSpace;
 

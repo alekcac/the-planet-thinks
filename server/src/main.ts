@@ -84,6 +84,7 @@ function dwellSnapshot() {
 }
 
 const server = http.createServer((req, res) => {
+  res.setHeader('x-robots-tag', 'noindex'); // JSON endpoints must never appear in search results
   if (req.url === '/healthz') {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({ ok: true, clients: wss.clients.size, ...stats.snapshot() }));

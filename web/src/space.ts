@@ -10,7 +10,7 @@ export interface SpaceLayer { update: () => void; }
 
 export function createSpace(scene: THREE.Scene, loader: THREE.TextureLoader): SpaceLayer {
   // starfield: a big sphere with the night-sky texture on the inside
-  const starTex = loader.load('/stars.png');
+  const starTex = loader.load('/stars.webp');
   starTex.colorSpace = THREE.SRGBColorSpace;
   const stars = new THREE.Mesh(
     new THREE.SphereGeometry(STAR_RADIUS, 48, 32),
