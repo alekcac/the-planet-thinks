@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How Often Is Wikipedia Edited? Live Statistics — The Planet Thinks</title>
+  <meta name="description" content="Live Wikipedia edit statistics: how many edits happen per minute, per hour, and per day across ~300 language editions — measured in real time from the Wikimedia edit stream." />
+  <link rel="canonical" href="https://theplanetthinks.com/stats" />
+  <meta name="theme-color" content="#01020a" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://theplanetthinks.com/stats" />
+  <meta property="og:site_name" content="The Planet Thinks" />
+  <meta property="og:title" content="Wikipedia edit statistics, live" />
+  <meta property="og:description" content="How many times is Wikipedia edited per day? Watch the live rate, measured from the Wikimedia edit stream." />
+  <meta property="og:image" content="https://theplanetthinks.com/og.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://theplanetthinks.com/og.jpg" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How many times is Wikipedia edited per day?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Measured live from the Wikimedia recent-changes stream, Wikipedia typically receives a few hundred edits per minute across all of its roughly 300 language editions — on the order of half a million edits in a typical day. The rate varies with the time of day and with bursts of automated bot activity." }
+      },
+      {
+        "@type": "Question",
+        "name": "How many times is Wikipedia edited per second?",
+        "acceptedAnswer": { "@type": "Answer", "text": "On average around 3 to 6 edits are saved every second across all language editions combined. During bot maintenance runs the rate can spike far higher for short periods." }
+      },
+      {
+        "@type": "Question",
+        "name": "How is this measured?",
+        "acceptedAnswer": { "@type": "Answer", "text": "The numbers on this page come directly from Wikimedia EventStreams, the public real-time feed of every change saved on Wikipedia. This page keeps one connection open and counts article edits as they arrive — nothing is estimated or cached." }
+      },
+      {
+        "@type": "Question",
+        "name": "Which Wikipedia language edition is edited the most?",
+        "acceptedAnswer": { "@type": "Answer", "text": "English Wikipedia is usually the most actively edited, but at any given moment the mix shifts with the sun: European languages peak during European daytime, East Asian languages during theirs, and bot activity can put smaller editions on top for minutes at a time. The live table on this page shows the current mix." }
+      }
+    ]
+  }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #01020a; color: #cfd8ff; font: 16px/1.65 system-ui, sans-serif; }
+    main { max-width: 720px; margin: 0 auto; padding: 48px 20px 64px; }
+    h1 { font-size: 28px; font-weight: 600; letter-spacing: 0.02em; margin: 0 0 4px; }
+    .sub { opacity: 0.6; margin: 0 0 32px; font-size: 15px; }
+    h2 { font-size: 19px; font-weight: 600; margin: 40px 0 10px; }
+    p { margin: 10px 0; }
+    a { color: #9fc4ff; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 24px 0; }
+    .card { background: rgba(120,150,255,0.07); border: 1px solid rgba(120,150,255,0.15); border-radius: 10px; padding: 14px 16px; }
+    .card .v { font-size: 26px; font-weight: 600; color: #eef2ff; font-variant-numeric: tabular-nums; }
+    .card .l { font-size: 12.5px; opacity: 0.6; margin-top: 2px; }
+    .status { font-size: 13px; opacity: 0.55; margin: -12px 0 0; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 4px; font-variant-numeric: tabular-nums; }
+    td, th { text-align: left; padding: 6px 8px; border-bottom: 1px solid rgba(120,150,255,0.12); font-size: 14.5px; }
+    th { opacity: 0.6; font-weight: 500; font-size: 12.5px; }
+    td.n, th.n { text-align: right; }
+    .muted { opacity: 0.55; font-size: 14px; }
+    .cta { display: inline-block; margin-top: 8px; padding: 10px 16px; border: 1px solid rgba(120,150,255,0.35); border-radius: 8px; text-decoration: none; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Wikipedia edit statistics, live</h1>
+  <p class="sub">Measured right now from the Wikimedia edit stream — not an estimate.</p>
+
+  <div class="cards">
+    <div class="card"><div class="v" id="rate-min">—</div><div class="l">edits per minute, now</div></div>
+    <div class="card"><div class="v" id="rate-hour">—</div><div class="l">per hour at this pace</div></div>
+    <div class="card"><div class="v" id="rate-day">—</div><div class="l">per day at this pace</div></div>
+    <div class="card"><div class="v" id="rate-geo">—</div><div class="l">edits/min about places</div></div>
+  </div>
+  <p class="status" id="status">connecting to the live stream…</p>
+
+  <p>Every number above updates every few seconds from
+    <a href="https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams" rel="noopener">Wikimedia EventStreams</a> —
+    the public firehose of every change saved on Wikipedia. Across its ~300 language editions,
+    Wikipedia typically receives <b>a few hundred edits every minute</b>, which works out to
+    roughly <b>half a million edits on a typical day</b>. The pace follows the sun: European
+    editions peak in European daytime, East Asian editions in theirs, and automated bots can
+    briefly push the rate far above its usual range at any hour.</p>
+
+  <h2>What's being edited right now</h2>
+  <p class="muted">Geo-located article edits in the last minute, by language edition.</p>
+  <table aria-live="polite">
+    <thead><tr><th>Language edition</th><th class="n">edits/min</th></tr></thead>
+    <tbody id="langs"><tr><td colspan="2" class="muted">waiting for data…</td></tr></tbody>
+  </table>
+
+  <h2>See the edits on a globe</h2>
+  <p>Every geo-located edit counted here lights up, live, on a realistic 3D globe — where the
+    article's subject actually is on Earth. It is free, open source, and strangely calming.</p>
+  <p><a class="cta" href="/">Watch Wikipedia edit itself, live →</a></p>
+
+  <h2>Notes on the numbers</h2>
+  <p class="muted">An "edit" here is a saved change to an article (the main namespace), including
+    those made by bots. Rates are one-minute rolling counts, so they move constantly. Only edits
+    to articles with map coordinates — about a fifth of Wikipedia — appear in the geo count and on
+    the globe. This page holds one lightweight connection to the same feed the globe uses; nothing
+    is sampled or cached.</p>
+</main>
+<script>
+  var LANG_NAMES = { en:'English', de:'German', fr:'French', es:'Spanish', it:'Italian', ru:'Russian', ja:'Japanese', zh:'Chinese', pt:'Portuguese', pl:'Polish', nl:'Dutch', sv:'Swedish', uk:'Ukrainian', ar:'Arabic', ko:'Korean', tr:'Turkish', he:'Hebrew', fa:'Persian', vi:'Vietnamese', th:'Thai', id:'Indonesian', cs:'Czech', hu:'Hungarian', fi:'Finnish', da:'Danish', no:'Norwegian', nn:'Norwegian (Nynorsk)', ca:'Catalan', gl:'Galician', eu:'Basque', ur:'Urdu', hi:'Hindi', bn:'Bengali', ta:'Tamil', ce:'Chechen', sr:'Serbian', hr:'Croatian', sl:'Slovenian', sk:'Slovak', bg:'Bulgarian', ro:'Romanian', el:'Greek', et:'Estonian', lt:'Lithuanian', lv:'Latvian', ms:'Malay', tl:'Tagalog', az:'Azerbaijani', hy:'Armenian', ka:'Georgian', kk:'Kazakh', uz:'Uzbek', tt:'Tatar', be:'Belarusian', sw:'Swahili', af:'Afrikaans', os:'Ossetian', mr:'Marathi', sat:'Santali', als:'Alemannic', lij:'Ligurian', bcl:'Central Bikol' };
+  var fmt = function (n) { return n.toLocaleString('en-US'); };
+  var delay = 2000;
+  function connect() {
+    var ws = new WebSocket('wss://api.theplanetthinks.com/ws');
+    ws.onopen = function () { delay = 2000; document.getElementById('status').textContent = 'live — updates every few seconds'; };
+    ws.onmessage = function (ev) {
+      var m; try { m = JSON.parse(ev.data); } catch (e) { return; }
+      if (m.type !== 'stats') return;
+      document.getElementById('rate-min').textContent = fmt(m.total_rate);
+      document.getElementById('rate-hour').textContent = fmt(m.total_rate * 60);
+      document.getElementById('rate-day').textContent = fmt(m.total_rate * 1440);
+      document.getElementById('rate-geo').textContent = fmt(m.geo_rate);
+      var rows = Object.keys(m.by_lang || {})
+        .map(function (k) { return [k, m.by_lang[k]]; })
+        .sort(function (a, b) { return b[1] - a[1]; })
+        .slice(0, 12)
+        .map(function (r) {
+          var name = LANG_NAMES[r[0]] || (r[0] + ' Wikipedia');
+          return '<tr><td>' + name + ' (' + r[0] + ')</td><td class="n">' + fmt(r[1]) + '</td></tr>';
+        });
+      if (rows.length) document.getElementById('langs').innerHTML = rows.join('');
+    };
+    ws.onclose = function () {
+      document.getElementById('status').textContent = 'reconnecting…';
+      setTimeout(connect, delay);
+      delay = Math.min(delay * 2, 30000);
+    };
+    ws.onerror = function () { ws.close(); };
+  }
+  connect();
+</script>
+</body>
+</html>

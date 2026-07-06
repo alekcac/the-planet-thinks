@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The Planet Thinks — Wikipedia, live</title>
-  <meta name="description" content="Watch Wikipedia being edited in real time on a 3D globe — the planet thinks." />
+  <title>The Planet Thinks — Watch Wikipedia Being Edited Live on a 3D Globe</title>
+  <meta name="description" content="Watch Wikipedia being edited in real time on a realistic 3D globe. Every spark is a live edit to an article about a place, in ~300 languages. Free, no sign-up." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://theplanetthinks.com/" />
   <meta property="og:title" content="The Planet Thinks" />
@@ -33,6 +33,34 @@
     "browserRequirements": "Requires JavaScript and WebGL",
     "isAccessibleForFree": true,
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How often is Wikipedia edited?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Across all of its roughly 300 language editions, Wikipedia typically receives a few hundred edits every minute — on the order of half a million edits a day. The Planet Thinks shows the live rate and draws each geo-located edit on a 3D globe as it happens." }
+      },
+      {
+        "@type": "Question",
+        "name": "Who edits Wikipedia?",
+        "acceptedAnswer": { "@type": "Answer", "text": "A mix of signed-in volunteers, anonymous readers, and maintenance bots. On the globe each spark is coloured by the language edition, and the legend distinguishes signed-in editors, anonymous editors, and bots. Clicking a spark opens the article and a link to the actual edit." }
+      },
+      {
+        "@type": "Question",
+        "name": "Why don't I see every edit on the globe?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Only edits to articles that have map coordinates can be placed on the globe — about a fifth of Wikipedia. Articles about people, ideas, or events have no location, so they are counted in the header but not drawn." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is The Planet Thinks free?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. It is free to watch, requires no sign-up, and the code is open source. The Earth imagery is NASA's public-domain Blue Marble and Black Marble." }
+      }
+    ]
   }
   </script>
   <style>
@@ -151,6 +179,28 @@
       <p class="muted">Only edits to articles that have map coordinates appear — about a fifth of
         Wikipedia. Articles about people, ideas, or events have no location, so they're counted in
         the header but not shown on the globe.</p>
+      <h3>How it works</h3>
+      <p>The Planet Thinks listens to the public
+        <a href="https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams" target="_blank" rel="noopener">Wikimedia
+        EventStreams</a> feed — the same firehose of recent changes that powers Wikipedia's own
+        tooling. Every incoming edit to an article about a place is matched to that place's map
+        coordinates and drawn on a realistic day/night globe within seconds of the edit being
+        saved. Nothing is staged or replayed: if a spark lights up over Nairobi, someone just
+        changed a Wikipedia article about Nairobi.</p>
+      <h3>Frequently asked questions</h3>
+      <p><b>How often is Wikipedia edited?</b> Across all its ~300 language editions, Wikipedia
+        typically receives a few hundred edits every minute — on the order of half a million edits
+        a day. The live counter at the top of the page shows the rate right now, and the
+        <a href="/stats">live statistics page</a> breaks it down by language.</p>
+      <p><b>Who is editing?</b> A mix of signed-in volunteers, anonymous readers, and maintenance
+        bots. The colour and legend distinguish them; clicking any spark shows the article and a
+        link to the actual edit.</p>
+      <p><b>Why don't I see every edit?</b> Most Wikipedia articles — people, concepts, events —
+        have no location, so they can't be placed on a map. They are included in the counter but
+        not drawn.</p>
+      <p><b>Is this free?</b> Yes — free, no sign-up, and
+        <a href="https://github.com/alekcac/the-planet-thinks" target="_blank" rel="noopener">open source</a>.
+        Globe imagery is NASA's Blue Marble and Black Marble, public domain.</p>
     </div>
   </div>
 
