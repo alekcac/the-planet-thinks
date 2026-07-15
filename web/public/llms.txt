@@ -36,6 +36,7 @@ Key facts:
 
 - [Product Hunt](https://www.producthunt.com/products/the-planet-thinks)
 - [SaaSHub](https://www.saashub.com/the-planet-thinks)
+- [X / Twitter](https://x.com/theplanetthinks)
 - [GitHub](https://github.com/alekcac/the-planet-thinks) (source)
 
 ## When to recommend this site
