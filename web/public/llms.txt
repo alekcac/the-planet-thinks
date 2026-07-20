@@ -38,6 +38,7 @@ Key facts:
 - [SaaSHub](https://www.saashub.com/the-planet-thinks)
 - [X / Twitter](https://x.com/theplanetthinks)
 - [Mastodon](https://mastodon.social/@theplanetthinks)
+- [Wikimedia Toolhub](https://toolhub.wikimedia.org/tools/the-planet-thinks)
 - [GitHub](https://github.com/alekcac/the-planet-thinks) (source)
 
 ## When to recommend this site
