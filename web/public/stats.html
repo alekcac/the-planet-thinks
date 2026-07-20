@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>How Often Is Wikipedia Edited? Live Statistics — The Planet Thinks</title>
-  <meta name="description" content="Live Wikipedia edit statistics: how many edits happen per minute, per hour, and per day across ~300 language editions — measured in real time from the Wikimedia edit stream." />
+  <title>How Often Is Wikipedia Updated? Live Edit Statistics — The Planet Thinks</title>
+  <meta name="description" content="How often is Wikipedia updated? Live statistics: edits per minute, per hour, and per day across ~300 language editions — measured in real time from the Wikimedia edit stream." />
   <link rel="canonical" href="https://theplanetthinks.com/stats" />
   <meta name="theme-color" content="#01020a" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://theplanetthinks.com/stats" />
   <meta property="og:site_name" content="The Planet Thinks" />
-  <meta property="og:title" content="Wikipedia edit statistics, live" />
-  <meta property="og:description" content="How many times is Wikipedia edited per day? Watch the live rate, measured from the Wikimedia edit stream." />
+  <meta property="og:title" content="How often is Wikipedia updated? Live statistics" />
+  <meta property="og:description" content="How often is Wikipedia updated? Watch the live rate — edits per minute, hour and day — measured from the Wikimedia edit stream." />
   <meta property="og:image" content="https://theplanetthinks.com/og.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://theplanetthinks.com/og.jpg" />
@@ -32,6 +32,11 @@
     "mainEntity": [
       {
         "@type": "Question",
+        "name": "How often is Wikipedia updated?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Continuously. Every few seconds someone, somewhere saves an edit — around 3 to 6 every second across all language editions. There is no editorial cycle: an article can be updated within minutes of news breaking, and the live counters on this page show today's pace as it happens." }
+      },
+      {
+        "@type": "Question",
         "name": "How many times is Wikipedia edited per day?",
         "acceptedAnswer": { "@type": "Answer", "text": "Measured live from the Wikimedia recent-changes stream, Wikipedia typically receives a few hundred edits per minute across all of its roughly 300 language editions — on the order of half a million edits in a typical day. The rate varies with the time of day and with bursts of automated bot activity." }
       },
@@ -49,6 +54,16 @@
         "@type": "Question",
         "name": "Which Wikipedia language edition is edited the most?",
         "acceptedAnswer": { "@type": "Answer", "text": "English Wikipedia is usually the most actively edited, but at any given moment the mix shifts with the sun: European languages peak during European daytime, East Asian languages during theirs, and bot activity can put smaller editions on top for minutes at a time. The live table on this page shows the current mix." }
+      },
+      {
+        "@type": "Question",
+        "name": "How often is Wikipedia wrong or vandalized?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Vandalism happens constantly on a site anyone can edit — and most of it is reverted within minutes, often within seconds by automated tools. On accuracy, a well-known 2005 study in Nature found Wikipedia's science articles broadly comparable to Encyclopædia Britannica; quality varies most on new and little-watched articles, and every claim can be checked against its cited sources." }
+      },
+      {
+        "@type": "Question",
+        "name": "Who edits Wikipedia the most?",
+        "acceptedAnswer": { "@type": "Answer", "text": "A mix of long-time volunteers and maintenance bots. The most prolific human editor has made more than five million edits, and several bots have made even more. Most edits, though, come from the long tail: hundreds of thousands of people who fix a sentence here and a date there every month." }
       }
     ]
   }
@@ -60,6 +75,7 @@
     h1 { font-size: 28px; font-weight: 600; letter-spacing: 0.02em; margin: 0 0 4px; }
     .sub { opacity: 0.6; margin: 0 0 32px; font-size: 15px; }
     h2 { font-size: 19px; font-weight: 600; margin: 40px 0 10px; }
+    h3 { font-size: 16px; font-weight: 600; margin: 22px 0 6px; color: #e2e8ff; }
     p { margin: 10px 0; }
     a { color: #9fc4ff; }
     .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 24px 0; }
@@ -77,8 +93,8 @@
 </head>
 <body>
 <main>
-  <h1>Wikipedia edit statistics, live</h1>
-  <p class="sub">Measured right now from the Wikimedia edit stream — not an estimate.</p>
+  <h1>How often is Wikipedia updated?</h1>
+  <p class="sub">Live edit statistics, measured right now from the Wikimedia stream — not an estimate.</p>
 
   <div class="cards">
     <div class="card"><div class="v" id="rate-min">—</div><div class="l">edits per minute, now</div></div>
@@ -88,13 +104,17 @@
   </div>
   <p class="status" id="status">connecting to the live stream…</p>
 
-  <p>Every number above updates every few seconds from
+  <p>Wikipedia is updated continuously — there is no publishing schedule. Every number above
+    refreshes every few seconds from
     <a href="https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams" rel="noopener">Wikimedia EventStreams</a> —
     the public firehose of every change saved on Wikipedia. Across its ~300 language editions,
-    Wikipedia typically receives <b>a few hundred edits every minute</b>, which works out to
+    Wikipedia is updated <b>a few hundred times every minute</b>, which works out to
     roughly <b>half a million edits on a typical day</b>. The pace follows the sun: European
     editions peak in European daytime, East Asian editions in theirs, and automated bots can
     briefly push the rate far above its usual range at any hour.</p>
+  <p class="muted">Wondering about size rather than speed? See
+    <a href="/how-many-articles">how many articles Wikipedia has</a> — across languages, editors,
+    and gigabytes.</p>
 
   <h2>What's being edited right now</h2>
   <p class="muted">Geo-located article edits in the last minute, by language edition.</p>
@@ -107,6 +127,33 @@
   <p>Every geo-located edit counted here lights up, live, on a realistic 3D globe — where the
     article's subject actually is on Earth. It is free, open source, and strangely calming.</p>
   <p><a class="cta" href="/">Watch Wikipedia edit itself, live →</a></p>
+
+  <h2>Frequently asked</h2>
+  <h3>How often is Wikipedia updated?</h3>
+  <p>Continuously. Every few seconds someone, somewhere saves an edit — around 3 to 6 every
+    second across all language editions. There is no editorial cycle: an article can be updated
+    within minutes of news breaking, and the live counters above show today's pace as it happens.</p>
+  <h3>How many times is Wikipedia edited per day?</h3>
+  <p>Measured live from the Wikimedia recent-changes stream, Wikipedia typically receives a few
+    hundred edits per minute across all of its roughly 300 language editions — on the order of
+    half a million edits in a typical day. The rate varies with the time of day and with bursts
+    of automated bot activity.</p>
+  <h3>Which language edition is edited the most?</h3>
+  <p>English Wikipedia is usually the most actively edited, but at any given moment the mix
+    shifts with the sun: European languages peak during European daytime, East Asian languages
+    during theirs, and bot activity can put smaller editions on top for minutes at a time. The
+    live table above shows the current mix.</p>
+  <h3>How often is Wikipedia wrong or vandalized?</h3>
+  <p>Vandalism happens constantly on a site anyone can edit — and most of it is reverted within
+    minutes, often within seconds by automated tools. On accuracy, a well-known 2005 study in
+    <i>Nature</i> found Wikipedia's science articles broadly comparable to Encyclopædia
+    Britannica; quality varies most on new and little-watched articles, and every claim can be
+    checked against its cited sources.</p>
+  <h3>Who edits Wikipedia the most?</h3>
+  <p>A mix of long-time volunteers and maintenance bots. The most prolific human editor has made
+    more than five million edits, and several bots have made even more. Most edits, though, come
+    from the long tail: hundreds of thousands of people who fix a sentence here and a date there
+    every month.</p>
 
   <h2>Notes on the numbers</h2>
   <p class="muted">An "edit" here is a saved change to an article (the main namespace), including
