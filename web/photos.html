@@ -45,6 +45,29 @@
     ]
   }
   </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What am I looking at?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Each spark is a photo that was just uploaded to Wikimedia Commons — the free media library behind Wikipedia — shown on the globe where the photo was taken. Click any spark to see the picture itself, moments after a volunteer shared it with the world." }
+      },
+      {
+        "@type": "Question",
+        "name": "Why do only some uploads appear on the globe?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Only photos that carry a location — usually recorded by the camera's own GPS — can be placed on the globe, which is roughly one upload in ten. There is also a short delay while Commons indexes a fresh photo's location, so each picture appears a couple of minutes after its upload." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this free, and can I use the photos?",
+        "acceptedAnswer": { "@type": "Answer", "text": "The page is free, has no sign-up, and is open source. The photos themselves are freely licensed by their authors on Wikimedia Commons — follow any spark to its file page for the exact license and author credit." }
+      }
+    ]
+  }
+  </script>
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; background: #01020a; color: #cfd8ff; font: 14px/1.45 system-ui, sans-serif; overflow: hidden; }
@@ -158,11 +181,22 @@
         a location — usually from the camera's own GPS — it appears here within seconds of the
         upload. Nothing is staged: every picture is genuinely new, shared freely by a volunteer
         moments ago.</p>
-      <p>Photos without location data never appear, and only plain photo files are shown. All
-        pictures are freely licensed by their authors; follow any spark to the file page on
-        Commons for the author and license.</p>
+      <h3>What am I looking at?</h3>
+      <p>Each spark is a photo that was just uploaded to Wikimedia Commons — the free media
+        library behind Wikipedia — shown on the globe where the photo was taken. Click any spark
+        to see the picture itself, moments after a volunteer shared it with the world.</p>
+      <h3>Why do only some uploads appear on the globe?</h3>
+      <p>Only photos that carry a location — usually recorded by the camera's own GPS — can be
+        placed on the globe, which is roughly one upload in ten. There is also a short delay
+        while Commons indexes a fresh photo's location, so each picture appears a couple of
+        minutes after its upload.</p>
+      <h3>Is this free, and can I use the photos?</h3>
+      <p>The page is free, has no sign-up, and is open source. The photos themselves are freely
+        licensed by their authors on Wikimedia Commons — follow any spark to its file page for
+        the exact license and author credit.</p>
       <p class="muted">Part of <a href="/">The Planet Thinks</a> — watch Wikipedia being edited
-        live on the same globe, or see <a href="/stats">live edit statistics</a>. Free,
+        live on the same globe, see <a href="/stats">live edit statistics</a>, or
+        <a href="/how-many-articles">how big Wikipedia is</a>. Free,
         <a href="https://github.com/alekcac/the-planet-thinks" target="_blank" rel="noopener">open source</a>,
         no sign-up. Globe imagery: NASA Blue Marble / Black Marble.</p>
     </div>
