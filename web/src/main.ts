@@ -21,6 +21,24 @@ onToggle('music', on => music.setEnabled(on));
 onToggle('follow', on => globe.setFollow(on));
 
 function handlePulse(p: Pulse, replayed = false) {
+  // Photo pulses warm their thumbnail BEFORE the marker lights up: by the time the tour
+  // flies over, the card opens instantly with an already-cached image. (Replayed background
+  // markers skip this — preloading a whole replay buffer would pull megabytes for nothing.)
+  if (!replayed && p.img) {
+    const warm = new Image();
+    let lit = false;
+    const light = () => {
+      if (lit) return;
+      lit = true;
+      globe.addPulse(p, false);
+      chimes.play(p.size_delta);
+    };
+    warm.onload = light;
+    warm.onerror = light;
+    warm.src = p.img;
+    setTimeout(light, 5000); // a slow file still gets its marker, just without the head start
+    return;
+  }
   globe.addPulse(p, replayed);
   if (!replayed) chimes.play(p.size_delta);
 }
