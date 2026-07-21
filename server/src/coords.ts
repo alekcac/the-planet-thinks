@@ -12,6 +12,12 @@ export interface CoordsResolverOpts {
   maxQueued?: number;
   maxAttempts?: number;
   fetchFn?: typeof fetch;
+  /**
+   * Cache "no coordinates" answers (default true). Turn off when querying pages whose
+   * coordinates may appear shortly after creation — e.g. freshly uploaded Commons files,
+   * which GeoData indexes with a lag — so a later retry can still succeed.
+   */
+  cacheNegatives?: boolean;
 }
 
 export class CoordsResolver {
@@ -24,6 +30,7 @@ export class CoordsResolver {
   private readonly maxAttempts: number;
   private readonly fetchFn: typeof fetch;
   private readonly userAgent: string;
+  private readonly cacheNegatives: boolean;
 
   constructor(opts: CoordsResolverOpts) {
     this.userAgent = opts.userAgent;
@@ -32,6 +39,7 @@ export class CoordsResolver {
     this.maxQueued = opts.maxQueued ?? 2000;
     this.maxAttempts = opts.maxAttempts ?? 3;
     this.fetchFn = opts.fetchFn ?? fetch;
+    this.cacheNegatives = opts.cacheNegatives ?? true;
   }
 
   resolve(wiki: string, title: string): Promise<Coords | null> {
@@ -89,7 +97,8 @@ export class CoordsResolver {
       }
       for (const p of batch) {
         const c = byTitle.get(p.title) ?? null;
-        this.cache.set(`${wiki}|${p.title}`, c ?? 'none');
+        if (c) this.cache.set(`${wiki}|${p.title}`, c);
+        else if (this.cacheNegatives) this.cache.set(`${wiki}|${p.title}`, 'none');
         p.resolve(c);
       }
     } catch {

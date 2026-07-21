@@ -3,22 +3,38 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { WebSocketServer, WebSocket } from 'ws';
 import { EventSource } from 'eventsource';
-import { classify } from './classify.js';
+import { classify, classifyCommonsUpload } from './classify.js';
 import { CoordsResolver } from './coords.js';
 import { ReplayBuffer } from './replay.js';
 import { StatsTracker } from './stats.js';
 import type { Pulse, ServerMessage } from './protocol.js';
+
+// Streams a client can subscribe to via /ws?stream=…; the default stays the Wikipedia
+// edit feed so clients deployed before this existed keep working untouched.
+type StreamName = 'wiki' | 'commons';
 
 const PORT = Number(process.env.PORT ?? 8080);
 const DATA_DIR = process.env.DATA_DIR ?? './data';
 const STREAM_URL = process.env.STREAM_URL ?? 'https://stream.wikimedia.org/v2/stream/recentchange';
 const USER_AGENT = process.env.USER_AGENT ?? 'earth-globe/0.1 (set USER_AGENT to a contact URL)';
 const MAX_CLIENTS = Number(process.env.MAX_CLIENTS ?? 5000); // cap connections so a spike can't exhaust a shared host
+// GeoData indexes a fresh upload's location with a lag: almost nothing at 90s, most of it a few
+// minutes in. First look after the initial delay; one more look later catches the slow ones.
+const COMMONS_RESOLVE_DELAY_MS = Number(process.env.COMMONS_RESOLVE_DELAY_MS ?? 120_000);
+const COMMONS_RETRY_DELAY_MS = Number(process.env.COMMONS_RETRY_DELAY_MS ?? 240_000);
 const CACHE_FILE = path.join(DATA_DIR, 'coords.json');
 
 const resolver = new CoordsResolver({ userAgent: USER_AGENT });
 const buffer = new ReplayBuffer();
 const stats = new StatsTracker();
+// Photo uploads are sparser than article edits (a couple of geotagged ones per minute on
+// average, with quiet hours), so keep a long replay window: the photos page should open
+// already populated even at night.
+const commonsBuffer = new ReplayBuffer(30 * 60_000, 300);
+const commonsStats = new StatsTracker();
+// Separate resolver without negative caching: a miss at the first look must not block
+// the retry once GeoData catches up.
+const commonsResolver = new CoordsResolver({ userAgent: USER_AGENT, cacheNegatives: false });
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 try {
@@ -87,7 +103,12 @@ const server = http.createServer((req, res) => {
   res.setHeader('x-robots-tag', 'noindex'); // JSON endpoints must never appear in search results
   if (req.url === '/healthz') {
     res.setHeader('content-type', 'application/json');
-    res.end(JSON.stringify({ ok: true, clients: wss.clients.size, ...stats.snapshot() }));
+    res.end(JSON.stringify({
+      ok: true,
+      clients: wss.clients.size,
+      ...stats.snapshot(),
+      commons: { total_rate: commonsStats.snapshot().total_rate, geo_rate: commonsStats.snapshot().geo_rate },
+    }));
   } else if (req.url === '/referrers') {
     res.setHeader('content-type', 'application/json');
     const sorted = [...referrers.entries()].sort((a, b) => b[1] - a[1]);
@@ -101,25 +122,36 @@ const server = http.createServer((req, res) => {
   }
 });
 
+type StreamSocket = WebSocket & { stream?: StreamName };
+
 const wss = new WebSocketServer({ server, path: '/ws' });
-wss.on('connection', (ws, req) => {
+wss.on('connection', (ws: StreamSocket, req) => {
   if (wss.clients.size > MAX_CLIENTS) { ws.close(1013, 'at capacity'); return; }
   const t0 = Date.now();
   ws.on('close', () => recordDwell(Date.now() - t0));
+  ws.stream = 'wiki';
   try {
-    const ref = (new URL(req.url ?? '/', 'http://x').searchParams.get('ref') ?? '').slice(0, 80);
+    const params = new URL(req.url ?? '/', 'http://x').searchParams;
+    if (params.get('stream') === 'commons') ws.stream = 'commons';
+    const ref = (params.get('ref') ?? '').slice(0, 80);
     if (ref && (referrers.has(ref) || referrers.size < 1000)) {
       referrers.set(ref, (referrers.get(ref) ?? 0) + 1);
     }
-  } catch { /* ignore malformed ref */ }
-  ws.send(JSON.stringify({ type: 'replay', events: buffer.list() } satisfies ServerMessage));
+  } catch { /* ignore malformed url */ }
+  const replay = ws.stream === 'commons' ? commonsBuffer : buffer;
+  ws.send(JSON.stringify({ type: 'replay', events: replay.list() } satisfies ServerMessage));
 });
 
-function broadcast(msg: ServerMessage) {
+function broadcast(msg: ServerMessage, stream: StreamName = 'wiki') {
   const s = JSON.stringify(msg);
-  for (const c of wss.clients) if (c.readyState === WebSocket.OPEN) c.send(s);
+  for (const c of wss.clients as Set<StreamSocket>) {
+    if (c.readyState === WebSocket.OPEN && (c.stream ?? 'wiki') === stream) c.send(s);
+  }
 }
-setInterval(() => broadcast(stats.snapshot()), 5000);
+setInterval(() => {
+  broadcast(stats.snapshot(), 'wiki');
+  broadcast(commonsStats.snapshot(), 'commons');
+}, 5000);
 
 let es: EventSource | null = null;
 let lastEventAt = Date.now();
@@ -137,24 +169,54 @@ function startStream() {
     let rc: unknown;
     try { rc = JSON.parse(ev.data); } catch { return; }
     const edit = classify(rc as Parameters<typeof classify>[0]);
-    if (!edit) return;
-    stats.recordTotal();
-    const coords = await resolver.resolve(edit.wiki, edit.title);
-    if (!coords) return;
-    const pulse: Pulse = {
-      type: 'pulse',
-      lat: coords.lat,
-      lon: coords.lon,
-      lang: edit.lang,
-      title: edit.title,
-      url: edit.url,
-      editor_type: edit.editor_type,
-      size_delta: edit.size_delta,
-      ts: edit.ts,
-    };
-    buffer.push(pulse);
-    stats.recordGeo(pulse.lang);
-    broadcast(pulse);
+    if (edit) {
+      stats.recordTotal();
+      const coords = await resolver.resolve(edit.wiki, edit.title);
+      if (!coords) return;
+      const pulse: Pulse = {
+        type: 'pulse',
+        lat: coords.lat,
+        lon: coords.lon,
+        lang: edit.lang,
+        title: edit.title,
+        url: edit.url,
+        editor_type: edit.editor_type,
+        size_delta: edit.size_delta,
+        ts: edit.ts,
+      };
+      buffer.push(pulse);
+      stats.recordGeo(pulse.lang);
+      broadcast(pulse, 'wiki');
+      return;
+    }
+    const up = classifyCommonsUpload(rc as Parameters<typeof classifyCommonsUpload>[0]);
+    if (up) {
+      commonsStats.recordTotal();
+      const tryEmit = async (): Promise<boolean> => {
+        const coords = await commonsResolver.resolve('commons.wikimedia.org', up.title);
+        if (!coords) return false;
+        const pulse: Pulse = {
+          type: 'pulse',
+          lat: coords.lat,
+          lon: coords.lon,
+          lang: 'commons',
+          title: up.file,
+          url: up.url,
+          img: up.img,
+          editor_type: up.editor_type,
+          // No byte delta for uploads; a fixed value keeps photo markers comfortably visible.
+          size_delta: 1500,
+          ts: up.ts,
+        };
+        commonsBuffer.push(pulse);
+        commonsStats.recordGeo('commons');
+        broadcast(pulse, 'commons');
+        return true;
+      };
+      setTimeout(async () => {
+        if (!(await tryEmit())) setTimeout(() => void tryEmit(), COMMONS_RETRY_DELAY_MS);
+      }, COMMONS_RESOLVE_DELAY_MS);
+    }
   };
 }
 

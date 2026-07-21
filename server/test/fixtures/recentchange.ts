@@ -66,4 +66,28 @@ export const fx = {
     length: { new: 2400 },
     revision: { new: 777001 },
   },
+  commonsUpload: {
+    meta: { dt: '2026-06-11T10:00:00Z', domain: 'commons.wikimedia.org' },
+    wiki: 'commonswiki',
+    type: 'log', log_type: 'upload', log_action: 'upload',
+    namespace: 6, title: 'File:Sunset over Lisbon harbour.jpg',
+    user: 'PhotoUser', bot: false,
+    server_name: 'commons.wikimedia.org',
+  },
+  commonsOverwrite: {
+    meta: { dt: '2026-06-11T10:00:00Z', domain: 'commons.wikimedia.org' },
+    wiki: 'commonswiki',
+    type: 'log', log_type: 'upload', log_action: 'overwrite',
+    namespace: 6, title: 'File:Sunset over Lisbon harbour.jpg',
+    user: 'PhotoUser', bot: false,
+    server_name: 'commons.wikimedia.org',
+  },
+  commonsSvgUpload: {
+    meta: { dt: '2026-06-11T10:00:00Z', domain: 'commons.wikimedia.org' },
+    wiki: 'commonswiki',
+    type: 'log', log_type: 'upload', log_action: 'upload',
+    namespace: 6, title: 'File:Coat of arms of Example.svg',
+    user: 'VectorUser', bot: false,
+    server_name: 'commons.wikimedia.org',
+  },
 };

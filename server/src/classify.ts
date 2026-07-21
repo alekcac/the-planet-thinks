@@ -10,6 +10,8 @@ export interface RcEvent {
   length?: { old?: number; new?: number };
   revision?: { old?: number; new?: number };
   meta?: { dt?: string };
+  log_type?: string;
+  log_action?: string;
 }
 
 export interface ArticleEdit {
@@ -31,6 +33,40 @@ export function editorType(rc: RcEvent): EditorType {
   const u = rc.user ?? '';
   if (TEMP_ACCOUNT.test(u) || IPV4.test(u) || (u.includes(':') && IPV6.test(u))) return 'anon';
   return 'user';
+}
+
+export interface CommonsUpload {
+  /** Full page title, e.g. "File:Sunset in Kyiv.jpg" — used for the coordinates lookup */
+  title: string;
+  /** File name without the namespace prefix */
+  file: string;
+  /** File description page */
+  url: string;
+  /** Thumbnail via Special:FilePath (redirects to the sized image) */
+  img: string;
+  editor_type: EditorType;
+  ts: number;
+}
+
+// Plain raster photos only: predictable thumbnails, and the kind of camera/phone uploads
+// that carry EXIF locations. Skips svg/pdf/video/etc.
+const PHOTO_EXT = /\.(jpe?g|png|webp)$/i;
+
+export function classifyCommonsUpload(rc: RcEvent): CommonsUpload | null {
+  if (rc.server_name !== 'commons.wikimedia.org') return null;
+  if (rc.type !== 'log' || rc.log_type !== 'upload' || rc.log_action !== 'upload') return null;
+  if (rc.namespace !== 6 || !rc.title) return null;
+  const file = rc.title.replace(/^File:/, '');
+  if (!PHOTO_EXT.test(file)) return null;
+  const under = encodeURIComponent(file.replace(/ /g, '_'));
+  return {
+    title: rc.title,
+    file,
+    url: `https://commons.wikimedia.org/wiki/File:${under}`,
+    img: `https://commons.wikimedia.org/wiki/Special:FilePath/${under}?width=640`,
+    editor_type: editorType(rc),
+    ts: rc.meta?.dt ? Date.parse(rc.meta.dt) : Date.now(),
+  };
 }
 
 export function classify(rc: RcEvent): ArticleEdit | null {

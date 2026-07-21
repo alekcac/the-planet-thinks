@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { classify, editorType } from '../src/classify.js';
+import { classify, classifyCommonsUpload, editorType } from '../src/classify.js';
 import { fx } from './fixtures/recentchange.js';
 
 describe('classify', () => {
@@ -24,4 +24,27 @@ describe('classify', () => {
     const r = classify(fx.newPage)!;
     expect(r.url).toBe('https://en.wikipedia.org/wiki/Some_New_Place');
   });
+});
+
+describe('classifyCommonsUpload', () => {
+  it('keeps a fresh photo upload with page, thumb and editor type', () => {
+    const r = classifyCommonsUpload(fx.commonsUpload)!;
+    expect(r).toMatchObject({
+      title: 'File:Sunset over Lisbon harbour.jpg',
+      file: 'Sunset over Lisbon harbour.jpg',
+      editor_type: 'user',
+    });
+    expect(r.url).toBe('https://commons.wikimedia.org/wiki/File:Sunset_over_Lisbon_harbour.jpg');
+    expect(r.img).toBe(
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Sunset_over_Lisbon_harbour.jpg?width=640',
+    );
+    expect(r.ts).toBe(Date.parse('2026-06-11T10:00:00Z'));
+  });
+  it('drops overwrites of existing files', () =>
+    expect(classifyCommonsUpload(fx.commonsOverwrite)).toBeNull());
+  it('drops non-photo file types', () =>
+    expect(classifyCommonsUpload(fx.commonsSvgUpload)).toBeNull());
+  it('drops wikipedia edits', () => expect(classifyCommonsUpload(fx.humanEdit)).toBeNull());
+  it('never matches in the wikipedia classifier', () =>
+    expect(classify(fx.commonsUpload)).toBeNull());
 });

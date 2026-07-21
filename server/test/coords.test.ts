@@ -61,6 +61,39 @@ describe('CoordsResolver', () => {
     expect(fetchFn).toHaveBeenCalledTimes(2);
   });
 
+  it('with cacheNegatives off, a miss is re-queried and can succeed later', async () => {
+    vi.useFakeTimers();
+    let hasCoords = false;
+    const fetchFn = vi.fn(async () =>
+      okJson({
+        query: {
+          pages: [
+            hasCoords
+              ? { pageid: 1, title: 'File:Fresh.jpg', coordinates: [{ lat: 10, lon: 20, primary: true }] }
+              : { pageid: 1, title: 'File:Fresh.jpg' },
+          ],
+        },
+      }));
+    const r = new CoordsResolver({
+      userAgent: 'test', flushMs: 10, cacheNegatives: false,
+      fetchFn: fetchFn as unknown as typeof fetch,
+    });
+
+    const p1 = r.resolve('commons.wikimedia.org', 'File:Fresh.jpg');
+    await vi.advanceTimersByTimeAsync(20);
+    expect(await p1).toBeNull();
+
+    hasCoords = true; // GeoData caught up
+    const p2 = r.resolve('commons.wikimedia.org', 'File:Fresh.jpg');
+    await vi.advanceTimersByTimeAsync(20);
+    expect(await p2).toEqual({ lat: 10, lon: 20 });
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+
+    // the positive answer is cached
+    expect(await r.resolve('commons.wikimedia.org', 'File:Fresh.jpg')).toEqual({ lat: 10, lon: 20 });
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+  });
+
   it('dump/load round-trips the cache', async () => {
     vi.useFakeTimers();
     const fetchFn = vi.fn(async () => okJson(apiResponse));

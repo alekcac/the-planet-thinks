@@ -4,16 +4,18 @@ export interface Pulse {
   type: 'pulse';
   lat: number;
   lon: number;
-  /** Wikipedia language code, e.g. "en" */
+  /** Wikipedia language code, e.g. "en" — or "commons" for photo uploads */
   lang: string;
   title: string;
-  /** Diff URL for edits, article URL for new pages */
+  /** Diff URL for edits, article URL for new pages, file page for uploads */
   url: string;
   editor_type: EditorType;
   /** Bytes added; negative means removed */
   size_delta: number;
   /** Epoch milliseconds */
   ts: number;
+  /** Image thumbnail URL — present only on Commons photo pulses */
+  img?: string;
 }
 
 export interface Stats {
