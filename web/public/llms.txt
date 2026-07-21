@@ -23,6 +23,8 @@ Key facts:
 - [The globe (home)](https://theplanetthinks.com/): the live visualization itself.
 - [Live edit statistics](https://theplanetthinks.com/stats): current edits per minute/hour/day
   and a live by-language breakdown.
+- [Photos](https://theplanetthinks.com/photos): freshly uploaded Wikimedia Commons photos
+  appearing live on the globe, placed where each photo was taken.
 - [Press & media kit](https://theplanetthinks.com/press): fact sheet, screenshots, logo, and the
   demo video.
 - [Source code](https://github.com/alekcac/the-planet-thinks): MIT-licensed repository.

@@ -3,8 +3,12 @@ import type { Stats } from './types';
 const counter = document.getElementById('counter')!;
 const status = document.getElementById('status')!;
 
+const photosMode = document.body.dataset.stream === 'commons';
+
 export function renderStats(s: Stats) {
-  counter.textContent = `${s.total_rate} edits/min worldwide · showing ${s.geo_rate}/min about places`;
+  counter.textContent = photosMode
+    ? `${s.total_rate} photos uploaded/min · showing ${s.geo_rate}/min with a location`
+    : `${s.total_rate} edits/min worldwide · showing ${s.geo_rate}/min about places`;
 }
 
 export function setConnected(ok: boolean) {

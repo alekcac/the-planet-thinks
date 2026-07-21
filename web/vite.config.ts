@@ -11,4 +11,10 @@ const wsProxy = {
 export default defineConfig({
   server: { proxy: wsProxy },
   preview: { proxy: wsProxy },
+  build: {
+    rollupOptions: {
+      // Two entries share one bundle: the Wikipedia globe and the Commons photos layer.
+      input: { main: 'index.html', photos: 'photos.html' },
+    },
+  },
 });

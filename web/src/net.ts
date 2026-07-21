@@ -18,10 +18,19 @@ export function connect(
 ) {
   let delay = 1000;
   let first = true;
+  // Reconnects drop only the one-shot ref param (a visit is counted once, not per drop)
+  // but keep everything else — e.g. the stream selector must survive reconnects.
+  function reconnectUrl(u: string): string {
+    try {
+      const x = new URL(u);
+      x.searchParams.delete('ref');
+      return x.toString();
+    } catch {
+      return u.split('?')[0];
+    }
+  }
   function open() {
-    // Send the referrer query only on the first connect; reconnects use the bare URL
-    // so a single visit is counted once, not on every dropped connection.
-    const target = first ? url : url.split('?')[0];
+    const target = first ? url : reconnectUrl(url);
     first = false;
     const ws = new WebSocket(target);
     ws.onopen = () => { delay = 1000; onStatus(true); };

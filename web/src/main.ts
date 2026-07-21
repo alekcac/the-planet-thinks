@@ -36,14 +36,22 @@ function referrerTag(): string {
   catch { return 'direct'; }
 }
 // Pass where this visit came from once, on the first connect (net.ts drops it on reconnects).
-const WS_URL = `${resolveWsUrl()}?ref=${encodeURIComponent(referrerTag())}`;
+// Pages other than the main globe pick their feed via <body data-stream>.
+const params = new URLSearchParams({ ref: referrerTag() });
+if (document.body.dataset.stream === 'commons') params.set('stream', 'commons');
+const WS_URL = `${resolveWsUrl()}?${params}`;
 
 connect(
   WS_URL,
   m => {
     if (m.type === 'pulse') handlePulse(m);
     else if (m.type === 'stats') renderStats(m);
-    else if (m.type === 'replay') m.events.forEach(e => handlePulse(e, true));
+    else if (m.type === 'replay') {
+      // Photos arrive sparsely, so treat the newest replayed one as live: the tour then
+      // has somewhere to fly right away instead of waiting minutes for a fresh upload.
+      const liveTail = document.body.dataset.stream === 'commons' ? m.events.length - 1 : -1;
+      m.events.forEach((e, i) => handlePulse(e, i !== liveTail));
+    }
   },
   setConnected,
 );
