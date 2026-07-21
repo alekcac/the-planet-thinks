@@ -103,6 +103,8 @@
     .sw.signed { background: hsl(210, 75%, 65%); }
     .sw.anon { background: hsl(210, 30%, 60%); }
     .sw.bot { background: hsl(0, 0%, 55%); }
+    .legend a { color: #8fa6ff; text-decoration: none; }
+    .legend a:hover { text-decoration: underline; }
     .about-btn { margin-top: -2px; align-self: flex-start; background: none; border: none;
                  color: #8fa6ff; font: inherit; font-size: 11.5px; cursor: pointer; padding: 2px 0; opacity: 0.9; }
     .about-btn:hover { text-decoration: underline; }
@@ -112,7 +114,8 @@
     .modal[hidden] { display: none; }
     .modal-card { position: relative; max-width: 460px; width: 100%; background: #0a0e1c;
                   border: 1px solid rgba(110, 140, 255, 0.28); border-radius: 14px; padding: 22px 24px;
-                  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55); }
+                  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+                  max-height: calc(100vh - 40px); max-height: calc(100dvh - 40px); overflow-y: auto; }
     .modal-card h2 { margin: 0 0 10px; font-size: 18px; font-weight: 600; }
     .modal-card p { margin: 0 0 12px; font-size: 13.5px; line-height: 1.5; opacity: 0.85; }
     .modal-card p.muted { opacity: 0.6; font-size: 12.5px; margin-bottom: 0; }
@@ -170,6 +173,7 @@
   <div class="hud legend">
     <div class="row"><span class="sw lang"></span> colour = language</div>
     <div class="row"><span class="sw signed"></span> signed-in &nbsp;<span class="sw anon"></span> anonymous &nbsp;<span class="sw bot"></span> bot</div>
+    <div class="row"><a href="/photos">→ watch the world being photographed</a></div>
     <button id="about-btn" class="about-btn" type="button">about ↗</button>
   </div>
 
