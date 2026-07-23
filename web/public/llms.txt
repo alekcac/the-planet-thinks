@@ -25,6 +25,9 @@ Key facts:
   and a live by-language breakdown.
 - [Photos](https://theplanetthinks.com/photos): freshly uploaded Wikimedia Commons photos
   appearing live on the globe, placed where each photo was taken.
+- [Live screensaver](https://theplanetthinks.com/screensaver): how to run the globe as a free
+  ambient screensaver / live wallpaper on a TV or second monitor, or as an OBS stream background
+  (via the /?cinematic full-screen mode).
 - [Press & media kit](https://theplanetthinks.com/press): fact sheet, screenshots, logo, and the
   demo video.
 - [Source code](https://github.com/alekcac/the-planet-thinks): MIT-licensed repository.

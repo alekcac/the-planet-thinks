@@ -19,6 +19,15 @@ export function initCinematic() {
     reveal();
   };
 
+  // Ambient entry point for OBS Browser Sources / TVs / second monitors: /?cinematic starts with
+  // the HUD hidden but WITHOUT requesting fullscreen — browsers block that without a gesture, and
+  // OBS/kiosk setups size the page themselves. A mousemove still reveals the controls to leave.
+  if (new URLSearchParams(location.search).has('cinematic')) {
+    body.classList.add('cinematic');
+    box.checked = true;
+    reveal();
+  }
+
   const exit = () => {
     body.classList.remove('cinematic', 'reveal');
     if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
