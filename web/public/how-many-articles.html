@@ -90,6 +90,26 @@
     .muted { opacity: 0.55; font-size: 14px; }
     .cta { display: inline-block; margin-top: 8px; padding: 10px 16px; border: 1px solid rgba(120,150,255,0.35); border-radius: 8px; text-decoration: none; }
   </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": "Wikipedia article counts by language edition",
+    "description": "How many articles Wikipedia has — the total across all ~340 language editions (over 65 million as of 2026), English Wikipedia's article count, new articles created per day, and a live by-language breakdown.",
+    "url": "https://theplanetthinks.com/how-many-articles",
+    "keywords": ["Wikipedia", "number of articles", "article count", "articles by language", "new articles per day"],
+    "creator": { "@type": "Organization", "name": "The Planet Thinks", "url": "https://theplanetthinks.com/" },
+    "isBasedOn": "https://stream.wikimedia.org/v2/stream/recentchange",
+    "temporalCoverage": "2026-01-01/..",
+    "measurementTechnique": "Compiled from published Wikimedia statistics and the live EventStreams recent-changes feed",
+    "variableMeasured": [
+      { "@type": "PropertyValue", "name": "Total articles across all language editions" },
+      { "@type": "PropertyValue", "name": "Articles per language edition" },
+      { "@type": "PropertyValue", "name": "New articles created per day" }
+    ],
+    "license": "https://creativecommons.org/publicdomain/zero/1.0/"
+  }
+  </script>
 </head>
 <body>
 <main>

@@ -90,6 +90,27 @@
     .muted { opacity: 0.55; font-size: 14px; }
     .cta { display: inline-block; margin-top: 8px; padding: 10px 16px; border: 1px solid rgba(120,150,255,0.35); border-radius: 8px; text-decoration: none; }
   </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": "Live Wikipedia edit statistics",
+    "description": "Real-time statistics of how often Wikipedia is edited — edits per second, per minute and per day across all ~300 language editions, with a live by-language breakdown — measured directly from the public Wikimedia EventStreams recent-changes feed.",
+    "url": "https://theplanetthinks.com/stats",
+    "keywords": ["Wikipedia", "edit rate", "edits per minute", "real-time", "EventStreams", "recent changes"],
+    "creator": { "@type": "Organization", "name": "The Planet Thinks", "url": "https://theplanetthinks.com/" },
+    "isBasedOn": "https://stream.wikimedia.org/v2/stream/recentchange",
+    "temporalCoverage": "2026-01-01/..",
+    "measurementTechnique": "Live count from the Wikimedia EventStreams recentchange feed",
+    "variableMeasured": [
+      { "@type": "PropertyValue", "name": "Edits per second" },
+      { "@type": "PropertyValue", "name": "Edits per minute" },
+      { "@type": "PropertyValue", "name": "Edits per day" },
+      { "@type": "PropertyValue", "name": "Edits by language edition" }
+    ],
+    "license": "https://creativecommons.org/publicdomain/zero/1.0/"
+  }
+  </script>
 </head>
 <body>
 <main>
