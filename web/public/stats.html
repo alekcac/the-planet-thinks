@@ -42,6 +42,11 @@
       },
       {
         "@type": "Question",
+        "name": "How can I see how many times one Wikipedia article has been edited?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Open the article and click View history at the top to see every edit ever made to it. For an exact total, open Tools → Page information and read the \"Total number of edits\", or use an external tool such as XTools. The live counters on this page measure the whole of Wikipedia, not a single article." }
+      },
+      {
+        "@type": "Question",
         "name": "How many times is Wikipedia edited per second?",
         "acceptedAnswer": { "@type": "Answer", "text": "On average around 3 to 6 edits are saved every second across all language editions combined. During bot maintenance runs the rate can spike far higher for short periods." }
       },
@@ -125,12 +130,12 @@
   </div>
   <p class="status" id="status">connecting to the live stream…</p>
 
-  <p>Wikipedia is updated continuously — there is no publishing schedule. Every number above
+  <p>Wikipedia is updated continuously, with no publishing schedule: across its ~300 language
+    editions it is edited about <b>3 to 6 times every second</b> — a few hundred edits every
+    minute, on the order of <b>half a million edits on a typical day</b>. Every number above
     refreshes every few seconds from
-    <a href="https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams" rel="noopener">Wikimedia EventStreams</a> —
-    the public firehose of every change saved on Wikipedia. Across its ~300 language editions,
-    Wikipedia is updated <b>a few hundred times every minute</b>, which works out to
-    roughly <b>half a million edits on a typical day</b>. The pace follows the sun: European
+    <a href="https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams" rel="noopener">Wikimedia EventStreams</a>,
+    the public firehose of every change saved on Wikipedia. The pace follows the sun: European
     editions peak in European daytime, East Asian editions in theirs, and automated bots can
     briefly push the rate far above its usual range at any hour.</p>
   <p class="muted">Wondering about size rather than speed? See
@@ -160,6 +165,11 @@
     hundred edits per minute across all of its roughly 300 language editions — on the order of
     half a million edits in a typical day. The rate varies with the time of day and with bursts
     of automated bot activity.</p>
+  <h3>How can I see how many times one Wikipedia article has been edited?</h3>
+  <p>Open the article and click <b>View history</b> at the top to see every edit ever made to it.
+    For an exact total, open <b>Tools → Page information</b> and read the "Total number of edits",
+    or use an external tool such as XTools. The live counters above measure the whole of Wikipedia,
+    not a single article.</p>
   <h3>Which language edition is edited the most?</h3>
   <p>English Wikipedia is usually the most actively edited, but at any given moment the mix
     shifts with the sun: European languages peak during European daytime, East Asian languages
