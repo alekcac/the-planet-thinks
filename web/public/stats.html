@@ -18,6 +18,19 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": "https://theplanetthinks.com/stats",
+    "url": "https://theplanetthinks.com/stats",
+    "name": "How often is Wikipedia updated?",
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": ["h1", "#answer"]
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "The Planet Thinks", "item": "https://theplanetthinks.com/" },
@@ -145,7 +158,7 @@
   </div>
   <p class="status" id="status">connecting to the live stream…</p>
 
-  <p>Wikipedia is updated continuously, with no publishing schedule: across its ~300 language
+  <p id="answer">Wikipedia is updated continuously, with no publishing schedule: across its ~300 language
     editions it is edited about <b>3 to 6 times every second</b> — a few hundred edits every
     minute, on the order of <b>half a million edits on a typical day</b>. Every number above
     refreshes every few seconds from

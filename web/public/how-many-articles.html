@@ -18,6 +18,19 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": "https://theplanetthinks.com/how-many-articles",
+    "url": "https://theplanetthinks.com/how-many-articles",
+    "name": "How many Wikipedia articles are there?",
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": ["h1", "#answer"]
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "The Planet Thinks", "item": "https://theplanetthinks.com/" },
@@ -129,7 +142,7 @@
   </div>
   <p class="status" id="status">connecting to the live stream…</p>
 
-  <p>As of 2026, the total number of Wikipedia articles stands at <b>more than 65 million</b>,
+  <p id="answer">As of 2026, the total number of Wikipedia articles stands at <b>more than 65 million</b>,
     across roughly <b>340 language editions</b> — about 300 of which are actively edited.
     <b>English Wikipedia</b>, the largest edition, passed <b>seven million articles</b> — yet it
     is only around a tenth of the total. About <b>15,000 new articles</b> are added every day
