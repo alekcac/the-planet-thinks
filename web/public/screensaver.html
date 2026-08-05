@@ -28,6 +28,69 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to run a free live screensaver on a TV or second monitor",
+    "description": "Turn any screen with a browser into an ambient live screensaver — a real-time 3D globe of Wikipedia edits. Nothing to install.",
+    "totalTime": "PT1M",
+    "estimatedCost": { "@type": "MonetaryAmount", "currency": "USD", "value": "0" },
+    "supply": [{ "@type": "HowToSupply", "name": "Any screen with a web browser (TV, second monitor, spare laptop)" }],
+    "tool": [{ "@type": "HowToTool", "name": "A modern web browser" }],
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Open the cinematic globe",
+        "text": "Open theplanetthinks.com/?cinematic in a browser. The cinematic parameter starts it with the interface already hidden.",
+        "url": "https://theplanetthinks.com/screensaver#on-a-screen"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Go full screen",
+        "text": "Press F11, or use your browser's full-screen option. On a smart TV or streaming stick, use the browser's full-screen control and switch off the TV's sleep timer.",
+        "url": "https://theplanetthinks.com/screensaver#on-a-screen"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Leave it running",
+        "text": "An auto-piloted camera drifts from edit to edit. Move the mouse at any time to bring the controls back or leave. The scene renders at your screen's native resolution, so on a 4K panel it is a true 4K screensaver.",
+        "url": "https://theplanetthinks.com/screensaver#on-a-screen"
+      }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to use a live globe as an OBS 'be right back' background",
+    "description": "Add a free, always-moving ambient scene to OBS as a BRB screen, intro, or starting-soon overlay.",
+    "totalTime": "PT2M",
+    "estimatedCost": { "@type": "MonetaryAmount", "currency": "USD", "value": "0" },
+    "tool": [{ "@type": "HowToTool", "name": "OBS Studio" }],
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Add a Browser source",
+        "text": "In OBS, add a new Browser source to your scene.",
+        "url": "https://theplanetthinks.com/screensaver#obs"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Point it at the cinematic globe",
+        "text": "Set the URL to https://theplanetthinks.com/?cinematic — the heads-up display is hidden automatically.",
+        "url": "https://theplanetthinks.com/screensaver#obs"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Match your canvas size",
+        "text": "Set the source width and height to your canvas, for example 1920 by 1080.",
+        "url": "https://theplanetthinks.com/screensaver#obs"
+      }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
       {
@@ -104,7 +167,7 @@
     genuinely different every minute, which is exactly why it holds a glance on a second screen.</p>
 
   <h2>Use it as an ambient screen</h2>
-  <h3>On a second monitor</h3>
+  <h3 id="on-a-screen">On a second monitor</h3>
   <ol>
     <li>Open <a href="/?cinematic">theplanetthinks.com/?cinematic</a> in a browser.</li>
     <li>Press <b>F11</b> (or your browser's full-screen button). The interface disappears.</li>
@@ -120,7 +183,7 @@
     TV's sleep timer. The scene renders at your screen's native resolution — on a 4K panel it is
     a true <b>4K screensaver</b>, not an upscaled video loop.</p>
 
-  <h3>As an OBS "be right back" screen or stream background</h3>
+  <h3 id="obs">As an OBS "be right back" screen or stream background</h3>
   <ol>
     <li>In OBS, add a <b>Browser</b> source.</li>
     <li>Set the URL to <code>https://theplanetthinks.com/?cinematic</code></li>
