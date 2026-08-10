@@ -21,6 +21,23 @@ Edits light up where the **article subject** is located. Articles without coordi
 (people, ideas, eras — about 80% of Wikipedia) are counted in the header but not shown.
 Editor IPs are never used; Wikipedia no longer exposes them.
 
+## Embed it
+
+The globe embeds anywhere an `<iframe>` works — a blog post, a docs page, a dashboard:
+
+```html
+<iframe src="https://theplanetthinks.com/?cinematic"
+  style="width:100%;max-width:800px;aspect-ratio:16/9;border:0;border-radius:12px"
+  loading="lazy" allowfullscreen
+  title="The Planet Thinks — live Wikipedia edits on a 3D globe"></iframe>
+<p><a href="https://theplanetthinks.com/">The Planet Thinks — live Wikipedia edits on a 3D globe</a></p>
+```
+
+Tune the scene with URL options: `?lang=de,fr` shows only those language editions,
+`?view=51,10,1.6` opens the camera at lat,lng[,altitude], `?follow=off` keeps it parked,
+and `/photos?cinematic` embeds the photo globe instead. Keeping the credit line under
+the iframe is appreciated.
+
 ## Develop
 
 Requires Node ≥ 22.
