@@ -7,6 +7,7 @@ import { Chimes } from './sound';
 import { Music } from './music';
 import { initAbout } from './about';
 import { initCinematic } from './cinematic';
+import { parseLangFilter, parseFollowOff } from './url-params';
 import type { Pulse } from './types';
 
 const q = qualityFor(window.innerWidth, matchMedia('(pointer: coarse)').matches);
@@ -20,7 +21,17 @@ onToggle('sound', on => chimes.setEnabled(on));
 onToggle('music', on => music.setEnabled(on));
 onToggle('follow', on => globe.setFollow(on));
 
+// Shareable personal views (see url-params.ts). The language filter only makes sense on the
+// wiki globe — the Commons stream has a single pseudo-language.
+const langFilter = document.body.dataset.stream === 'commons' ? null : parseLangFilter(location.search);
+if (parseFollowOff(location.search)) {
+  globe.setFollow(false);
+  const box = document.getElementById('follow') as HTMLInputElement | null;
+  if (box) box.checked = false;
+}
+
 function handlePulse(p: Pulse, replayed = false) {
+  if (langFilter && !langFilter.has(p.lang)) return;
   // Photo pulses warm their thumbnail BEFORE the marker lights up: by the time the tour
   // flies over, the card opens instantly with an already-cached image. (Replayed background
   // markers skip this — preloading a whole replay buffer would pull megabytes for nothing.)

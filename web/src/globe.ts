@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { colorFor, radiusFor, hslColor } from './visuals';
 import { sunDirection, subsolarPoint } from './sun';
 import { angularDistanceDeg } from './geo';
+import { parseView } from './url-params';
 import { createSpace } from './space';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
@@ -131,8 +132,11 @@ export function createGlobe(el: HTMLElement, q: Quality, onPick: (p: Pulse) => v
   const sunNow = subsolarPoint(new Date());
   const INTRO_MS = 5200;
   const INTRO_SWEEP_DEG = 150; // how far past the terminator, into the night, we start
+  // A shared /?view=lat,lng[,alt] link opens straight at that spot — a deterministic
+  // opening shot (OBS scenes, "look at my city" links) instead of the sunrise sweep.
+  const urlView = parseView(location.search, DEFAULT_ALTITUDE);
   const introStart = { lat: sunNow.lat, lng: normLng(sunNow.lon + INTRO_SWEEP_DEG), altitude: 0.8 };
-  const introEnd = { lat: 25, lng: sunNow.lon, altitude: DEFAULT_ALTITUDE };
+  const introEnd = urlView ?? { lat: 25, lng: sunNow.lon, altitude: DEFAULT_ALTITUDE };
 
   const globe = new Globe(el, { animateIn: false }) // no built-in zoom-in: the camera must sit at the intro start from frame one
     .backgroundColor('#01020a')
@@ -140,7 +144,7 @@ export function createGlobe(el: HTMLElement, q: Quality, onPick: (p: Pulse) => v
     .showAtmosphere(true)
     .atmosphereColor('#3a6fff')
     .atmosphereAltitude(0.18)
-    .pointOfView(REDUCED_MOTION ? introEnd : introStart)
+    .pointOfView(REDUCED_MOTION || urlView ? introEnd : introStart)
     .ringsData([])
     .ringMaxRadius((d: object) => (d as RingDatum).maxR)
     .ringPropagationSpeed(2.2)
@@ -413,7 +417,7 @@ export function createGlobe(el: HTMLElement, q: Quality, onPick: (p: Pulse) => v
     requestAnimationFrame(frame);
   }
 
-  if (REDUCED_MOTION) {
+  if (REDUCED_MOTION || urlView) {
     liftCurtain();
     document.body.classList.remove('intro');
     tourTimer = setTimeout(runTour, DWELL_MS);
