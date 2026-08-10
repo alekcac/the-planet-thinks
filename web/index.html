@@ -138,6 +138,11 @@
     #curtain.lift { opacity: 0; }
     body.cinematic .hud, body.cinematic #card { opacity: 0; pointer-events: none; transition: opacity .5s ease; }
     body.cinematic.reveal .hud, body.cinematic.reveal #card { opacity: 1; pointer-events: auto; }
+    .embed-badge { position: fixed; z-index: 12; left: 14px; bottom: 12px; padding: 5px 10px;
+                   background: rgba(8,12,24,0.78); border: 1px solid rgba(120,150,255,0.3);
+                   border-radius: 999px; color: #cfd8ff; font-size: 12px; text-decoration: none;
+                   opacity: 0.8; }
+    .embed-badge:hover { opacity: 1; }
     body.cinematic { cursor: none; }
     body.cinematic.reveal { cursor: default; }
 
