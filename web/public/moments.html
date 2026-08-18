@@ -91,7 +91,7 @@
       var link = el('a', null, a.title);
       link.href = a.url; link.rel = 'noopener';
       li.appendChild(link);
-      li.appendChild(document.createTextNode(' — ' + a.count + ' edits '));
+      li.appendChild(document.createTextNode(' — ' + a.count + (a.count === 1 ? ' edit ' : ' edits ')));
       li.appendChild(el('span', 'lang', '(' + a.lang + ')'));
       ol.appendChild(li);
     });

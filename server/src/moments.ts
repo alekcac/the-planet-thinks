@@ -141,7 +141,7 @@ export function buildMomentsRss(days: DaySummary[], pageUrl = 'https://theplanet
     const title = `${d.date} — ${d.edits.toLocaleString('en-US')} located edits` +
       (hottest ? `; hottest place: ${hottest.title}` : '');
     const top = d.top_articles.map(a =>
-      `<li><a href="${esc(a.url)}">${esc(a.title)}</a> (${a.lang}) — ${a.count} edits</li>`).join('');
+      `<li><a href="${esc(a.url)}">${esc(a.title)}</a> (${a.lang}) — ${a.count} ${a.count === 1 ? 'edit' : 'edits'}</li>`).join('');
     const photos = d.day_photos.map(p =>
       `<a href="${esc(p.url)}">${esc(p.title)}</a>`).join(' · ');
     const body =
