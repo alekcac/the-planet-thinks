@@ -7,6 +7,7 @@ import { classify, classifyCommonsUpload } from './classify.js';
 import { CoordsResolver } from './coords.js';
 import { ReplayBuffer } from './replay.js';
 import { StatsTracker } from './stats.js';
+import { MomentsTracker, buildMomentsRss } from './moments.js';
 import type { Pulse, ServerMessage } from './protocol.js';
 
 // Streams a client can subscribe to via /ws?stream=…; the default stays the Wikipedia
@@ -72,6 +73,15 @@ try {
 } catch { /* start empty */ }
 setInterval(() => fs.writeFile(DWELL_FILE, JSON.stringify(dwell), () => {}), 5 * 60_000);
 
+// Daily digest for the /moments page and RSS feed.
+const MOMENTS_FILE = path.join(DATA_DIR, 'moments.json');
+const moments = new MomentsTracker();
+try {
+  moments.load(JSON.parse(fs.readFileSync(MOMENTS_FILE, 'utf8')));
+  console.log('moments state loaded');
+} catch { /* start empty */ }
+setInterval(() => fs.writeFile(MOMENTS_FILE, JSON.stringify(moments.dump()), () => {}), 5 * 60_000);
+
 function recordDwell(ms: number) {
   const sec = ms / 1000;
   if (!(sec >= 0) || sec > 86_400) return; // ignore negative / absurd (>24h)
@@ -101,7 +111,14 @@ function dwellSnapshot() {
 
 const server = http.createServer((req, res) => {
   res.setHeader('x-robots-tag', 'noindex'); // JSON endpoints must never appear in search results
-  if (req.url === '/healthz') {
+  res.setHeader('access-control-allow-origin', '*'); // public read-only data; the static site fetches it cross-origin
+  if (req.url === '/moments') {
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify(moments.snapshot()));
+  } else if (req.url === '/moments.xml') {
+    res.setHeader('content-type', 'application/rss+xml; charset=utf-8');
+    res.end(buildMomentsRss(moments.snapshot().days));
+  } else if (req.url === '/healthz') {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({
       ok: true,
@@ -186,6 +203,7 @@ function startStream() {
       };
       buffer.push(pulse);
       stats.recordGeo(pulse.lang);
+      moments.recordEdit(pulse);
       broadcast(pulse, 'wiki');
       return;
     }
@@ -210,6 +228,7 @@ function startStream() {
         };
         commonsBuffer.push(pulse);
         commonsStats.recordGeo('commons');
+        moments.recordPhoto(pulse);
         broadcast(pulse, 'commons');
         return true;
       };

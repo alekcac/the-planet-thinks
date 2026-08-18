@@ -25,6 +25,9 @@ Key facts:
   and a live by-language breakdown.
 - [Photos](https://theplanetthinks.com/photos): freshly uploaded Wikimedia Commons photos
   appearing live on the globe, placed where each photo was taken.
+- [Daily moments](https://theplanetthinks.com/moments): a day-by-day digest — the most-edited
+  Wikipedia places and a sample of the day's Commons photos, with an RSS feed
+  (https://api.theplanetthinks.com/moments.xml).
 - [Live screensaver](https://theplanetthinks.com/screensaver): how to run the globe as a free
   ambient screensaver / live wallpaper on a TV or second monitor, or as an OBS stream background
   (via the /?cinematic full-screen mode).

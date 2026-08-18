@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Daily Moments — The Planet Thinks</title>
+  <meta name="description" content="A daily digest of the planet: the most-edited Wikipedia places and a sample of photos freshly uploaded to Wikimedia Commons, day by day. With an RSS feed." />
+  <link rel="canonical" href="https://theplanetthinks.com/moments" />
+  <link rel="alternate" type="application/rss+xml" title="The Planet Thinks — daily moments" href="https://api.theplanetthinks.com/moments.xml" />
+  <meta name="theme-color" content="#01020a" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://theplanetthinks.com/moments" />
+  <meta property="og:site_name" content="The Planet Thinks" />
+  <meta property="og:title" content="Daily Moments — The Planet Thinks" />
+  <meta property="og:description" content="What the planet edited and photographed each day: the hottest Wikipedia places and fresh Commons photos." />
+  <meta property="og:image" content="https://theplanetthinks.com/og.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://theplanetthinks.com/og.jpg" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "The Planet Thinks", "item": "https://theplanetthinks.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Daily moments", "item": "https://theplanetthinks.com/moments" }
+    ]
+  }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #01020a; color: #cfd8ff; font: 16px/1.65 system-ui, sans-serif; }
+    main { max-width: 760px; margin: 0 auto; padding: 48px 20px 64px; }
+    h1 { font-size: 28px; font-weight: 600; letter-spacing: 0.02em; margin: 0 0 4px; }
+    .sub { opacity: 0.6; margin: 0 0 28px; font-size: 15px; }
+    h2 { font-size: 19px; font-weight: 600; margin: 40px 0 6px; }
+    p { margin: 10px 0; }
+    a { color: #9fc4ff; }
+    .totals { font-size: 14px; opacity: 0.75; margin: 0 0 10px; }
+    ol { margin: 8px 0; padding-left: 22px; }
+    li { margin: 4px 0; font-size: 14.5px; }
+    .lang { opacity: 0.5; font-size: 12.5px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin: 12px 0 4px; }
+    .grid a { display: block; aspect-ratio: 1; border-radius: 8px; overflow: hidden;
+              border: 1px solid rgba(120,150,255,0.15); background: #05070f; }
+    .grid img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .muted { opacity: 0.55; font-size: 14px; }
+    .rss { display: inline-block; margin-top: 4px; }
+    hr { border: 0; border-top: 1px solid rgba(120,150,255,0.12); margin: 36px 0; }
+    .cta { display: inline-block; margin-top: 8px; padding: 10px 16px; border: 1px solid rgba(120,150,255,0.35); border-radius: 8px; text-decoration: none; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Daily moments</h1>
+  <p class="sub">What the planet edited and photographed, day by day. Compiled live from the
+    <a href="/">globe of Wikipedia edits</a> and the <a href="/photos">photo stream</a>;
+    days close at midnight UTC.</p>
+
+  <p class="muted rss">Follow along: <a href="https://api.theplanetthinks.com/moments.xml">RSS feed</a> ·
+    <a href="/stats">live edit statistics</a></p>
+
+  <section id="today">
+    <h2>Today so far</h2>
+    <p class="muted" id="today-note">Loading the live digest…</p>
+  </section>
+
+  <div id="days"></div>
+
+  <hr />
+  <p>Every entry here happened in public: each place links to the real Wikipedia article, each
+    photo to its Wikimedia Commons file page.</p>
+  <p><a class="cta" href="/">Watch the planet think, live →</a></p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var API = 'https://api.theplanetthinks.com/moments';
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text) n.textContent = text;
+    return n;
+  }
+
+  function articleList(top) {
+    var ol = el('ol');
+    top.forEach(function (a) {
+      var li = el('li');
+      var link = el('a', null, a.title);
+      link.href = a.url; link.rel = 'noopener';
+      li.appendChild(link);
+      li.appendChild(document.createTextNode(' — ' + a.count + ' edits '));
+      li.appendChild(el('span', 'lang', '(' + a.lang + ')'));
+      ol.appendChild(li);
+    });
+    return ol;
+  }
+
+  function photoGrid(photos) {
+    var g = el('div', 'grid');
+    photos.forEach(function (p) {
+      if (!p.img) return;
+      var a = el('a');
+      a.href = p.url; a.rel = 'noopener'; a.title = p.title;
+      var img = el('img');
+      img.src = p.img; img.alt = p.title; img.loading = 'lazy';
+      a.appendChild(img);
+      g.appendChild(a);
+    });
+    return g;
+  }
+
+  function fillSection(container, day, isToday) {
+    var totals = (day.edits.toLocaleString('en-US')) + ' edits to articles about places · ' +
+      (day.photos.toLocaleString('en-US')) + ' located photos';
+    container.appendChild(el('p', 'totals', totals));
+    if (day.top_articles.length) {
+      container.appendChild(el('p', 'muted', isToday ? 'Most-edited places right now:' : 'Most-edited places:'));
+      container.appendChild(articleList(day.top_articles));
+    }
+    if (day.day_photos.length) container.appendChild(photoGrid(day.day_photos));
+  }
+
+  fetch(API).then(function (r) { return r.json(); }).then(function (d) {
+    var today = document.getElementById('today');
+    document.getElementById('today-note').remove();
+    fillSection(today, d.today, true);
+
+    var days = document.getElementById('days');
+    d.days.forEach(function (day) {
+      var s = el('section');
+      s.id = day.date;
+      s.appendChild(el('h2', null, day.date));
+      fillSection(s, day, false);
+      days.appendChild(s);
+    });
+    if (!d.days.length) {
+      days.appendChild(el('p', 'muted', 'Past days will appear here — the first one closes at midnight UTC.'));
+    }
+  }).catch(function () {
+    document.getElementById('today-note').textContent = 'Could not load the digest — please try again in a minute.';
+  });
+})();
+</script>
+</body>
+</html>
