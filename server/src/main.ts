@@ -149,8 +149,8 @@ function broadcast(msg: ServerMessage, stream: StreamName = 'wiki') {
   }
 }
 setInterval(() => {
-  broadcast(stats.snapshot(), 'wiki');
-  broadcast(commonsStats.snapshot(), 'commons');
+  broadcast({ ...stats.snapshot(), watching: wss.clients.size }, 'wiki');
+  broadcast({ ...commonsStats.snapshot(), watching: wss.clients.size }, 'commons');
 }, 5000);
 
 let es: EventSource | null = null;

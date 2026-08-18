@@ -93,6 +93,7 @@
     .hud.top h1 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: 0.04em; }
     .hud.top .sub { margin: 4px 0 0; opacity: 0.6; font-size: 12.5px; }
     .hud.top .counter { margin: 10px 0 0; font-size: 13px; opacity: 0.92; }
+    .hud.top .watching { margin: 2px 0 0; opacity: 0.55; font-size: 11.5px; }
     .hud.top .note { margin: 2px 0 0; opacity: 0.45; font-size: 11.5px; }
 
     .legend { bottom: 16px; left: 20px; display: flex; flex-direction: column; gap: 5px;
@@ -172,6 +173,7 @@
     <h1>The Planet Thinks</h1>
     <p class="sub">Wikipedia, edited live. Each pulse is an edit to an article about that place.</p>
     <p class="counter" id="counter">connecting…</p>
+    <p class="watching" id="watching" hidden></p>
     <p class="note">Only edits to articles with a location appear — most of Wikipedia (people, ideas, events) has none.</p>
   </header>
 

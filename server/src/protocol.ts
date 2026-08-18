@@ -26,6 +26,8 @@ export interface Stats {
   geo_rate: number;
   /** Pulses per minute by language, rolling minute */
   by_lang: Record<string, number>;
+  /** Open viewer connections across all streams; absent on servers that predate it */
+  watching?: number;
 }
 
 export interface Replay {
