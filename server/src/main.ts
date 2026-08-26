@@ -1,6 +1,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import zlib from 'node:zlib';
 import { WebSocketServer, WebSocket } from 'ws';
 import { EventSource } from 'eventsource';
 import { classify, classifyCommonsUpload } from './classify.js';
@@ -8,11 +9,12 @@ import { CoordsResolver } from './coords.js';
 import { ReplayBuffer } from './replay.js';
 import { StatsTracker } from './stats.js';
 import { MomentsTracker, buildMomentsRss } from './moments.js';
+import { diffUrl, parseSequence, parseOsmChange } from './osm.js';
 import type { Pulse, ServerMessage } from './protocol.js';
 
 // Streams a client can subscribe to via /ws?stream=…; the default stays the Wikipedia
 // edit feed so clients deployed before this existed keep working untouched.
-type StreamName = 'wiki' | 'commons';
+type StreamName = 'wiki' | 'commons' | 'osm';
 
 const PORT = Number(process.env.PORT ?? 8080);
 const DATA_DIR = process.env.DATA_DIR ?? './data';
@@ -36,6 +38,9 @@ const commonsStats = new StatsTracker();
 // Separate resolver without negative caching: a miss at the first look must not block
 // the retry once GeoData catches up.
 const commonsResolver = new CoordsResolver({ userAgent: USER_AGENT, cacheNegatives: false });
+// OpenStreetMap changesets: about fifty a minute, so a short window is already a full globe.
+const osmBuffer = new ReplayBuffer(10 * 60_000, 200);
+const osmStats = new StatsTracker();
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 try {
@@ -135,6 +140,7 @@ const server = http.createServer((req, res) => {
       clients: wss.clients.size,
       ...stats.snapshot(),
       commons: { total_rate: commonsStats.snapshot().total_rate, geo_rate: commonsStats.snapshot().geo_rate },
+      osm: { total_rate: osmStats.snapshot().total_rate, geo_rate: osmStats.snapshot().geo_rate, sequence: osmSequence },
     }));
   } else if (route === '/referrers') {
     res.setHeader('content-type', 'application/json');
@@ -159,13 +165,14 @@ wss.on('connection', (ws: StreamSocket, req) => {
   ws.stream = 'wiki';
   try {
     const params = new URL(req.url ?? '/', 'http://x').searchParams;
-    if (params.get('stream') === 'commons') ws.stream = 'commons';
+    const stream = params.get('stream');
+    if (stream === 'commons' || stream === 'osm') ws.stream = stream;
     const ref = (params.get('ref') ?? '').slice(0, 80);
     if (ref && (referrers.has(ref) || referrers.size < 1000)) {
       referrers.set(ref, (referrers.get(ref) ?? 0) + 1);
     }
   } catch { /* ignore malformed url */ }
-  const replay = ws.stream === 'commons' ? commonsBuffer : buffer;
+  const replay = ws.stream === 'commons' ? commonsBuffer : ws.stream === 'osm' ? osmBuffer : buffer;
   ws.send(JSON.stringify({ type: 'replay', events: replay.list() } satisfies ServerMessage));
 });
 
@@ -178,6 +185,7 @@ function broadcast(msg: ServerMessage, stream: StreamName = 'wiki') {
 setInterval(() => {
   broadcast({ ...stats.snapshot(), watching: wss.clients.size }, 'wiki');
   broadcast({ ...commonsStats.snapshot(), watching: wss.clients.size }, 'commons');
+  broadcast({ ...osmStats.snapshot(), watching: wss.clients.size }, 'osm');
 }, 5000);
 
 let es: EventSource | null = null;
@@ -251,6 +259,78 @@ function startStream() {
 }
 
 startStream();
+
+// ---- OpenStreetMap: the minutely replication diffs -------------------------
+//
+// One file per minute, at a URL derived from a sequence number. We poll the
+// sequence, fetch each new file once, and let the changesets out gradually over
+// the following minute so the globe breathes instead of flashing all at once.
+
+const OSM_BASE = process.env.OSM_REPLICATION ?? 'https://planet.openstreetmap.org/replication/minute';
+const OSM_POLL_MS = Number(process.env.OSM_POLL_MS ?? 30_000);
+let osmSequence = 0;
+let osmTimers: NodeJS.Timeout[] = [];
+
+async function osmFetch(url: string): Promise<Buffer | null> {
+  try {
+    const res = await fetch(url, { headers: { 'User-Agent': USER_AGENT } });
+    if (!res.ok) return null;
+    return Buffer.from(await res.arrayBuffer());
+  } catch {
+    return null;
+  }
+}
+
+function emitChangeset(cs: ReturnType<typeof parseOsmChange>[number]) {
+  const pulse: Pulse = {
+    type: 'pulse',
+    lat: cs.lat,
+    lon: cs.lon,
+    // The globe hashes this into a hue, so the action becomes the colour key.
+    lang: cs.action,
+    title: cs.user ? `${cs.user} · ${cs.nodes} node${cs.nodes === 1 ? '' : 's'}` : `${cs.nodes} nodes`,
+    url: `https://www.openstreetmap.org/changeset/${cs.id}`,
+    editor_type: 'user',
+    // Node count drives the marker size the way a byte delta does for Wikipedia.
+    size_delta: cs.nodes * 40,
+    ts: cs.ts,
+  };
+  osmBuffer.push(pulse);
+  osmStats.recordGeo(cs.action);
+  broadcast(pulse, 'osm');
+}
+
+async function pollOsm() {
+  const state = await osmFetch(`${OSM_BASE}/state.txt`);
+  if (!state) return;
+  const seq = parseSequence(state.toString('utf8'));
+  if (!seq || seq === osmSequence) return;
+  const first = osmSequence === 0;
+  osmSequence = seq;
+
+  const gz = await osmFetch(diffUrl(seq, OSM_BASE));
+  if (!gz) return;
+  let xml: string;
+  try { xml = zlib.gunzipSync(gz).toString('utf8'); } catch { return; }
+
+  const changesets = parseOsmChange(xml);
+  changesets.forEach(() => osmStats.recordTotal());
+  if (!changesets.length) return;
+
+  // On the very first poll show a handful straight away, so an arriving visitor
+  // does not stare at an empty globe for a minute.
+  osmTimers.forEach(clearTimeout);
+  osmTimers = [];
+  const spread = Math.max(1, Math.floor(55_000 / changesets.length));
+  changesets.forEach((cs, i) => {
+    const delay = first && i < 8 ? i * 400 : i * spread;
+    osmTimers.push(setTimeout(() => emitChangeset(cs), delay));
+  });
+}
+
+void pollOsm();
+setInterval(() => void pollOsm(), OSM_POLL_MS);
+
 
 // The upstream SSE feed occasionally drops (or goes silent) and the client library doesn't
 // always recover — leaving the server up but starved of events. If nothing arrives for a
