@@ -110,7 +110,10 @@ function dwellSnapshot() {
 }
 
 const server = http.createServer((req, res) => {
-  res.setHeader('x-robots-tag', 'noindex'); // JSON endpoints must never appear in search results
+  // Raw JSON endpoints must never appear in search results. The RSS feed is the exception:
+  // it is a publication meant to be found, and it is the only crawlable rendering of the
+  // daily digest (the /moments page builds itself client-side).
+  if (req.url !== '/moments.xml') res.setHeader('x-robots-tag', 'noindex');
   res.setHeader('access-control-allow-origin', '*'); // public read-only data; the static site fetches it cross-origin
   if (req.url === '/moments') {
     res.setHeader('content-type', 'application/json');
