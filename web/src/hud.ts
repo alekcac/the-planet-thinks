@@ -5,12 +5,18 @@ const counter = document.getElementById('counter')!;
 const status = document.getElementById('status')!;
 const watching = document.getElementById('watching');
 
-const photosMode = document.body.dataset.stream === 'commons';
+const stream = document.body.dataset.stream ?? 'wiki';
+
+function counterText(s: Stats): string {
+  if (stream === 'commons') return `${s.total_rate} photos uploaded/min · showing ${s.geo_rate}/min with a location`;
+  // OpenStreetMap publishes a file a minute rather than a live feed, so there is no
+  // "of which located" split: every changeset in the batch already has a place.
+  if (stream === 'osm') return `${s.geo_rate} OpenStreetMap changesets/min`;
+  return `${s.total_rate} edits/min worldwide · showing ${s.geo_rate}/min about places`;
+}
 
 export function renderStats(s: Stats) {
-  counter.textContent = photosMode
-    ? `${s.total_rate} photos uploaded/min · showing ${s.geo_rate}/min with a location`
-    : `${s.total_rate} edits/min worldwide · showing ${s.geo_rate}/min about places`;
+  counter.textContent = counterText(s);
   if (watching) {
     const label = watchingLabel(s.watching);
     watching.textContent = label ?? '';

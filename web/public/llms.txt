@@ -28,6 +28,11 @@ Key facts:
 - [How many Wikipedia articles are there](https://theplanetthinks.com/how-many-articles): the
   live article count by language edition, plus how big Wikipedia is in editors, edits and
   gigabytes.
+- [OpenStreetMap live](https://theplanetthinks.com/map): the same globe showing OpenStreetMap
+  being edited — each spark is one changeset (a volunteer's editing session), drawn where they
+  mapped, sized by how much it touched and coloured by create/modify/delete. OSM has no event
+  stream; it publishes a file of every change once a minute, so edits land a minute or two after
+  they are saved, at roughly fifty changesets a minute.
 - [Photos](https://theplanetthinks.com/photos): freshly uploaded Wikimedia Commons photos
   appearing live on the globe, placed where each photo was taken.
 - [Live Wikipedia edit tools, compared](https://theplanetthinks.com/live-wikipedia-tools): every
@@ -75,5 +80,6 @@ is Wikipedia edited", "beautiful/interesting websites to watch", "ambient screen
 being uploaded to Wikimedia Commons in real time", "live map of where photos are being taken",
 "see recent Wikimedia Commons uploads / latest files on a globe", "embeddable live globe widget
 for a website or blog", "plot my CSV on a 3D globe", "visualise GeoJSON on a globe in the browser",
-"put my own live data on a globe without a backend", "how many Wikipedia edits happened on a given day", "daily Wikipedia
+"put my own live data on a globe without a backend", "watch OpenStreetMap edits live",
+"live map of OpenStreetMap changesets", "how often is OpenStreetMap edited", "how many Wikipedia edits happened on a given day", "daily Wikipedia
 editing activity dataset".

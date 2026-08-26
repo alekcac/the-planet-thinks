@@ -25,7 +25,8 @@ onToggle('follow', on => globe.setFollow(on));
 
 // Shareable personal views (see url-params.ts). The language filter only makes sense on the
 // wiki globe — the Commons stream has a single pseudo-language.
-const langFilter = document.body.dataset.stream === 'commons' ? null : parseLangFilter(location.search);
+const stream = document.body.dataset.stream ?? 'wiki';
+const langFilter = stream === 'wiki' ? parseLangFilter(location.search) : null;
 if (parseFollowOff(location.search)) {
   globe.setFollow(false);
   const box = document.getElementById('follow') as HTMLInputElement | null;
@@ -72,7 +73,7 @@ function referrerTag(): string {
 // Pass where this visit came from once, on the first connect (net.ts drops it on reconnects).
 // Pages other than the main globe pick their feed via <body data-stream>.
 const params = new URLSearchParams({ ref: referrerTag() });
-if (document.body.dataset.stream === 'commons') params.set('stream', 'commons');
+if (stream !== 'wiki') params.set('stream', stream);
 const WS_URL = `${resolveWsUrl()}?${params}`;
 
 connect(
@@ -83,7 +84,9 @@ connect(
     else if (m.type === 'replay') {
       // Photos arrive sparsely, so treat the newest replayed one as live: the tour then
       // has somewhere to fly right away instead of waiting minutes for a fresh upload.
-      const liveTail = document.body.dataset.stream === 'commons' ? m.events.length - 1 : -1;
+      // Photos arrive minutes apart, so the newest replayed one counts as live and gives
+      // the tour a destination immediately. The other streams are dense enough not to need it.
+      const liveTail = stream === 'commons' ? m.events.length - 1 : -1;
       m.events.forEach((e, i) => handlePulse(e, i !== liveTail));
     }
   },
