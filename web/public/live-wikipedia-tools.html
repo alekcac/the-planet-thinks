@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Watch Wikipedia Edits Live: Every Tool, Tested</title>
+  <meta name="description" content="Every live Wikipedia edit visualization, tested in August 2026: which ones still work, which went dark when Wikipedia removed IP addresses, and what each one is best for." />
+  <link rel="canonical" href="https://theplanetthinks.com/live-wikipedia-tools" />
+  <meta name="theme-color" content="#01020a" />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://theplanetthinks.com/live-wikipedia-tools" />
+  <meta property="og:site_name" content="The Planet Thinks" />
+  <meta property="og:title" content="Watch Wikipedia Edits Live: Every Tool, Tested" />
+  <meta property="og:description" content="Which live Wikipedia edit visualizations still work in 2026 — and why half of the maps went dark." />
+  <meta property="og:image" content="https://theplanetthinks.com/og.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://theplanetthinks.com/og.jpg" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "The Planet Thinks", "item": "https://theplanetthinks.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Live Wikipedia edit tools", "item": "https://theplanetthinks.com/live-wikipedia-tools" }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": "https://theplanetthinks.com/live-wikipedia-tools",
+    "url": "https://theplanetthinks.com/live-wikipedia-tools",
+    "name": "Watch Wikipedia edits live: every tool, tested",
+    "datePublished": "2026-08-26",
+    "speakable": { "@type": "SpeakableSpecification", "cssSelector": ["h1", "#answer"] }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Live Wikipedia edit visualizations",
+    "description": "Tools that show Wikipedia being edited in real time, checked on 26 August 2026.",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "item": { "@type": "WebApplication", "name": "Listen to Wikipedia", "url": "https://listen.hatnote.com/", "applicationCategory": "Visualization", "description": "Turns each live edit into a sound and a circle. Not a map — the classic ambient version." } },
+      { "@type": "ListItem", "position": 2, "item": { "@type": "WebApplication", "name": "The Planet Thinks", "url": "https://theplanetthinks.com/", "applicationCategory": "Visualization", "description": "A live globe of Wikipedia edits, placed where each article's subject sits on Earth." } },
+      { "@type": "ListItem", "position": 3, "item": { "@type": "WebApplication", "name": "Wikipedia Live", "url": "https://wikipedia.datastories.live/", "applicationCategory": "Visualization", "description": "An AI writes a short news bulletin about the last window of edits, every 45 seconds. Text, not a map." } },
+      { "@type": "ListItem", "position": 4, "item": { "@type": "WebApplication", "name": "overwatch.earth", "url": "https://overwatch.earth/wikipedia", "applicationCategory": "Visualization", "description": "A 3D globe combining many live data feeds, of which Wikipedia edits are one." } },
+      { "@type": "ListItem", "position": 5, "item": { "@type": "WebApplication", "name": "Wikipedia Recent Changes Map", "url": "https://rcmap.hatnote.com/", "applicationCategory": "Visualization", "description": "Sunset. Mapped edits by the editor's IP address, which Wikipedia stopped exposing in November 2025." } }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What are some websites like Listen to Wikipedia?",
+        "acceptedAnswer": { "@type": "Answer", "text": "The closest working ones in 2026 are The Planet Thinks, which draws each geo-located edit on a 3D globe where the article's subject sits; Wikipedia Live, where an AI writes a short bulletin about each window of edits; and overwatch.earth, a multi-feed globe that includes Wikipedia edits among about thirty other live data sources. Listen to Wikipedia itself is still running. The older map-style tools, Wikipedia Recent Changes Map and WikiMap, no longer show edits." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the Wikipedia Recent Changes Map gone?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. Hatnote's Recent Changes Map has been sunset. Its own notice explains why: in November 2025 Wikipedia replaced anonymous IP-based editing with temporary accounts, so the IP addresses the map used to geolocate editors are no longer published. The site still loads, but the feed is switched off." }
+      },
+      {
+        "@type": "Question",
+        "name": "Why did the Wikipedia edit maps stop working?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Most of them mapped the editor, not the subject. They read the IP address attached to an anonymous edit and looked up its approximate location. When Wikipedia moved unregistered editors to temporary accounts in November 2025 — a privacy improvement — those IP addresses disappeared from the public feed, and every tool built on them went dark. Tools that place an edit by the location of the article's subject were unaffected, because that data comes from the article itself." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can you still see where Wikipedia editors are located?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No, and that is deliberate. Since November 2025 unregistered edits are attributed to temporary accounts rather than to IP addresses, so editor locations are no longer public. Live maps of Wikipedia today show where the edited subject is, not where the person editing it sits." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is there a live map of Wikipedia edits?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. The Planet Thinks is a live globe of Wikipedia edits: every edit to an article that carries map coordinates lights up at that place, seconds after it is saved, across roughly 300 language editions. overwatch.earth also renders Wikipedia edits on a globe alongside its other feeds." }
+      }
+    ]
+  }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #01020a; color: #cfd8ff; font: 16px/1.65 system-ui, sans-serif; }
+    main { max-width: 760px; margin: 0 auto; padding: 48px 20px 64px; }
+    h1 { font-size: 28px; font-weight: 600; letter-spacing: 0.02em; margin: 0 0 4px; }
+    .sub { opacity: 0.6; margin: 0 0 28px; font-size: 15px; }
+    h2 { font-size: 20px; font-weight: 600; margin: 42px 0 8px; }
+    h3 { font-size: 17px; font-weight: 600; margin: 28px 0 4px; }
+    p { margin: 10px 0; }
+    a { color: #9fc4ff; }
+    #answer { font-size: 17px; }
+    .wrap { overflow-x: auto; margin: 18px 0 6px; }
+    table { width: 100%; border-collapse: collapse; min-width: 560px; }
+    td, th { text-align: left; padding: 9px 10px; border-bottom: 1px solid rgba(120,150,255,0.12); font-size: 14.5px; vertical-align: top; }
+    th { opacity: 0.6; font-weight: 500; }
+    .ok { color: #8fe3b0; }
+    .dead { color: #ff9d9d; }
+    .muted { opacity: 0.55; font-size: 14px; }
+    .cta { display: inline-block; margin-top: 10px; padding: 10px 16px; border: 1px solid rgba(120,150,255,0.35); border-radius: 8px; text-decoration: none; }
+    hr { border: 0; border-top: 1px solid rgba(120,150,255,0.12); margin: 36px 0; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Watch Wikipedia edits live: every tool, tested</h1>
+  <p class="sub">Checked by hand on 26 August 2026 — each one opened in a browser and watched.</p>
+
+  <p id="answer">Four tools still show Wikipedia being edited in real time:
+    <a href="https://listen.hatnote.com/" rel="noopener">Listen to Wikipedia</a> turns edits into
+    sound, <a href="/">The Planet Thinks</a> draws them on a globe,
+    <a href="https://wikipedia.datastories.live/" rel="noopener">Wikipedia Live</a> has an AI narrate
+    them, and <a href="https://overwatch.earth/wikipedia" rel="noopener">overwatch.earth</a> puts
+    them on a globe alongside flights and ships. Two well-known ones — the Wikipedia Recent Changes
+    Map and WikiMap — no longer show any edits, for a reason worth knowing.</p>
+
+  <h2>Why half the maps went dark</h2>
+  <p>The older tools mapped <em>the editor</em>. When someone edited Wikipedia without logging in,
+    their IP address was published alongside the edit, and a map could look up roughly where that
+    address was. That is what made a "map of Wikipedia editors" possible at all.</p>
+  <p>In November 2025 Wikipedia moved unregistered editors to
+    <a href="https://en.wikipedia.org/wiki/Wikipedia:Temporary_accounts" rel="noopener">temporary
+    accounts</a>. Anonymous edits are now credited to a short-lived account name instead of an IP
+    address — a clear privacy improvement, and the end of the road for anything built on those IPs.
+    Hatnote's Recent Changes Map says so plainly in its own sunset notice.</p>
+  <p>The tools that survived never looked at editors in the first place. They place an edit by the
+    location of <em>the thing being edited</em>: if someone improves the article about a river, the
+    river lights up. That data comes from the article's own coordinates, so no privacy change can
+    take it away.</p>
+
+  <h2>The tools</h2>
+  <div class="wrap">
+  <table>
+    <tr><th>Tool</th><th>What it shows</th><th>Status, 26 Aug 2026</th></tr>
+    <tr>
+      <td><a href="https://listen.hatnote.com/" rel="noopener">Listen to Wikipedia</a></td>
+      <td>Every edit as a sound and a growing circle. No map.</td>
+      <td class="ok">Working</td>
+    </tr>
+    <tr>
+      <td><a href="/">The Planet Thinks</a></td>
+      <td>A 3D globe; each geo-located edit flares where its subject is.</td>
+      <td class="ok">Working</td>
+    </tr>
+    <tr>
+      <td><a href="https://wikipedia.datastories.live/" rel="noopener">Wikipedia Live</a></td>
+      <td>An AI writes a bulletin about each 45-second window of edits.</td>
+      <td class="ok">Working</td>
+    </tr>
+    <tr>
+      <td><a href="https://overwatch.earth/wikipedia" rel="noopener">overwatch.earth</a></td>
+      <td>A globe of ~34 live feeds; Wikipedia edits are one of them.</td>
+      <td class="ok">Working</td>
+    </tr>
+    <tr>
+      <td><a href="https://rcmap.hatnote.com/" rel="noopener">Recent Changes Map</a></td>
+      <td>Mapped anonymous editors by IP location.</td>
+      <td class="dead">Sunset</td>
+    </tr>
+    <tr>
+      <td><a href="https://wikimap.duncanmcardle.com/" rel="noopener">WikiMap</a></td>
+      <td>Mapped edits by country, from editor IPs.</td>
+      <td class="dead">No data</td>
+    </tr>
+    <tr>
+      <td><a href="https://wikistream.toolforge.org/" rel="noopener">Wikistream</a></td>
+      <td>A scrolling text list of edits.</td>
+      <td class="dead">No data</td>
+    </tr>
+  </table>
+  </div>
+
+  <h3>Listen to Wikipedia</h3>
+  <p>The original, and still the one most people mean. Bells for additions, plucked strings for
+    removals, pitch set by the size of the edit; circles bloom and fade over a white field. It is
+    not a map and never tried to be — it is the ambient one, and it has aged beautifully. When we
+    checked it, it was running at 17 edits a minute.</p>
+
+  <h3>The Planet Thinks</h3>
+  <p>Ours, so weigh this accordingly. A realistic 3D Earth with a moving day/night line; every edit
+    to an article that has map coordinates lights up at that place, in the colour of its language
+    edition. Click a spark and you get the article and the actual diff. About a fifth of Wikipedia
+    carries coordinates, so the rest of the traffic is counted in the header rather than drawn.
+    There is also a <a href="/photos">photo mode</a> for live Wikimedia Commons uploads, a
+    <a href="/screensaver">full-screen mode</a> for a TV or second monitor, and a
+    <a href="/moments">daily digest</a>. Free, no sign-up, no tracking cookies, MIT-licensed.</p>
+
+  <h3>Wikipedia Live</h3>
+  <p>The newest idea of the group, and a genuinely different one: instead of drawing the edits it
+    <em>reports</em> on them. Every 45 seconds an AI model reads the last window of activity and
+    writes a short bulletin — how much of it is bots, which articles drew a revert, which rename was
+    quietly funny. If you want to know what the edit stream <em>means</em> rather than watch it move,
+    this is the one. It is text, not a globe, despite occasionally being described as one.</p>
+
+  <h3>overwatch.earth</h3>
+  <p>A single 3D globe carrying roughly 34 live feeds — flights, ships, weather, satellites,
+    internet events — with Wikipedia edits as one layer among them. If you want one screen for
+    everything happening on Earth rather than one subject watched closely, it covers far more ground
+    than anything else here. A consent screen loads before the globe does; we did not pass it, so
+    this description follows the site's own account of itself.</p>
+
+  <h3>Recent Changes Map, WikiMap, Wikistream</h3>
+  <p>Recent Changes Map has been formally retired and says so on its front page, pointing visitors
+    to Listen to Wikipedia. WikiMap still loads its world map and its counters, but after a full
+    minute of watching it reported zero edits received. Wikistream draws its filter bar and then
+    nothing at all. All three are worth remembering: for years they were how people saw this.</p>
+
+  <hr />
+  <h2>Frequently asked</h2>
+  <p><b>What are some websites like Listen to Wikipedia?</b> The four working tools above. If you
+    want the same ambient quality in a different sense, the globe versions are closest; if you want
+    words, Wikipedia Live is the one.</p>
+  <p><b>Can you still see where Wikipedia editors are?</b> No, and that is the point. Since November
+    2025 anonymous edits are credited to temporary accounts rather than IP addresses, so editor
+    locations are no longer public. Live maps today show where the <em>subject</em> is.</p>
+  <p><b>Is there a live map of Wikipedia edits?</b> Yes — this site is one, and overwatch.earth
+    carries the same feed on its multi-feed globe.</p>
+  <p><b>Where does the data come from?</b> All of these read the same public source: Wikimedia
+    <a href="https://stream.wikimedia.org/?doc" rel="noopener">EventStreams</a>, which publishes
+    every saved change within about a second. Nobody here has special access; the difference is only
+    in what each one does with it.</p>
+
+  <p class="muted">Something missing or out of date? The
+    <a href="https://github.com/alekcac/the-planet-thinks" rel="noopener">source of this site</a> is
+    public — open an issue and we will re-check and update the list.</p>
+
+  <p><a class="cta" href="/">Watch Wikipedia edit itself, live →</a></p>
+</main>
+</body>
+</html>
