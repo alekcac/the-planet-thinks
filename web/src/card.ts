@@ -21,7 +21,12 @@ async function changesetNote(url: string, timeoutMs = 1500): Promise<string> {
     if (!res.ok) return '';
     const cs = (await res.json())?.changeset;
     const comment = String(cs?.tags?.comment ?? '').trim();
-    const editor = String(cs?.tags?.created_by ?? '').split(' ')[0];
+    // created_by is free text: "iD 2.27", "StreetComplete 63.4", sometimes a bare URL.
+    const editor = String(cs?.tags?.created_by ?? '')
+      .split(' ')[0]
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .replace(/\/$/, '');
     if (comment) return editor ? `“${comment}” · via ${editor}` : `“${comment}”`;
     return editor ? `via ${editor}` : '';
   } catch {
