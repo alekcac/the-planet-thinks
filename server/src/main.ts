@@ -44,7 +44,8 @@ const osmBuffer = new ReplayBuffer(10 * 60_000, 200);
 const osmStats = new StatsTracker();
 
 // Country outlines ship with the image; without them pulses simply carry no place name.
-const countryCount = loadCountries(new URL('../../assets/countries.json', import.meta.url).pathname);
+// dist/main.js sits one level below the package root, where assets/ lives.
+const countryCount = loadCountries(new URL('../assets/countries.json', import.meta.url).pathname);
 console.log(countryCount ? `country outlines loaded (${countryCount})` : 'no country outlines — pulses will have no place label');
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
