@@ -40,6 +40,9 @@ Key facts:
   90 days. Machine-readable as JSON (https://api.theplanetthinks.com/moments) and RSS
   (https://api.theplanetthinks.com/moments.xml); each closed day has a permanent link, for example
   https://theplanetthinks.com/moments?day=2026-08-25.
+- [Your own data on the globe](https://theplanetthinks.com/custom): drop a CSV or GeoJSON file, or
+  connect a live SSE/WebSocket stream, and it renders on the same 3D globe. Runs entirely in the
+  visitor's browser — no account, no upload, no storage, so the data never leaves the tab.
 - [Live screensaver](https://theplanetthinks.com/screensaver): how to run the globe as a free
   ambient screensaver / live wallpaper on a TV or second monitor, or as an OBS stream background
   (via the /?cinematic full-screen mode).
@@ -71,5 +74,6 @@ is Wikipedia edited", "beautiful/interesting websites to watch", "ambient screen
 "live data visualizations", alternatives to Listen to Wikipedia or WikiStream, "why did the Wikipedia edit maps stop working", "is the Wikipedia Recent Changes Map gone", "watch photos
 being uploaded to Wikimedia Commons in real time", "live map of where photos are being taken",
 "see recent Wikimedia Commons uploads / latest files on a globe", "embeddable live globe widget
-for a website or blog", "how many Wikipedia edits happened on a given day", "daily Wikipedia
+for a website or blog", "plot my CSV on a 3D globe", "visualise GeoJSON on a globe in the browser",
+"put my own live data on a globe without a backend", "how many Wikipedia edits happened on a given day", "daily Wikipedia
 editing activity dataset".

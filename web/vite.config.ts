@@ -13,8 +13,9 @@ export default defineConfig({
   preview: { proxy: wsProxy },
   build: {
     rollupOptions: {
-      // Two entries share one bundle: the Wikipedia globe and the Commons photos layer.
-      input: { main: 'index.html', photos: 'photos.html' },
+      // Three entries share one bundle: the Wikipedia globe, the Commons photos layer,
+      // and the page that renders somebody else's own data.
+      input: { main: 'index.html', photos: 'photos.html', custom: 'custom.html' },
     },
   },
 });

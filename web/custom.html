@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Put Your Own Data on a Live 3D Globe — The Planet Thinks</title>
+  <meta name="description" content="Drop a CSV or GeoJSON file, or connect a live SSE or WebSocket stream, and watch your own data light up a 3D globe. Everything runs in your browser — nothing is uploaded and nothing is stored." />
+  <link rel="canonical" href="https://theplanetthinks.com/custom" />
+  <meta name="theme-color" content="#01020a" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://theplanetthinks.com/custom" />
+  <meta property="og:site_name" content="The Planet Thinks" />
+  <meta property="og:title" content="Put your own data on a live 3D globe" />
+  <meta property="og:description" content="Drop a CSV or GeoJSON, or connect a live stream. Runs entirely in your browser — your data never leaves it." />
+  <meta property="og:image" content="https://theplanetthinks.com/og.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://theplanetthinks.com/og.jpg" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "The Planet Thinks — your own data on the globe",
+    "alternateName": ["Custom data globe", "CSV to 3D globe"],
+    "url": "https://theplanetthinks.com/custom",
+    "description": "Render your own CSV, GeoJSON or live SSE/WebSocket data on a realistic 3D globe, entirely client-side. No account, no upload, no storage.",
+    "applicationCategory": "Visualization",
+    "operatingSystem": "Any (modern web browser)",
+    "browserRequirements": "Requires JavaScript and WebGL",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "license": "https://opensource.org/licenses/MIT",
+    "isPartOf": { "@type": "WebSite", "name": "The Planet Thinks", "url": "https://theplanetthinks.com/" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "The Planet Thinks", "item": "https://theplanetthinks.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Your own data", "item": "https://theplanetthinks.com/custom" }
+    ]
+  }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #01020a; color: #cfd8ff; font: 14px/1.45 system-ui, sans-serif; overflow: hidden; }
+    #app { position: fixed; inset: 0; }
+    .vignette { position: fixed; inset: 0; z-index: 1; pointer-events: none;
+                background: radial-gradient(ellipse at center, transparent 56%, rgba(0,0,0,0.5) 100%); }
+    .hud { position: fixed; z-index: 10; user-select: none; }
+    .hud.top { top: 16px; left: 20px; max-width: 360px; }
+    .hud.top h1 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: 0.04em; }
+    .hud.top .sub { margin: 4px 0 0; opacity: 0.6; font-size: 12.5px; }
+
+    .panel { position: fixed; z-index: 12; top: 92px; left: 20px; width: 360px; max-width: calc(100vw - 40px);
+             background: rgba(6,9,20,0.9); border: 1px solid rgba(120,150,255,0.18); border-radius: 12px;
+             padding: 14px 16px; backdrop-filter: blur(6px); max-height: calc(100vh - 130px); overflow-y: auto; }
+    .panel h2 { margin: 0 0 8px; font-size: 13px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; opacity: 0.6; }
+    .panel p { margin: 8px 0; font-size: 12.5px; opacity: 0.75; }
+    .drop { border: 1px dashed rgba(120,150,255,0.35); border-radius: 10px; padding: 18px 12px; text-align: center;
+            cursor: pointer; transition: background .15s, border-color .15s; font-size: 13px; }
+    .drop:hover, .drop.over { background: rgba(120,150,255,0.08); border-color: rgba(120,150,255,0.6); }
+    .row { display: flex; gap: 6px; margin-top: 10px; }
+    input[type=url] { flex: 1; min-width: 0; background: rgba(255,255,255,0.04); color: inherit; font: inherit;
+                      border: 1px solid rgba(120,150,255,0.25); border-radius: 8px; padding: 8px 10px; }
+    input[type=url]:focus { outline: none; border-color: rgba(120,150,255,0.6); }
+    button { background: rgba(120,150,255,0.14); color: #cfd8ff; font: inherit; cursor: pointer;
+             border: 1px solid rgba(120,150,255,0.35); border-radius: 8px; padding: 8px 14px; }
+    button:hover { background: rgba(120,150,255,0.24); }
+    button.ghost { background: none; }
+    .status { margin-top: 10px; font-size: 12.5px; min-height: 1.4em; }
+    .status.bad { color: #ff9d9d; }
+    .status.good { color: #8fe3b0; }
+    .hint { font-size: 11.5px; opacity: 0.5; margin-top: 10px; line-height: 1.5; }
+    .hint code { background: rgba(120,150,255,0.12); padding: 1px 4px; border-radius: 3px; }
+    a { color: #9fc4ff; }
+    #card { position: fixed; z-index: 11; right: 20px; bottom: 20px; max-width: 320px;
+            background: rgba(6,9,20,0.92); border: 1px solid rgba(120,150,255,0.2); border-radius: 12px;
+            padding: 12px 14px; display: flex; flex-direction: column; gap: 5px; }
+    #card[hidden] { display: none; }
+    #card strong { font-size: 15px; }
+    #card .meta { opacity: 0.65; font-size: 12px; }
+    .legend { bottom: 16px; left: 20px; font-size: 11.5px; opacity: 0.6; }
+    @media (max-width: 640px) {
+      .panel { top: auto; bottom: 12px; left: 12px; right: 12px; width: auto; max-height: 52vh; }
+      .legend { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div class="vignette"></div>
+
+  <header class="hud top">
+    <h1>Your own data, on the globe</h1>
+    <p class="sub">Runs entirely in this browser tab. Nothing is uploaded, nothing is stored.</p>
+  </header>
+
+  <section class="panel">
+    <h2>A file</h2>
+    <div class="drop" id="drop" tabindex="0" role="button">
+      Drop a CSV or GeoJSON here, or click to choose
+    </div>
+    <input type="file" id="file" accept=".csv,.tsv,.json,.geojson,text/csv,application/json" hidden />
+
+    <h2 style="margin-top:16px">A live stream</h2>
+    <div class="row">
+      <input type="url" id="url" placeholder="https://… (SSE) or wss://… " spellcheck="false" />
+      <button id="connect" type="button">Connect</button>
+    </div>
+
+    <p class="status" id="status"></p>
+    <button class="ghost" id="clear" type="button" hidden>Clear the globe</button>
+
+    <p class="hint">
+      A CSV needs <code>lat</code> and <code>lon</code> columns (or <code>latitude</code>/<code>longitude</code>).
+      Optional: <code>title</code>, <code>category</code> — which picks the colour — <code>weight</code>,
+      <code>url</code>, <code>time</code>. GeoJSON points work as they are.
+      A stream should send one JSON object per event with the same fields; it must allow
+      cross-origin requests, and on this HTTPS page it has to be <code>https</code> or <code>wss</code>.
+    </p>
+    <p class="hint">
+      Built on the same globe as <a href="/">the live Wikipedia one</a> ·
+      <a href="https://github.com/alekcac/the-planet-thinks" target="_blank" rel="noopener">source</a>
+    </p>
+  </section>
+
+  <div class="hud legend">colour = category · size = weight · click a point for details</div>
+
+  <aside id="card" hidden></aside>
+  <script type="module" src="/src/custom.ts"></script>
+</body>
+</html>
