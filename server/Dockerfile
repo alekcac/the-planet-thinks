@@ -14,6 +14,7 @@ COPY package.json package-lock.json ./
 COPY server/package.json server/
 RUN npm ci -w server --omit=dev
 COPY --from=build /app/server/dist server/dist
+COPY server/assets server/assets
 # Writable cache dir owned by the non-root runtime user (a mounted volume inherits this).
 RUN mkdir -p /data && chown node:node /data
 USER node

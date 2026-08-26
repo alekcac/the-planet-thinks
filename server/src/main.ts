@@ -10,6 +10,7 @@ import { ReplayBuffer } from './replay.js';
 import { StatsTracker } from './stats.js';
 import { MomentsTracker, buildMomentsRss } from './moments.js';
 import { diffUrl, parseSequence, parseOsmChange } from './osm.js';
+import { loadCountries, countryAt } from './countries.js';
 import type { Pulse, ServerMessage } from './protocol.js';
 
 // Streams a client can subscribe to via /ws?stream=…; the default stays the Wikipedia
@@ -41,6 +42,10 @@ const commonsResolver = new CoordsResolver({ userAgent: USER_AGENT, cacheNegativ
 // OpenStreetMap changesets: about fifty a minute, so a short window is already a full globe.
 const osmBuffer = new ReplayBuffer(10 * 60_000, 200);
 const osmStats = new StatsTracker();
+
+// Country outlines ship with the image; without them pulses simply carry no place name.
+const countryCount = loadCountries(new URL('../../assets/countries.json', import.meta.url).pathname);
+console.log(countryCount ? `country outlines loaded (${countryCount})` : 'no country outlines — pulses will have no place label');
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 try {
@@ -291,6 +296,7 @@ function emitChangeset(cs: ReturnType<typeof parseOsmChange>[number]) {
     title: cs.user ? `${cs.user} · ${cs.nodes} node${cs.nodes === 1 ? '' : 's'}` : `${cs.nodes} nodes`,
     url: `https://www.openstreetmap.org/changeset/${cs.id}`,
     editor_type: 'user',
+    ...(countryAt(cs.lat, cs.lon) ? { place: countryAt(cs.lat, cs.lon)! } : {}),
     // Node count drives the marker size the way a byte delta does for Wikipedia.
     size_delta: cs.nodes * 40,
     ts: cs.ts,

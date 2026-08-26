@@ -1,34 +1,32 @@
 import type { Pulse } from './types';
 
 const el = document.getElementById('card')!;
-const OSM = document.body.dataset.stream === 'osm';
-let osmSeq = 0;
-
-async function describeChangeset(url: string, seq: number) {
-  const id = url.match(/changeset\/(\d+)/)?.[1];
-  if (!id) return;
-  try {
-    const res = await fetch(`https://api.openstreetmap.org/api/0.6/changeset/${id}.json`);
-    if (!res.ok) return;
-    const cs = (await res.json())?.changeset;
-    if (!cs || seq !== osmSeq) return; // a newer card is showing; leave it alone
-    const comment = String(cs.tags?.comment ?? '').trim();
-    const editor = String(cs.tags?.created_by ?? '').split(' ')[0];
-    if (!comment && !editor) return;
-    const line = document.createElement('span');
-    line.className = 'meta';
-    line.textContent = comment
-      ? editor ? `“${comment}” · via ${editor}` : `“${comment}”`
-      : `via ${editor}`;
-    el.querySelector('a')?.before(line);
-  } catch {
-    // Offline, rate-limited, or a changeset that has since vanished — the card is
-    // already useful without this.
-  }
-}
 
 function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+}
+
+const OSM = document.body.dataset.stream === 'osm';
+let osmSeq = 0;
+
+/** The mapper's own words, when the changeset API answers in time. */
+async function changesetNote(url: string, timeoutMs = 1500): Promise<string> {
+  const id = url.match(/changeset\/(\d+)/)?.[1];
+  if (!id) return '';
+  try {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), timeoutMs);
+    const res = await fetch(`https://api.openstreetmap.org/api/0.6/changeset/${id}.json`, { signal: ctl.signal });
+    clearTimeout(timer);
+    if (!res.ok) return '';
+    const cs = (await res.json())?.changeset;
+    const comment = String(cs?.tags?.comment ?? '').trim();
+    const editor = String(cs?.tags?.created_by ?? '').split(' ')[0];
+    if (comment) return editor ? `“${comment}” · via ${editor}` : `“${comment}”`;
+    return editor ? `via ${editor}` : '';
+  } catch {
+    return ''; // offline, slow, or since deleted — the card stands without it
+  }
 }
 
 // Guards against a slow thumbnail overwriting a newer card once it finally loads.
@@ -71,16 +69,19 @@ export function showCard(p: Pulse) {
   // An OpenStreetMap changeset is not a Wikipedia edit: no language subdomain, no byte
   // delta, and the node count is already part of its title.
   if (OSM) {
+    // Fetch the mapper's note BEFORE drawing, so the card appears once at its final
+    // size. Rendering first and growing a line later made it jump under the reader.
     const seq = ++osmSeq;
-    el.innerHTML = `
-      <strong>${escapeHtml(p.title)}</strong>
-      <span class="meta">openstreetmap.org · ${escapeHtml(p.lang)}</span>
-      <a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">open the changeset →</a>`;
-    el.hidden = false;
-    // The minutely diff carries positions, not intent. The mapper's own comment lives on
-    // the changeset itself, so fetch that one record — from this browser, only when
-    // somebody actually clicks, which keeps it a courtesy call rather than a crawl.
-    void describeChangeset(p.url, seq);
+    void changesetNote(p.url).then(note => {
+      if (seq !== osmSeq) return; // a newer pulse already owns the card
+      const where = p.place ? ` · ${escapeHtml(p.place)}` : '';
+      el.innerHTML = `
+        <strong>${escapeHtml(p.title)}</strong>
+        <span class="meta">openstreetmap.org · ${escapeHtml(p.lang)}${where}</span>
+        ${note ? `<span class="meta">${escapeHtml(note)}</span>` : ''}
+        <a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">open the changeset →</a>`;
+      el.hidden = false;
+    });
     return;
   }
   const sign = p.size_delta >= 0 ? '+' : '';

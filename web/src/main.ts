@@ -11,8 +11,13 @@ import { initEmbedBadge } from './embed';
 import { parseLangFilter, parseFollowOff } from './url-params';
 import type { Pulse } from './types';
 
+const stream = document.body.dataset.stream ?? 'wiki';
 const q = qualityFor(window.innerWidth, matchMedia('(pointer: coarse)').matches);
-const globe = createGlobe(document.getElementById('app')!, q, showCard);
+// OpenStreetMap publishes about fifty changesets a minute and every card now carries a
+// sentence worth reading, so the tour lingers there instead of flicking through them.
+const globe = createGlobe(document.getElementById('app')!, q, showCard, {
+  dwellMs: stream === 'osm' ? 11_000 : undefined,
+});
 const chimes = new Chimes();
 const music = new Music();
 
@@ -25,7 +30,6 @@ onToggle('follow', on => globe.setFollow(on));
 
 // Shareable personal views (see url-params.ts). The language filter only makes sense on the
 // wiki globe — the Commons stream has a single pseudo-language.
-const stream = document.body.dataset.stream ?? 'wiki';
 const langFilter = stream === 'wiki' ? parseLangFilter(location.search) : null;
 if (parseFollowOff(location.search)) {
   globe.setFollow(false);

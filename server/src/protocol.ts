@@ -18,6 +18,8 @@ export interface Pulse {
   img?: string;
   /** True when the edit created the article; absent on ordinary edits */
   is_new?: boolean;
+  /** Country the point falls in, when we can name it offline */
+  place?: string;
 }
 
 export interface Stats {

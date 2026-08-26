@@ -107,7 +107,12 @@ function normLng(lng: number): number {
 
 const DEFAULT_ALTITUDE = 2.4; // camera distance the tour always settles back to
 
-export function createGlobe(el: HTMLElement, q: Quality, onPick: (p: Pulse) => void): GlobeHandle {
+export function createGlobe(
+  el: HTMLElement,
+  q: Quality,
+  onPick: (p: Pulse) => void,
+  opts: { dwellMs?: number } = {},
+): GlobeHandle {
   const loader = new THREE.TextureLoader();
   let texturesLoaded = 0;
   const onTexture = () => { texturesLoaded++; };
@@ -339,7 +344,9 @@ export function createGlobe(el: HTMLElement, q: Quality, onPick: (p: Pulse) => v
   const ALTITUDE_SPEED = 0.7;   // altitude units per second — keep zoom changes gentle
   const MIN_FLY_MS = 800;       // floor so tiny hops don't feel abrupt
   const MAX_FLY_MS = 9000;      // ceiling for half-globe jumps
-  const DWELL_MS = 5000;        // time spent resting on a target before moving on
+  // Time spent resting on a target before moving on. Each stop opens a card, so this
+  // is really "how often the reader is handed something new" — dense feeds want longer.
+  const DWELL_MS = opts.dwellMs ?? 5000;
   const IDLE_POLL_MS = 1000;    // re-check cadence while waiting for a pulse / the user
   const CANDIDATE_CAP = 80;
 

@@ -1,6 +1,18 @@
 import type { EditorType } from './types';
 
+// Hashing a string into a hue works well across ~300 language codes, but it has no
+// idea which strings need to be told apart. "create" and "delete" happen to land one
+// degree from each other, which made two of the three OpenStreetMap actions the same
+// orange. Where the meaning is fixed and small, so is the palette.
+const FIXED_HUES: Record<string, number> = {
+  create: 140, // green — something new exists
+  modify: 210, // blue — something changed
+  delete: 5,   // red — something is gone
+};
+
 export function hueFor(lang: string): number {
+  const fixed = FIXED_HUES[lang];
+  if (fixed !== undefined) return fixed;
   let h = 0;
   for (const c of lang) h = (h * 31 + c.charCodeAt(0)) % 360;
   return h;
