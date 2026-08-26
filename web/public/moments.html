@@ -72,8 +72,8 @@
     code { background: rgba(120,150,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 12.5px; display: inline-block; margin-top: 4px; }
     ul { margin: 10px 0; padding-left: 20px; }
     li { margin: 5px 0; }
-    h2 a.self { text-decoration: none; opacity: 0; margin-left: 8px; font-size: 15px; transition: opacity .15s; }
-    h2:hover a.self, h2 a.self:focus { opacity: 0.5; }
+    h2 a.self { color: inherit; text-decoration: none; }
+    h2 a.self:hover, h2 a.self:focus { color: #9fc4ff; text-decoration: underline; }
     .rss { display: inline-block; margin-top: 4px; }
     hr { border: 0; border-top: 1px solid rgba(120,150,255,0.12); margin: 36px 0; }
     .cta { display: inline-block; margin-top: 8px; padding: 10px 16px; border: 1px solid rgba(120,150,255,0.35); border-radius: 8px; text-decoration: none; }
@@ -134,7 +134,11 @@
       var li = el('li');
       var link = el('a', null, a.title);
       link.href = a.url; link.rel = 'noopener';
-      li.appendChild(link);
+      // Titles arrive in ~300 languages; without isolation an RTL one drags the
+      // surrounding digits and words to the wrong side of the line.
+      var iso = el('bdi');
+      iso.appendChild(link);
+      li.appendChild(iso);
       li.appendChild(document.createTextNode(' — ' + a.count + (a.count === 1 ? ' edit ' : ' edits ')));
       li.appendChild(el('span', 'lang', '(' + a.lang + ')'));
       ol.appendChild(li);
@@ -178,8 +182,8 @@
     shown.forEach(function (day) {
       var s = el('section');
       s.id = day.date;
-      var h = el('h2', null, day.date);
-      var link = el('a', 'self', '#');
+      var h = el('h2');
+      var link = el('a', 'self', day.date);
       link.href = '/moments?day=' + day.date;
       link.title = 'Permanent link to ' + day.date;
       h.appendChild(link);
