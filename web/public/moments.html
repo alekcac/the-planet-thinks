@@ -19,6 +19,31 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": "Daily Wikipedia edit and Wikimedia Commons photo activity",
+    "description": "A day-by-day record of geo-located Wikipedia editing and Wikimedia Commons photo uploads: how many located edits and located photos each UTC day carried, and which places were edited most. Compiled live from the public Wikimedia EventStreams feed, one day at a time.",
+    "url": "https://theplanetthinks.com/moments",
+    "keywords": ["Wikipedia", "edits per day", "Wikimedia Commons", "uploads per day", "most-edited articles", "EventStreams", "daily"],
+    "creator": { "@type": "Organization", "name": "The Planet Thinks", "url": "https://theplanetthinks.com/" },
+    "isBasedOn": "https://stream.wikimedia.org/v2/stream/recentchange",
+    "temporalCoverage": "2026-08-18/..",
+    "measurementTechnique": "Live count from the Wikimedia EventStreams recentchange feed, bucketed by UTC calendar day",
+    "accrualPeriodicity": "P1D",
+    "variableMeasured": [
+      { "@type": "PropertyValue", "name": "Geo-located Wikipedia edits per day" },
+      { "@type": "PropertyValue", "name": "Geo-located Wikimedia Commons photo uploads per day" },
+      { "@type": "PropertyValue", "name": "Most-edited places of the day" }
+    ],
+    "distribution": [
+      { "@type": "DataDownload", "encodingFormat": "application/rss+xml", "contentUrl": "https://api.theplanetthinks.com/moments.xml", "name": "RSS feed (last 14 days)" },
+      { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://api.theplanetthinks.com/moments", "name": "JSON (today plus up to 90 closed days)" }
+    ],
+    "license": "https://creativecommons.org/publicdomain/zero/1.0/"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "The Planet Thinks", "item": "https://theplanetthinks.com/" },
@@ -44,6 +69,11 @@
               border: 1px solid rgba(120,150,255,0.15); background: #05070f; }
     .grid img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .muted { opacity: 0.55; font-size: 14px; }
+    code { background: rgba(120,150,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 12.5px; display: inline-block; margin-top: 4px; }
+    ul { margin: 10px 0; padding-left: 20px; }
+    li { margin: 5px 0; }
+    h2 a.self { text-decoration: none; opacity: 0; margin-left: 8px; font-size: 15px; transition: opacity .15s; }
+    h2:hover a.self, h2 a.self:focus { opacity: 0.5; }
     .rss { display: inline-block; margin-top: 4px; }
     hr { border: 0; border-top: 1px solid rgba(120,150,255,0.12); margin: 36px 0; }
     .cta { display: inline-block; margin-top: 8px; padding: 10px 16px; border: 1px solid rgba(120,150,255,0.35); border-radius: 8px; text-decoration: none; }
@@ -67,6 +97,20 @@
   <div id="days"></div>
 
   <hr />
+  <h2 id="data">Use the numbers</h2>
+  <p>These counts are measured, not estimated: one open connection to the public Wikimedia
+    EventStreams feed, counted as events arrive and bucketed by UTC day. Every closed day keeps a
+    permanent link — click the date to copy it — and the last 90 days stay available.</p>
+  <ul>
+    <li><a href="https://api.theplanetthinks.com/moments">JSON</a> — today so far, plus up to 90 closed days.</li>
+    <li><a href="https://api.theplanetthinks.com/moments.xml">RSS</a> — the last 14 days as a feed.</li>
+  </ul>
+  <p class="muted">Free to use, including commercially, with no permission needed: the figures are
+    released under <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener">CC0</a>.
+    A citation is appreciated —<br />
+    <code>The Planet Thinks, "Daily moments: Wikipedia edit and Commons upload activity",
+    theplanetthinks.com/moments</code></p>
+
   <p>Every entry here happened in public: each place links to the real Wikipedia article, each
     photo to its Wikimedia Commons file page.</p>
   <p><a class="cta" href="/">Watch the planet think, live →</a></p>
@@ -129,14 +173,29 @@
     fillSection(today, d.today, true);
 
     var days = document.getElementById('days');
-    d.days.forEach(function (day) {
+    var only = (location.search.match(/[?&]day=(\d{4}-\d{2}-\d{2})/) || [])[1];
+    var shown = only ? d.days.filter(function (x) { return x.date === only; }) : d.days;
+    shown.forEach(function (day) {
       var s = el('section');
       s.id = day.date;
-      s.appendChild(el('h2', null, day.date));
+      var h = el('h2', null, day.date);
+      var link = el('a', 'self', '#');
+      link.href = '/moments?day=' + day.date;
+      link.title = 'Permanent link to ' + day.date;
+      h.appendChild(link);
+      s.appendChild(h);
       fillSection(s, day, false);
       days.appendChild(s);
     });
-    if (!d.days.length) {
+    if (only) {
+      var back = el('p', 'muted');
+      var a = el('a', null, '← all days');
+      a.href = '/moments';
+      back.appendChild(a);
+      days.appendChild(back);
+      if (!shown.length) days.appendChild(el('p', 'muted', 'No record kept for ' + only + ' — the digest goes back 90 days.'));
+    }
+    if (!only && !d.days.length) {
       days.appendChild(el('p', 'muted', 'Past days will appear here — the first one closes at midnight UTC.'));
     }
   }).catch(function () {

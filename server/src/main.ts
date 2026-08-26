@@ -74,6 +74,7 @@ try {
 setInterval(() => fs.writeFile(DWELL_FILE, JSON.stringify(dwell), () => {}), 5 * 60_000);
 
 // Daily digest for the /moments page and RSS feed.
+const RSS_ITEMS = 14;
 const MOMENTS_FILE = path.join(DATA_DIR, 'moments.json');
 const moments = new MomentsTracker();
 try {
@@ -124,8 +125,9 @@ const server = http.createServer((req, res) => {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify(moments.snapshot()));
   } else if (route === '/moments.xml') {
+    // The feed carries the recent past; the full history stays available as JSON.
     res.setHeader('content-type', 'application/rss+xml; charset=utf-8');
-    res.end(buildMomentsRss(moments.snapshot().days));
+    res.end(buildMomentsRss(moments.snapshot().days.slice(0, RSS_ITEMS)));
   } else if (route === '/healthz') {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({

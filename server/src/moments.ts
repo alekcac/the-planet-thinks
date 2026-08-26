@@ -20,7 +20,9 @@ export interface DaySummary {
 
 const TOP_ARTICLES = 5;
 const PHOTO_SAMPLE = 12;
-const HISTORY_DAYS = 14;
+// A quarter of history: enough for the digest to be a citable record rather than a fortnight's
+// scratchpad. Each day is a handful of titles and photo links, so 90 of them stay tiny.
+const HISTORY_DAYS = 90;
 // A day sees tens of thousands of distinct geo-edited titles; once the map grows past
 // this, titles seen only once (the long tail) are dropped — the day's top can't be there.
 const MAX_TITLES = 20_000;
