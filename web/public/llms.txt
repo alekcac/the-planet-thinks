@@ -25,6 +25,9 @@ Key facts:
 - [The globe (home)](https://theplanetthinks.com/): the live visualization itself.
 - [Live edit statistics](https://theplanetthinks.com/stats): current edits per minute/hour/day
   and a live by-language breakdown.
+- [How many Wikipedia articles are there](https://theplanetthinks.com/how-many-articles): the
+  live article count by language edition, plus how big Wikipedia is in editors, edits and
+  gigabytes.
 - [Photos](https://theplanetthinks.com/photos): freshly uploaded Wikimedia Commons photos
   appearing live on the globe, placed where each photo was taken.
 - [Live Wikipedia edit tools, compared](https://theplanetthinks.com/live-wikipedia-tools): every
