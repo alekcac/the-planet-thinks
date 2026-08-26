@@ -8,10 +8,15 @@
 import { createGlobe } from './globe';
 import { qualityFor } from './quality';
 import { showCard } from './card';
-import { parseCustom, pulseFromObject, MAX_POINTS } from './custom-data';
+import { parseCustom, pulseFromObject } from './custom-data';
 import type { Pulse } from './types';
 
-const q = qualityFor(window.innerWidth, matchMedia('(pointer: coarse)').matches);
+// The live globes evict old markers to stay smooth under a constant stream. A dropped
+// file is not a stream: its points are meant to sit there, so this page raises the
+// ceiling — and then refuses to read more rows than it can honestly show.
+const base = qualityFor(window.innerWidth, matchMedia('(pointer: coarse)').matches);
+const coarse = matchMedia('(pointer: coarse)').matches;
+const q = { ...base, maxPoints: coarse ? 400 : 2000 };
 const globe = createGlobe(document.getElementById('app')!, q, showCard);
 globe.setFollow(false); // somebody else's data should sit still until they move it
 
@@ -53,10 +58,12 @@ function readFile(file: File) {
   const reader = new FileReader();
   reader.onerror = () => say('The file could not be read.', 'bad');
   reader.onload = () => {
-    const { points, skipped, error } = parseCustom(String(reader.result));
+    const { points, skipped, error } = parseCustom(String(reader.result), q.maxPoints);
     if (error) return say(error, 'bad');
     draw(points, true);
-    const capped = points.length >= MAX_POINTS ? ` (stopped at the first ${MAX_POINTS})` : '';
+    const capped = points.length >= q.maxPoints
+      ? ` — the first ${q.maxPoints}, which is all this globe holds at once`
+      : '';
     const dropped = skipped ? `, ${skipped} row${skipped === 1 ? '' : 's'} without a usable location` : '';
     say(`${points.length} point${points.length === 1 ? '' : 's'} on the globe${capped}${dropped}.`, 'good');
   };
