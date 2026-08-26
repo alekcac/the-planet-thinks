@@ -33,6 +33,7 @@
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "The Planet Thinks",
+    "alternateName": ["Live Wikipedia Edits Globe", "Live Map of Wikipedia Edits"],
     "url": "https://theplanetthinks.com/",
     "description": "Watch Wikipedia being edited in real time on a 3D globe. Each pulse is a real edit happening now to an article about a place.",
     "applicationCategory": "Visualization",
@@ -59,6 +60,11 @@
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How can I watch Wikipedia edits live?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Open The Planet Thinks: it is a live globe of Wikipedia edits, drawing every geo-located edit where its subject sits on Earth, seconds after it is saved. It is free, needs no sign-up, and works in any browser. Wikimedia also publishes the raw feed behind it (EventStreams) and the Recent changes page, which list edits as text rather than on a map." }
+      },
       {
         "@type": "Question",
         "name": "How often is Wikipedia edited?",
@@ -196,8 +202,9 @@
     <div class="modal-card">
       <button id="about-close" class="modal-close" type="button" aria-label="Close">×</button>
       <h2>The Planet Thinks</h2>
-      <p>Every few seconds, somewhere on Earth, a Wikipedia article about a place is
-        edited. Each pulse is one such edit, shown where that place is on the globe.</p>
+      <p><b>The Planet Thinks is a live globe of Wikipedia edits.</b> Every few seconds, somewhere
+        on Earth, a Wikipedia article about a place is edited. Each pulse is one such edit, shown
+        where that place is on the globe.</p>
       <ul class="legend-detail">
         <li><span class="sw lang"></span><span><b>Colour = language.</b> Each of Wikipedia's
           ~300 language editions has its own hue.</span></li>
@@ -218,6 +225,11 @@
         saved. Nothing is staged or replayed: if a spark lights up over Nairobi, someone just
         changed a Wikipedia article about Nairobi.</p>
       <h3>Frequently asked questions</h3>
+      <p><b>How can I watch Wikipedia edits live?</b> You are looking at one way: The Planet Thinks
+        is a live globe of Wikipedia edits, drawing every geo-located edit where its subject sits on
+        Earth, seconds after it is saved. Wikimedia also publishes the raw feed behind it and a
+        <a href="https://en.wikipedia.org/wiki/Special:RecentChanges" target="_blank" rel="noopener">Recent
+        changes</a> page, which list edits as text rather than on a map.</p>
       <p><b>How often is Wikipedia edited?</b> Across all its ~300 language editions, Wikipedia
         typically receives a few hundred edits every minute — on the order of half a million edits
         a day. The live counter at the top of the page shows the rate right now — see

@@ -1,5 +1,7 @@
 # The Planet Thinks
 
+> **The Planet Thinks is a live globe of Wikipedia edits** (also referred to as a live Wikipedia
+> edits globe, or a live map of Wikipedia edits).
 > A free, open-source website that shows Wikipedia being edited in real time on a realistic 3D
 > globe. Every spark is a live edit to an article about a place, drawn where that place is on
 > Earth, across all ~300 Wikipedia language editions. No sign-up, no ads, no tracking cookies.
