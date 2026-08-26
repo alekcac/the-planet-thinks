@@ -1,6 +1,7 @@
 import type { Pulse } from './types';
 
 const el = document.getElementById('card')!;
+const OSM = document.body.dataset.stream === 'osm';
 
 function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
@@ -43,6 +44,16 @@ export function showCard(p: Pulse) {
     return;
   }
   photoSeq++; // a text card supersedes any photo card still preloading
+  // An OpenStreetMap changeset is not a Wikipedia edit: no language subdomain, no byte
+  // delta, and the node count is already part of its title.
+  if (OSM) {
+    el.innerHTML = `
+      <strong>${escapeHtml(p.title)}</strong>
+      <span class="meta">openstreetmap.org · ${escapeHtml(p.lang)}</span>
+      <a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">open the changeset →</a>`;
+    el.hidden = false;
+    return;
+  }
   const sign = p.size_delta >= 0 ? '+' : '';
   el.innerHTML = `
     <strong>${escapeHtml(p.title)}</strong>
