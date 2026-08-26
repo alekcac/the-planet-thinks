@@ -110,18 +110,23 @@ function dwellSnapshot() {
 }
 
 const server = http.createServer((req, res) => {
+  // Route on the path alone: feed readers and link shorteners append query strings
+  // (?utm_source=…), and those must not turn a valid endpoint into a 404.
+  let route = req.url ?? '/';
+  const q = route.indexOf('?');
+  if (q !== -1) route = route.slice(0, q);
   // Raw JSON endpoints must never appear in search results. The RSS feed is the exception:
   // it is a publication meant to be found, and it is the only crawlable rendering of the
   // daily digest (the /moments page builds itself client-side).
-  if (req.url !== '/moments.xml') res.setHeader('x-robots-tag', 'noindex');
+  if (route !== '/moments.xml') res.setHeader('x-robots-tag', 'noindex');
   res.setHeader('access-control-allow-origin', '*'); // public read-only data; the static site fetches it cross-origin
-  if (req.url === '/moments') {
+  if (route === '/moments') {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify(moments.snapshot()));
-  } else if (req.url === '/moments.xml') {
+  } else if (route === '/moments.xml') {
     res.setHeader('content-type', 'application/rss+xml; charset=utf-8');
     res.end(buildMomentsRss(moments.snapshot().days));
-  } else if (req.url === '/healthz') {
+  } else if (route === '/healthz') {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({
       ok: true,
@@ -129,11 +134,11 @@ const server = http.createServer((req, res) => {
       ...stats.snapshot(),
       commons: { total_rate: commonsStats.snapshot().total_rate, geo_rate: commonsStats.snapshot().geo_rate },
     }));
-  } else if (req.url === '/referrers') {
+  } else if (route === '/referrers') {
     res.setHeader('content-type', 'application/json');
     const sorted = [...referrers.entries()].sort((a, b) => b[1] - a[1]);
     res.end(JSON.stringify(Object.fromEntries(sorted)));
-  } else if (req.url === '/dwell') {
+  } else if (route === '/dwell') {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({ live: wss.clients.size, ...dwellSnapshot() }));
   } else {
