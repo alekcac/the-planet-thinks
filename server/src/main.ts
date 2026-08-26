@@ -208,6 +208,7 @@ function startStream() {
         title: edit.title,
         url: edit.url,
         editor_type: edit.editor_type,
+        ...(edit.is_new ? { is_new: true as const } : {}),
         size_delta: edit.size_delta,
         ts: edit.ts,
       };

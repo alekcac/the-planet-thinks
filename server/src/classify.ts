@@ -20,6 +20,8 @@ export interface ArticleEdit {
   title: string;
   url: string;
   editor_type: EditorType;
+  /** True when this edit created the article */
+  is_new?: boolean;
   size_delta: number;
   ts: number;
 }
@@ -83,6 +85,9 @@ export function classify(rc: RcEvent): ArticleEdit | null {
     title: rc.title,
     url,
     editor_type: editorType(rc),
+    // Only set when true: an absent field keeps the payload small and lets older
+    // clients ignore it entirely.
+    ...(rc.type === 'new' ? { is_new: true as const } : {}),
     size_delta: (rc.length?.new ?? 0) - (rc.length?.old ?? 0),
     ts: rc.meta?.dt ? Date.parse(rc.meta.dt) : Date.now(),
   };

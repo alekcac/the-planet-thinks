@@ -16,6 +16,8 @@ export interface Pulse {
   ts: number;
   /** Image thumbnail URL — present only on Commons photo pulses */
   img?: string;
+  /** True when the edit created the article; absent on ordinary edits */
+  is_new?: boolean;
 }
 
 export interface Stats {

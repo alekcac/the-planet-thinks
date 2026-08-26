@@ -44,7 +44,7 @@ function handlePulse(p: Pulse, replayed = false) {
       if (lit) return;
       lit = true;
       globe.addPulse(p, false);
-      chimes.play(p.size_delta);
+      chimes.playShutter();
     };
     warm.onload = light;
     warm.onerror = light;
@@ -53,7 +53,10 @@ function handlePulse(p: Pulse, replayed = false) {
     return;
   }
   globe.addPulse(p, replayed);
-  if (!replayed) chimes.play(p.size_delta);
+  if (replayed) return;
+  if (p.img) chimes.playShutter();
+  else if (p.is_new) chimes.playNewArticle(p.size_delta);
+  else chimes.play(p.size_delta);
 }
 
 function resolveWsUrl(): string {
