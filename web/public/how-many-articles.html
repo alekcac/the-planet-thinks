@@ -229,7 +229,7 @@
     page is sampled or cached.</p>
 </main>
 <script>
-  var LANG_NAMES = { en:'English', de:'German', fr:'French', es:'Spanish', it:'Italian', ru:'Russian', ja:'Japanese', zh:'Chinese', pt:'Portuguese', pl:'Polish', nl:'Dutch', sv:'Swedish', uk:'Ukrainian', ar:'Arabic', ko:'Korean', tr:'Turkish', he:'Hebrew', fa:'Persian', vi:'Vietnamese', th:'Thai', id:'Indonesian', cs:'Czech', hu:'Hungarian', fi:'Finnish', da:'Danish', no:'Norwegian', nn:'Norwegian (Nynorsk)', ca:'Catalan', gl:'Galician', eu:'Basque', ur:'Urdu', hi:'Hindi', bn:'Bengali', ta:'Tamil', ce:'Chechen', sr:'Serbian', hr:'Croatian', sl:'Slovenian', sk:'Slovak', bg:'Bulgarian', ro:'Romanian', el:'Greek', et:'Estonian', lt:'Lithuanian', lv:'Latvian', ms:'Malay', tl:'Tagalog', az:'Azerbaijani', hy:'Armenian', ka:'Georgian', kk:'Kazakh', uz:'Uzbek', tt:'Tatar', be:'Belarusian', sw:'Swahili', af:'Afrikaans', os:'Ossetian', mr:'Marathi', sat:'Santali', als:'Alemannic', lij:'Ligurian', bcl:'Central Bikol' };
+  var LANG_NAMES = { en:'English', de:'German', fr:'French', es:'Spanish', it:'Italian', ru:'Russian', ja:'Japanese', zh:'Chinese', pt:'Portuguese', pl:'Polish', nl:'Dutch', sv:'Swedish', uk:'Ukrainian', ar:'Arabic', ko:'Korean', tr:'Turkish', he:'Hebrew', fa:'Persian', vi:'Vietnamese', th:'Thai', id:'Indonesian', cs:'Czech', hu:'Hungarian', fi:'Finnish', da:'Danish', no:'Norwegian', nn:'Norwegian (Nynorsk)', ca:'Catalan', gl:'Galician', eu:'Basque', ur:'Urdu', hi:'Hindi', bn:'Bengali', ta:'Tamil', ce:'Chechen', sr:'Serbian', hr:'Croatian', sl:'Slovenian', sk:'Slovak', bg:'Bulgarian', ro:'Romanian', el:'Greek', et:'Estonian', lt:'Lithuanian', lv:'Latvian', ms:'Malay', tl:'Tagalog', az:'Azerbaijani', hy:'Armenian', ka:'Georgian', kk:'Kazakh', uz:'Uzbek', tt:'Tatar', be:'Belarusian', sw:'Swahili', af:'Afrikaans', os:'Ossetian', mr:'Marathi', sat:'Santali', als:'Alemannic', lij:'Ligurian', bcl:'Central Bikol', mk:'Macedonian', ba:'Bashkir', shn:'Shan', sq:'Albanian', bs:'Bosnian', mn:'Mongolian', ne:'Nepali', si:'Sinhala', my:'Burmese', km:'Khmer', ky:'Kyrgyz', tg:'Tajik', ps:'Pashto', ku:'Kurdish', yo:'Yoruba', am:'Amharic', is:'Icelandic', cy:'Welsh', ga:'Irish', la:'Latin', eo:'Esperanto', jv:'Javanese', ceb:'Cebuano', war:'Waray', min:'Minangkabau', te:'Telugu', kn:'Kannada', ml:'Malayalam', gu:'Gujarati', pa:'Punjabi', 'zh-classical':'Classical Chinese', 'zh-yue':'Cantonese', 'be-tarask':'Belarusian (Taraskievica)', 'sh':'Serbo-Croatian' };
   var fmt = function (n) { return n.toLocaleString('en-US'); };
   var delay = 2000;
   function connect() {
@@ -275,8 +275,10 @@
         document.getElementById('new-answer').innerHTML =
           'So far today, <b>' + fmt(total) + '</b> new articles have been created across all ' +
           'language editions' +
-          (byBot == null ? '' : ' — <b>' + fmt(human) + '</b> of them by people and ' +
-            fmt(byBot) + ' by bots') + '. Counted live from midnight UTC.' +
+          (byBot == null ? ''
+            : byBot === 0 ? ' — all of them by people'
+            : ' — <b>' + fmt(human) + '</b> of them by people and ' + fmt(byBot) + ' by bots') +
+          '. Counted live from midnight UTC.' +
           (yesterday ? ' Yesterday the day closed at <b>' + fmt(yesterday.new_articles) +
             '</b> (' + yesterday.date + ').' : '');
         var langs = t.new_by_lang || {};
