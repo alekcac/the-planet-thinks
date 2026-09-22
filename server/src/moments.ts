@@ -1,4 +1,4 @@
-import type { Pulse } from './protocol.js';
+import type { EditorType, Pulse } from './protocol.js';
 
 // Daily digest: which places got edited the most, and a fair sample of the day's
 // photos. Everything is bucketed by UTC calendar day; when the first event of a
@@ -14,12 +14,25 @@ export interface DaySummary {
   edits: number;
   /** Geo-located Commons photos recorded that day */
   photos: number;
+  /**
+   * Articles created that day across every Wikipedia — counted before the coordinate
+   * lookup, so unlike `edits` this covers the whole encyclopedia and not just places.
+   * Optional because days recorded before this existed have no figure to show.
+   */
+  new_articles?: number;
+  /** How many of those a person created; the rest came from bots */
+  new_by_human?: number;
+  /** New articles per language edition that day, largest first */
+  new_by_lang?: Record<string, number>;
   top_articles: HotArticle[];
   day_photos: DayPhoto[];
 }
 
 const TOP_ARTICLES = 5;
 const PHOTO_SAMPLE = 12;
+// Enough languages to show who is writing today without turning the digest into a
+// 300-row table; the tail is always a handful of articles apiece.
+const NEW_LANGS = 12;
 // A quarter of history: enough for the digest to be a citable record rather than a fortnight's
 // scratchpad. Each day is a handful of titles and photo links, so 90 of them stay tiny.
 const HISTORY_DAYS = 90;
@@ -36,6 +49,9 @@ export class MomentsTracker {
   private counts = new Map<string, HotArticle>();
   private edits = 0;
   private photos = 0;
+  private newArticles = 0;
+  private newByHuman = 0;
+  private newLangs = new Map<string, number>();
   private photoSample: DayPhoto[] = [];
   private photoSeen = 0;
   history: DaySummary[] = [];
@@ -54,6 +70,18 @@ export class MomentsTracker {
       if (this.counts.size >= MAX_TITLES) this.pruneSingles();
       this.counts.set(key, { title: p.title, lang: p.lang, url: p.url, count: 1 });
     }
+  }
+
+  /**
+   * A brand-new article, anywhere on Wikipedia. Called before coordinates are looked
+   * up, because "how many articles appeared today" is a question about the whole
+   * encyclopedia — most new articles are about people, species and events, not places.
+   */
+  recordNewArticle(lang: string, editor: EditorType, now = Date.now()) {
+    this.roll(now);
+    this.newArticles++;
+    if (editor !== 'bot') this.newByHuman++;
+    this.newLangs.set(lang, (this.newLangs.get(lang) ?? 0) + 1);
   }
 
   recordPhoto(p: Pulse, now = Date.now()) {
@@ -78,7 +106,7 @@ export class MomentsTracker {
   private roll(now: number) {
     const d = dayOf(now);
     if (d === this.date) return;
-    if (this.edits || this.photos) {
+    if (this.edits || this.photos || this.newArticles) {
       this.history.unshift(this.summarize());
       if (this.history.length > HISTORY_DAYS) this.history.length = HISTORY_DAYS;
     }
@@ -86,16 +114,23 @@ export class MomentsTracker {
     this.counts.clear();
     this.edits = 0;
     this.photos = 0;
+    this.newArticles = 0;
+    this.newByHuman = 0;
+    this.newLangs.clear();
     this.photoSample = [];
     this.photoSeen = 0;
   }
 
   private summarize(): DaySummary {
     const top = [...this.counts.values()].sort((a, b) => b.count - a.count).slice(0, TOP_ARTICLES);
+    const langs = [...this.newLangs.entries()].sort((a, b) => b[1] - a[1]).slice(0, NEW_LANGS);
     return {
       date: this.date,
       edits: this.edits,
       photos: this.photos,
+      new_articles: this.newArticles,
+      new_by_human: this.newByHuman,
+      new_by_lang: Object.fromEntries(langs),
       top_articles: top,
       day_photos: [...this.photoSample].sort((a, b) => a.ts - b.ts),
     };
@@ -110,6 +145,9 @@ export class MomentsTracker {
       date: this.date,
       edits: this.edits,
       photos: this.photos,
+      newArticles: this.newArticles,
+      newByHuman: this.newByHuman,
+      newLangs: [...this.newLangs.entries()],
       photoSeen: this.photoSeen,
       photoSample: this.photoSample,
       counts: [...this.counts.values()],
@@ -122,6 +160,9 @@ export class MomentsTracker {
     this.date = s.date;
     this.edits = s.edits ?? 0;
     this.photos = s.photos ?? 0;
+    this.newArticles = s.newArticles ?? 0;
+    this.newByHuman = s.newByHuman ?? 0;
+    this.newLangs = new Map(Array.isArray(s.newLangs) ? s.newLangs : []);
     this.photoSeen = s.photoSeen ?? 0;
     this.photoSample = Array.isArray(s.photoSample) ? s.photoSample : [];
     this.counts.clear();
@@ -146,9 +187,16 @@ export function buildMomentsRss(days: DaySummary[], pageUrl = 'https://theplanet
       `<li><a href="${esc(a.url)}">${esc(a.title)}</a> (${a.lang}) — ${a.count} ${a.count === 1 ? 'edit' : 'edits'}</li>`).join('');
     const photos = d.day_photos.map(p =>
       `<a href="${esc(p.url)}">${esc(p.title)}</a>`).join(' · ');
+    const born = d.new_articles
+      ? `<p>${d.new_articles.toLocaleString('en-US')} new articles were created across all ` +
+        `Wikipedias that day` +
+        (d.new_by_human != null ? `, ${d.new_by_human.toLocaleString('en-US')} of them by people` : '') +
+        `.</p>`
+      : '';
     const body =
       `<p>${d.edits.toLocaleString('en-US')} edits to articles about places and ` +
       `${d.photos.toLocaleString('en-US')} freshly photographed locations.</p>` +
+      born +
       (top ? `<p>Most-edited places:</p><ol>${top}</ol>` : '') +
       (photos ? `<p>Photos of the day: ${photos}</p>` : '');
     return `  <item>\n` +

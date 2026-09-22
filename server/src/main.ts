@@ -212,6 +212,9 @@ function startStream() {
     const edit = classify(rc as Parameters<typeof classify>[0]);
     if (edit) {
       stats.recordTotal();
+      // Counted here, before the coordinate lookup: most new articles are about people
+      // and events rather than places, and they belong in the day's tally all the same.
+      if (edit.is_new) moments.recordNewArticle(edit.lang, edit.editor_type);
       const coords = await resolver.resolve(edit.wiki, edit.title);
       if (!coords) return;
       const pulse: Pulse = {

@@ -26,6 +26,41 @@ describe('MomentsTracker', () => {
     expect(today.day_photos[0]).toMatchObject({ title: 'cat.jpg', img: 'https://img/cat.jpg' });
   });
 
+  it('counts new articles across all wikis, splitting people from bots', () => {
+    const m = new MomentsTracker(DAY1);
+    m.recordNewArticle('en', 'user', DAY1);
+    m.recordNewArticle('en', 'anon', DAY1);
+    m.recordNewArticle('ce', 'bot', DAY1);
+    m.recordNewArticle('ce', 'bot', DAY1);
+    m.recordNewArticle('ce', 'bot', DAY1);
+    const { today } = m.snapshot(DAY1 + 1000);
+    expect(today.new_articles).toBe(5);
+    expect(today.new_by_human).toBe(2);
+    // Languages are ordered by how many articles each gained, biggest first.
+    expect(Object.keys(today.new_by_lang!)).toEqual(['ce', 'en']);
+    expect(today.new_by_lang).toEqual({ ce: 3, en: 2 });
+  });
+
+  it('seals a day that saw only new articles, and resets the tally', () => {
+    const m = new MomentsTracker(DAY1);
+    m.recordNewArticle('en', 'user', DAY1);
+    m.recordNewArticle('fr', 'user', DAY2); // rolls the day over
+    const { today, days } = m.snapshot(DAY2);
+    expect(days[0]).toMatchObject({ date: '2026-08-18', new_articles: 1, edits: 0 });
+    expect(today).toMatchObject({ date: '2026-08-19', new_articles: 1, new_by_lang: { fr: 1 } });
+  });
+
+  it('carries the new-article tally through dump and load', () => {
+    const m = new MomentsTracker(DAY1);
+    m.recordNewArticle('de', 'user', DAY1);
+    m.recordNewArticle('de', 'bot', DAY1);
+    const restored = new MomentsTracker(DAY1);
+    restored.load(m.dump());
+    expect(restored.snapshot(DAY1).today).toMatchObject({
+      new_articles: 2, new_by_human: 1, new_by_lang: { de: 2 },
+    });
+  });
+
   it('seals the finished day into history when a new day starts', () => {
     const m = new MomentsTracker(DAY1);
     m.recordEdit(edit('Paris'), DAY1);
