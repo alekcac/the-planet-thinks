@@ -15,6 +15,12 @@ export interface DaySummary {
   /** Geo-located Commons photos recorded that day */
   photos: number;
   /**
+   * Every article edit seen that day across all Wikipedias, located or not. This is the
+   * figure people mean by "how often is Wikipedia updated"; `edits` above is the subset
+   * the globe could place on a map. Optional: days recorded before this existed lack it.
+   */
+  all_edits?: number;
+  /**
    * Articles created that day across every Wikipedia — counted before the coordinate
    * lookup, so unlike `edits` this covers the whole encyclopedia and not just places.
    * Optional because days recorded before this existed have no figure to show.
@@ -48,6 +54,7 @@ export class MomentsTracker {
   private date: string;
   private counts = new Map<string, HotArticle>();
   private edits = 0;
+  private allEdits = 0;
   private photos = 0;
   private newArticles = 0;
   private newByHuman = 0;
@@ -70,6 +77,16 @@ export class MomentsTracker {
       if (this.counts.size >= MAX_TITLES) this.pruneSingles();
       this.counts.set(key, { title: p.title, lang: p.lang, url: p.url, count: 1 });
     }
+  }
+
+  /**
+   * Any article edit, anywhere on Wikipedia, whether or not it can be placed on the map.
+   * Called for every event the classifier accepts, so the day's total matches what the
+   * per-minute counter on the stats page adds up to.
+   */
+  recordAnyEdit(now = Date.now()) {
+    this.roll(now);
+    this.allEdits++;
   }
 
   /**
@@ -106,13 +123,14 @@ export class MomentsTracker {
   private roll(now: number) {
     const d = dayOf(now);
     if (d === this.date) return;
-    if (this.edits || this.photos || this.newArticles) {
+    if (this.edits || this.photos || this.newArticles || this.allEdits) {
       this.history.unshift(this.summarize());
       if (this.history.length > HISTORY_DAYS) this.history.length = HISTORY_DAYS;
     }
     this.date = d;
     this.counts.clear();
     this.edits = 0;
+    this.allEdits = 0;
     this.photos = 0;
     this.newArticles = 0;
     this.newByHuman = 0;
@@ -127,6 +145,7 @@ export class MomentsTracker {
     return {
       date: this.date,
       edits: this.edits,
+      all_edits: this.allEdits,
       photos: this.photos,
       new_articles: this.newArticles,
       new_by_human: this.newByHuman,
@@ -144,6 +163,7 @@ export class MomentsTracker {
     return {
       date: this.date,
       edits: this.edits,
+      allEdits: this.allEdits,
       photos: this.photos,
       newArticles: this.newArticles,
       newByHuman: this.newByHuman,
@@ -159,6 +179,7 @@ export class MomentsTracker {
     if (!s || typeof s.date !== 'string') return;
     this.date = s.date;
     this.edits = s.edits ?? 0;
+    this.allEdits = s.allEdits ?? 0;
     this.photos = s.photos ?? 0;
     this.newArticles = s.newArticles ?? 0;
     this.newByHuman = s.newByHuman ?? 0;

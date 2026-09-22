@@ -26,6 +26,15 @@ describe('MomentsTracker', () => {
     expect(today.day_photos[0]).toMatchObject({ title: 'cat.jpg', img: 'https://img/cat.jpg' });
   });
 
+  it('counts every edit, not just the ones it can map', () => {
+    const m = new MomentsTracker(DAY1);
+    for (let i = 0; i < 5; i++) m.recordAnyEdit(DAY1);
+    m.recordEdit(edit('Paris'), DAY1); // one of those five also had coordinates
+    const { today } = m.snapshot(DAY1 + 1000);
+    expect(today.all_edits).toBe(5);
+    expect(today.edits).toBe(1);
+  });
+
   it('counts new articles across all wikis, splitting people from bots', () => {
     const m = new MomentsTracker(DAY1);
     m.recordNewArticle('en', 'user', DAY1);
