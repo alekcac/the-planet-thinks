@@ -1,0 +1,23 @@
+# Cloudflare rebuilds the site from every commit on main, and the build asks the server
+# for the measured edit rate that goes in the stats page title. Nothing else changes that
+# number, so without a nudge the page would quote whatever was true on the day of the last
+# code change. An empty commit once a week is the whole mechanism.
+name: refresh-figures
+on:
+  schedule:
+    - cron: '17 5 * * 1' # Mondays, early enough that the week's figure is in place before US mornings
+  workflow_dispatch:
+
+jobs:
+  nudge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Commit nothing, so the site rebuilds with this week's numbers
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git commit --allow-empty -m "Rebuild so the stats page quotes the week's measured edit rate"
+          git push
