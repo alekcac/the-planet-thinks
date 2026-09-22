@@ -8,6 +8,7 @@ import { Music } from './music';
 import { initAbout } from './about';
 import { initCinematic } from './cinematic';
 import { initEmbedBadge } from './embed';
+import { initEmbedPanel } from './embed-panel';
 import { parseLangFilter, parseFollowOff } from './url-params';
 import type { Pulse } from './types';
 
@@ -24,6 +25,7 @@ const music = new Music();
 initAbout();
 initCinematic();
 initEmbedBadge();
+initEmbedPanel();
 onToggle('sound', on => chimes.setEnabled(on));
 onToggle('music', on => music.setEnabled(on));
 onToggle('follow', on => globe.setFollow(on));
