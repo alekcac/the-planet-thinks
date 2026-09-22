@@ -76,7 +76,7 @@
       {
         "@type": "Question",
         "name": "How many new Wikipedia articles are created per day?",
-        "acceptedAnswer": { "@type": "Answer", "text": "On the order of 15,000 new articles are created across all language editions on a typical day. English Wikipedia alone adds roughly 500–600 new articles a day after quality checks." }
+        "acceptedAnswer": { "@type": "Answer", "text": "On the order of 15,000 new articles survive a typical day across all language editions, and English Wikipedia alone adds roughly 500–600 after quality checks. The raw number of pages created is higher, because bots create articles in bulk in some editions and a share of new pages is deleted again within hours. This page counts the raw number live from the Wikimedia EventStreams feed, as each page is saved, and shows today's running total by language edition." }
       },
       {
         "@type": "Question",
@@ -139,6 +139,7 @@
     <div class="card"><div class="v">7,000,000+</div><div class="l">articles in English</div></div>
     <div class="card"><div class="v">~340</div><div class="l">language editions</div></div>
     <div class="card"><div class="v" id="langs-now">—</div><div class="l">editions with located edits, this minute</div></div>
+    <div class="card"><div class="v" id="new-today">—</div><div class="l">new articles so far today</div></div>
   </div>
   <p class="status" id="status">connecting to the live stream…</p>
 
@@ -161,6 +162,18 @@
     <thead><tr><th>Language edition</th><th class="n">edits/min</th></tr></thead>
     <tbody id="langs"><tr><td colspan="2" class="muted">waiting for data…</td></tr></tbody>
   </table>
+
+  <h2>How many new articles appeared today</h2>
+  <p id="new-answer">Counting from the live feed since midnight UTC, across every language edition.</p>
+  <table aria-live="polite">
+    <thead><tr><th>Language edition</th><th class="n">new articles today</th></tr></thead>
+    <tbody id="new-langs"><tr><td colspan="2" class="muted">waiting for data…</td></tr></tbody>
+  </table>
+  <p class="muted">Every new page in the encyclopedia's main namespace is counted the moment it is
+    saved, including the ones bots create and the ones deleted again hours later as unsuitable.
+    That is why this figure runs higher than the ~15,000 a day usually quoted, which counts
+    articles that survived. Closed daily totals going back 90 days live in the
+    <a href="/moments">daily moments digest</a>.</p>
 
   <h2>How big is Wikipedia?</h2>
   <p>Measured in articles: over <b>65 million</b> across all languages. Measured in pages —
@@ -192,8 +205,11 @@
     editions, and a dedicated core of tens of thousands make more than 100 edits a month. The
     most prolific human editor has made over five million edits.</p>
   <h3>How many new articles are created per day?</h3>
-  <p>On the order of 15,000 new articles are created across all language editions on a typical
-    day. English Wikipedia alone adds roughly 500–600 new articles a day after quality checks.</p>
+  <p>On the order of 15,000 new articles survive a typical day across all language editions, and
+    English Wikipedia alone adds roughly 500–600 after quality checks. The raw number of pages
+    created is higher, because bots create articles in bulk in some editions and a share of new
+    pages is deleted again within hours. This page counts the raw number live, as each page is
+    saved — today's running total is <a href="#new-answer">in the section above</a>.</p>
   <h3>How many gigabytes is Wikipedia?</h3>
   <p>Surprisingly few for the text: the compressed text of English Wikipedia's current articles
     is only about 25 GB — small enough to fit on a laptop. With full edit history and the media
@@ -242,6 +258,41 @@
     ws.onerror = function () { ws.close(); };
   }
   connect();
+
+  // New articles are counted server-side across every Wikipedia, not just the ones the
+  // globe can place on a map, so they arrive over HTTP rather than the pulse socket.
+  function loadNewArticles() {
+    fetch('https://api.theplanetthinks.com/moments')
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var t = (d && d.today) || {};
+        var total = t.new_articles || 0;
+        if (!total) return;
+        document.getElementById('new-today').textContent = fmt(total);
+        var human = t.new_by_human;
+        var byBot = human == null ? null : total - human;
+        var yesterday = (d.days || []).find(function (x) { return x.new_articles; });
+        document.getElementById('new-answer').innerHTML =
+          'So far today, <b>' + fmt(total) + '</b> new articles have been created across all ' +
+          'language editions' +
+          (byBot == null ? '' : ' — <b>' + fmt(human) + '</b> of them by people and ' +
+            fmt(byBot) + ' by bots') + '. Counted live from midnight UTC.' +
+          (yesterday ? ' Yesterday the day closed at <b>' + fmt(yesterday.new_articles) +
+            '</b> (' + yesterday.date + ').' : '');
+        var langs = t.new_by_lang || {};
+        var rows = Object.keys(langs)
+          .map(function (k) { return [k, langs[k]]; })
+          .sort(function (a, b) { return b[1] - a[1]; })
+          .map(function (r) {
+            var name = LANG_NAMES[r[0]] || (r[0] + ' Wikipedia');
+            return '<tr><td>' + name + ' (' + r[0] + ')</td><td class="n">' + fmt(r[1]) + '</td></tr>';
+          });
+        if (rows.length) document.getElementById('new-langs').innerHTML = rows.join('');
+      })
+      .catch(function () { /* the live table above still works without it */ });
+  }
+  loadNewArticles();
+  setInterval(loadNewArticles, 60000);
 </script>
 </body>
 </html>
