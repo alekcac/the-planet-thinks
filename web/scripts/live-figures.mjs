@@ -7,15 +7,18 @@
 // what it actually counted and writes that in.
 //
 // Only closed days count — today is always a partial day — and the median of the last
-// week keeps one bot-heavy Tuesday from setting the headline. If the server cannot be
-// reached, or has not finished a full day yet, the page ships with its original wording:
-// a build must never fail or lie because a number was unavailable.
+// week keeps one bot-heavy Tuesday from setting the headline. Three closed days are the
+// minimum, because the first day after a deploy is itself partial: the counter starts at
+// whatever hour the server restarted, and a median over three or more days steps past it.
+// If the server cannot be reached, or too few days have been measured, the page ships with
+// its original wording: a build must never fail or lie because a number was unavailable.
 
 import { readFile, writeFile } from 'node:fs/promises';
 
 const API = process.env.MOMENTS_URL ?? 'https://api.theplanetthinks.com/moments';
 const PAGE = new URL('../dist/stats.html', import.meta.url);
 const DAYS = 7;
+const MIN_DAYS = 3; // fewer than this and one partial day would set the headline
 const TIMEOUT_MS = 10_000;
 
 /** 471,032 reads as a false precision for a figure that moves daily; 470,000 is honest. */
@@ -35,7 +38,7 @@ async function figures() {
   if (!res.ok) throw new Error(`moments responded ${res.status}`);
   const { days = [] } = await res.json();
   const edits = days.map(d => d.all_edits).filter(n => typeof n === 'number' && n > 0).slice(0, DAYS);
-  if (!edits.length) return null;
+  if (edits.length < MIN_DAYS) return null;
   return { perDay: round(median(edits)), perMinute: round(median(edits) / 1440), sample: edits.length };
 }
 
@@ -44,7 +47,7 @@ const fmt = n => n.toLocaleString('en-US');
 try {
   const f = await figures();
   if (!f) {
-    console.log('live-figures: no closed day measured yet, leaving the page as written');
+    console.log(`live-figures: fewer than ${MIN_DAYS} closed days measured, leaving the page as written`);
     process.exit(0);
   }
   const html = await readFile(PAGE, 'utf8');
