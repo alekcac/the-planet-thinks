@@ -11,6 +11,7 @@ import { StatsTracker } from './stats.js';
 import { MomentsTracker, buildMomentsRss } from './moments.js';
 import { buildFacts } from './facts.js';
 import { oembedFor } from './oembed.js';
+import { buildWeeks } from './weeks.js';
 import { diffUrl, parseSequence, parseOsmChange } from './osm.js';
 import { loadCountries, countryAt } from './countries.js';
 import type { Pulse, ServerMessage } from './protocol.js';
@@ -158,6 +159,10 @@ const server = http.createServer((req, res) => {
     if (!card) { res.statusCode = 404; res.end(); return; }
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify(card));
+  } else if (route === '/weeks.json') {
+    // The daily digest rolled up into weeks — the unit other people cite and link to.
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify({ weeks: buildWeeks(moments.snapshot().days) }));
   } else if (route === '/healthz') {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({

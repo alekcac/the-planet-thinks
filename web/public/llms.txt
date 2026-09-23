@@ -40,6 +40,11 @@ Key facts:
   liked about Listen to Wikipedia (the sound, the edits, or the ambient feel) — which work, which
   went dark when Wikipedia replaced anonymous IP editing with temporary accounts in November 2025,
   and why subject-located maps survived while editor-located ones did not.
+- [A week of Wikipedia](https://theplanetthinks.com/week): the daily digest rolled up into ISO
+  weeks — edits across all editions, edits about places, articles created, photos reaching Commons,
+  the places that drew the most edits, and which day was busiest. Every week keeps a permanent
+  address (https://theplanetthinks.com/week?week=2026-W39), and the history is machine-readable at
+  https://api.theplanetthinks.com/weeks.json under CC0.
 - [Wikipedia measured yesterday](https://theplanetthinks.com/facts): yesterday's figures taken
   from the live feed rather than from published reports — how many edits Wikipedia took, how many
   articles it gained and how many of those people wrote rather than bots, which language edition
