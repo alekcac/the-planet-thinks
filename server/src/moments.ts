@@ -31,6 +31,12 @@ export interface DaySummary {
   /** New articles per language edition that day, largest first */
   new_by_lang?: Record<string, number>;
   /**
+   * Located edits per country that day. The globe knows which country every pulse falls
+   * in and has never said so anywhere; this is the only view of Wikipedia activity by
+   * place rather than by language.
+   */
+  by_country?: Record<string, number>;
+  /**
    * When counting of `all_edits` began for this day, ISO 8601. After a restart the
    * counter starts from zero at whatever hour the process came back, so a day whose
    * counting began after midnight holds a partial total and must not be quoted as
@@ -46,6 +52,10 @@ const PHOTO_SAMPLE = 12;
 // Enough languages to show who is writing today without turning the digest into a
 // 300-row table; the tail is always a handful of articles apiece.
 const NEW_LANGS = 12;
+// Per-country title tables are kept only for the day in progress, and only wide enough
+// to hold a credible top five once the singles are pruned away.
+const COUNTRY_TITLES = 400;
+const COUNTRY_TOP = 5;
 // A quarter of history: enough for the digest to be a citable record rather than a fortnight's
 // scratchpad. Each day is a handful of titles and photo links, so 90 of them stay tiny.
 const HISTORY_DAYS = 90;
@@ -67,6 +77,8 @@ export class MomentsTracker {
   private newArticles = 0;
   private newByHuman = 0;
   private newLangs = new Map<string, number>();
+  private countryEdits = new Map<string, number>();
+  private countryTitles = new Map<string, Map<string, HotArticle>>();
   private photoSample: DayPhoto[] = [];
   private photoSeen = 0;
   history: DaySummary[] = [];
@@ -78,6 +90,7 @@ export class MomentsTracker {
   recordEdit(p: Pulse, now = Date.now()) {
     this.roll(now);
     this.edits++;
+    if (p.place) this.recordCountry(p);
     const key = `${p.lang}\n${p.title}`;
     const a = this.counts.get(key);
     if (a) a.count++;
@@ -85,6 +98,27 @@ export class MomentsTracker {
       if (this.counts.size >= MAX_TITLES) this.pruneSingles();
       this.counts.set(key, { title: p.title, lang: p.lang, url: p.url, count: 1 });
     }
+  }
+
+  private recordCountry(p: Pulse) {
+    const place = p.place!;
+    this.countryEdits.set(place, (this.countryEdits.get(place) ?? 0) + 1);
+    let titles = this.countryTitles.get(place);
+    if (!titles) { titles = new Map(); this.countryTitles.set(place, titles); }
+    const key = `${p.lang}\n${p.title}`;
+    const seen = titles.get(key);
+    if (seen) { seen.count++; return; }
+    if (titles.size >= COUNTRY_TITLES) {
+      for (const [k, a] of titles) if (a.count === 1) titles.delete(k);
+    }
+    titles.set(key, { title: p.title, lang: p.lang, url: p.url, count: 1 });
+  }
+
+  /** Today's busiest places inside one country, for the page about that country. */
+  topInCountry(place: string): HotArticle[] {
+    const titles = this.countryTitles.get(place);
+    if (!titles) return [];
+    return [...titles.values()].sort((a, b) => b.count - a.count).slice(0, COUNTRY_TOP);
   }
 
   /**
@@ -145,6 +179,8 @@ export class MomentsTracker {
     this.newArticles = 0;
     this.newByHuman = 0;
     this.newLangs.clear();
+    this.countryEdits.clear();
+    this.countryTitles.clear();
     this.photoSample = [];
     this.photoSeen = 0;
   }
@@ -161,6 +197,7 @@ export class MomentsTracker {
       new_articles: this.newArticles,
       new_by_human: this.newByHuman,
       new_by_lang: Object.fromEntries(langs),
+      by_country: Object.fromEntries([...this.countryEdits.entries()].sort((a, b) => b[1] - a[1])),
       top_articles: top,
       day_photos: [...this.photoSample].sort((a, b) => a.ts - b.ts),
     };
@@ -180,6 +217,7 @@ export class MomentsTracker {
       newArticles: this.newArticles,
       newByHuman: this.newByHuman,
       newLangs: [...this.newLangs.entries()],
+      countryEdits: [...this.countryEdits.entries()],
       photoSeen: this.photoSeen,
       photoSample: this.photoSample,
       counts: [...this.counts.values()],
@@ -197,6 +235,7 @@ export class MomentsTracker {
     this.newArticles = s.newArticles ?? 0;
     this.newByHuman = s.newByHuman ?? 0;
     this.newLangs = new Map(Array.isArray(s.newLangs) ? s.newLangs : []);
+    this.countryEdits = new Map(Array.isArray(s.countryEdits) ? s.countryEdits : []);
     this.photoSeen = s.photoSeen ?? 0;
     this.photoSample = Array.isArray(s.photoSample) ? s.photoSample : [];
     this.counts.clear();

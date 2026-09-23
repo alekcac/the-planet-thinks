@@ -57,3 +57,22 @@ export function countryAt(lat: number, lon: number): string | null {
   }
   return null;
 }
+
+/**
+ * The middle of a country's bounding box, which is all a camera needs to park over it.
+ * Not a centroid: for Norway or the United States the true centroid is no more useful,
+ * and a box centre never lands outside the map the way an averaged coastline can.
+ */
+export function countryCentre(name: string): { lat: number; lon: number } | null {
+  const c = index.find(x => x.name === name);
+  if (!c) return null;
+  return {
+    lat: Math.round(((c.minLat + c.maxLat) / 2) * 100) / 100,
+    lon: Math.round(((c.minLon + c.maxLon) / 2) * 100) / 100,
+  };
+}
+
+/** Every country the outlines know, so a page can list the ones with activity. */
+export function countryNames(): string[] {
+  return index.map(c => c.name);
+}

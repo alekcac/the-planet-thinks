@@ -8,6 +8,9 @@ const DAY2 = Date.UTC(2026, 7, 19, 0, 30, 0);
 function edit(title: string, ts = DAY1, lang = 'en'): Pulse {
   return { type: 'pulse', lat: 0, lon: 0, lang, title, url: `https://x/${title}`, editor_type: 'user', size_delta: 1, ts };
 }
+function edifIn(title: string, place: string, ts = DAY1, lang = 'en'): Pulse {
+  return { ...edit(title, ts, lang), place };
+}
 function photo(title: string, ts = DAY1): Pulse {
   return { ...edit(title, ts, 'commons'), img: `https://img/${title}` };
 }
@@ -24,6 +27,30 @@ describe('MomentsTracker', () => {
     expect(today.photos).toBe(1);
     expect(today.top_articles[0]).toMatchObject({ title: 'Paris', count: 3 });
     expect(today.day_photos[0]).toMatchObject({ title: 'cat.jpg', img: 'https://img/cat.jpg' });
+  });
+
+  it('counts located edits by country and ranks places inside one', () => {
+    const m = new MomentsTracker(DAY1);
+    m.recordEdit(edifIn('Berlin', 'Germany'), DAY1);
+    m.recordEdit(edifIn('Berlin', 'Germany'), DAY1);
+    m.recordEdit(edifIn('Hamburg', 'Germany'), DAY1);
+    m.recordEdit(edifIn('Lyon', 'France'), DAY1);
+    m.recordEdit(edit('Nowhere'), DAY1); // no country: still a located edit, just unplaced
+    const { today } = m.snapshot(DAY1 + 1000);
+    expect(today.edits).toBe(5);
+    expect(today.by_country).toEqual({ Germany: 3, France: 1 });
+    expect(m.topInCountry('Germany')[0]).toMatchObject({ title: 'Berlin', count: 2 });
+    expect(m.topInCountry('Spain')).toEqual([]);
+  });
+
+  it('starts each country\'s day from zero', () => {
+    const m = new MomentsTracker(DAY1);
+    m.recordEdit(edifIn('Berlin', 'Germany'), DAY1);
+    m.recordEdit(edifIn('Lyon', 'France'), DAY2); // rolls the day
+    const { today, days } = m.snapshot(DAY2);
+    expect(days[0].by_country).toEqual({ Germany: 1 });
+    expect(today.by_country).toEqual({ France: 1 });
+    expect(m.topInCountry('Germany')).toEqual([]); // yesterday's titles are gone
   });
 
   it('counts every edit, not just the ones it can map', () => {

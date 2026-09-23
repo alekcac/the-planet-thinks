@@ -14,7 +14,7 @@ import { oembedFor } from './oembed.js';
 import { buildWeeks } from './weeks.js';
 import { historyCsv } from './csv.js';
 import { diffUrl, parseSequence, parseOsmChange } from './osm.js';
-import { loadCountries, countryAt } from './countries.js';
+import { loadCountries, countryAt, countryCentre } from './countries.js';
 import type { Pulse, ServerMessage } from './protocol.js';
 
 // Streams a client can subscribe to via /ws?stream=…; the default stays the Wikipedia
@@ -90,6 +90,8 @@ setInterval(() => fs.writeFile(DWELL_FILE, JSON.stringify(dwell), () => {}), 5 *
 
 // Daily digest for the /moments page and RSS feed.
 const RSS_ITEMS = 14;
+// Four weeks of a country's daily counts: enough to see a rhythm, small enough to send.
+const PLACE_HISTORY_DAYS = 28;
 const MOMENTS_FILE = path.join(DATA_DIR, 'moments.json');
 const moments = new MomentsTracker();
 try {
@@ -169,6 +171,34 @@ const server = http.createServer((req, res) => {
     res.setHeader('content-type', 'text/csv; charset=utf-8');
     res.setHeader('content-disposition', 'attachment; filename="the-planet-thinks-daily.csv"');
     res.end(historyCsv(moments.snapshot().days));
+  } else if (route === '/places.json') {
+    // Wikipedia activity by country — the one view of this feed that is about places
+    // rather than languages, and the only one the globe could always have given.
+    const snap = moments.snapshot();
+    const params = new URL(req.url ?? '/', 'http://x').searchParams;
+    const one = params.get('country');
+    if (one) {
+      const centre = countryCentre(one);
+      if (!centre) { res.statusCode = 404; res.end('{"error":"unknown country"}'); return; }
+      const history = snap.days
+        .slice(0, PLACE_HISTORY_DAYS)
+        .map(d => ({ date: d.date, edits: d.by_country?.[one] ?? 0 }));
+      res.setHeader('content-type', 'application/json');
+      res.end(JSON.stringify({
+        country: one,
+        centre,
+        today: snap.today.by_country?.[one] ?? 0,
+        top_articles: moments.topInCountry(one),
+        history,
+      }));
+      return;
+    }
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify({
+      today: snap.today.date,
+      countries: snap.today.by_country ?? {},
+      yesterday: snap.days[0]?.by_country ?? {},
+    }));
   } else if (route === '/healthz') {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({
@@ -248,6 +278,7 @@ function startStream() {
       if (edit.is_new) moments.recordNewArticle(edit.lang, edit.editor_type);
       const coords = await resolver.resolve(edit.wiki, edit.title);
       if (!coords) return;
+      const country = countryAt(coords.lat, coords.lon);
       const pulse: Pulse = {
         type: 'pulse',
         lat: coords.lat,
@@ -256,6 +287,7 @@ function startStream() {
         title: edit.title,
         url: edit.url,
         editor_type: edit.editor_type,
+        ...(country ? { place: country } : {}),
         ...(edit.is_new ? { is_new: true as const } : {}),
         size_delta: edit.size_delta,
         ts: edit.ts,
