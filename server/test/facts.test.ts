@@ -10,6 +10,7 @@ const day = (over: Partial<DaySummary> = {}): DaySummary => ({
   new_articles: 15_400,
   new_by_human: 11_100,
   new_by_lang: { en: 600, ce: 4_000 },
+  measured_from: '2026-09-22T00:00:31.000Z',
   top_articles: [{ title: 'Agra Fort', lang: 'en', url: 'https://x', count: 188 }],
   day_photos: [],
   ...over,
@@ -37,6 +38,19 @@ describe('buildFacts', () => {
     // A day in progress, sitting in front of finished ones, would read as a collapse.
     const sheet = buildFacts([day({ date: '2026-09-23', all_edits: 0 }), day()])!;
     expect(sheet.measured_day).toBe('2026-09-22');
+  });
+
+  it('refuses a day the server only saw part of', () => {
+    // The real case this guards: a restart at 16:30 leaves the counter holding about a
+    // third of the day, which would be published as the day's total.
+    const halfSeen = day({ date: '2026-09-23', all_edits: 171_479, measured_from: '2026-09-23T16:31:00.000Z' });
+    expect(buildFacts([halfSeen])).toBeNull();
+    // With a finished day behind it, that one is used instead.
+    expect(buildFacts([halfSeen, day()])!.measured_day).toBe('2026-09-22');
+  });
+
+  it('refuses a day recorded before coverage was tracked', () => {
+    expect(buildFacts([day({ measured_from: undefined })])).toBeNull();
   });
 
   it('returns nothing rather than a fact it cannot stand behind', () => {

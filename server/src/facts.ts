@@ -49,12 +49,23 @@ function longDate(iso: string): string {
 
 const num = (n: number) => n.toLocaleString('en-US');
 
+/** A day counted from its first minute; anything else holds a partial total. */
+const COVERED_FROM_MS = 120_000; // counting must have begun within two minutes of midnight UTC
+
+export function complete(d: DaySummary): boolean {
+  if (typeof d.all_edits !== 'number' || d.all_edits <= 0) return false;
+  if (!d.measured_from) return false; // recorded before coverage was tracked: unknowable
+  const began = Date.parse(d.measured_from) - Date.parse(`${d.date}T00:00:00Z`);
+  return began >= 0 && began <= COVERED_FROM_MS;
+}
+
 /**
- * Builds the sheet from the most recent day that is actually finished. A day still in
- * progress would read as a collapse in activity to anyone quoting it at noon.
+ * Builds the sheet from the most recent day that was counted end to end. A day the
+ * server only saw half of reports a third of the real total, and published as a fact
+ * that is not an approximation, it is a wrong number with a date attached.
  */
 export function buildFacts(days: DaySummary[], now = Date.now()): FactSheet | null {
-  const day = days.find(d => typeof d.all_edits === 'number' && d.all_edits > 0);
+  const day = days.find(complete);
   if (!day) return null;
   const when = longDate(day.date);
   const facts: Fact[] = [];

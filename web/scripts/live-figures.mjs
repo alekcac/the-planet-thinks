@@ -37,7 +37,14 @@ async function figures() {
   const res = await fetch(API, { signal: AbortSignal.timeout(TIMEOUT_MS) });
   if (!res.ok) throw new Error(`moments responded ${res.status}`);
   const { days = [] } = await res.json();
-  const edits = days.map(d => d.all_edits).filter(n => typeof n === 'number' && n > 0).slice(0, DAYS);
+  // Same rule the server applies to its fact sheet: a day whose counting began after
+  // midnight holds a partial total, and a median cannot rescue a number that is simply wrong.
+  const whole = days.filter(d => {
+    if (typeof d.all_edits !== 'number' || d.all_edits <= 0 || !d.measured_from) return false;
+    const began = Date.parse(d.measured_from) - Date.parse(`${d.date}T00:00:00Z`);
+    return began >= 0 && began <= 120_000;
+  });
+  const edits = whole.map(d => d.all_edits).slice(0, DAYS);
   if (edits.length < MIN_DAYS) return null;
   return { perDay: round(median(edits)), perMinute: round(median(edits) / 1440), sample: edits.length };
 }

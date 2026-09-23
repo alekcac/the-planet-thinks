@@ -30,6 +30,13 @@ export interface DaySummary {
   new_by_human?: number;
   /** New articles per language edition that day, largest first */
   new_by_lang?: Record<string, number>;
+  /**
+   * When counting of `all_edits` began for this day, ISO 8601. After a restart the
+   * counter starts from zero at whatever hour the process came back, so a day whose
+   * counting began after midnight holds a partial total and must not be quoted as
+   * the day's figure. Absent on days recorded before this was tracked.
+   */
+  measured_from?: string;
   top_articles: HotArticle[];
   day_photos: DayPhoto[];
 }
@@ -55,6 +62,7 @@ export class MomentsTracker {
   private counts = new Map<string, HotArticle>();
   private edits = 0;
   private allEdits = 0;
+  private allEditsFrom: number | null = null;
   private photos = 0;
   private newArticles = 0;
   private newByHuman = 0;
@@ -86,6 +94,7 @@ export class MomentsTracker {
    */
   recordAnyEdit(now = Date.now()) {
     this.roll(now);
+    if (this.allEditsFrom === null) this.allEditsFrom = now;
     this.allEdits++;
   }
 
@@ -131,6 +140,7 @@ export class MomentsTracker {
     this.counts.clear();
     this.edits = 0;
     this.allEdits = 0;
+    this.allEditsFrom = null;
     this.photos = 0;
     this.newArticles = 0;
     this.newByHuman = 0;
@@ -146,6 +156,7 @@ export class MomentsTracker {
       date: this.date,
       edits: this.edits,
       all_edits: this.allEdits,
+      ...(this.allEditsFrom === null ? {} : { measured_from: new Date(this.allEditsFrom).toISOString() }),
       photos: this.photos,
       new_articles: this.newArticles,
       new_by_human: this.newByHuman,
@@ -164,6 +175,7 @@ export class MomentsTracker {
       date: this.date,
       edits: this.edits,
       allEdits: this.allEdits,
+      allEditsFrom: this.allEditsFrom,
       photos: this.photos,
       newArticles: this.newArticles,
       newByHuman: this.newByHuman,
@@ -180,6 +192,7 @@ export class MomentsTracker {
     this.date = s.date;
     this.edits = s.edits ?? 0;
     this.allEdits = s.allEdits ?? 0;
+    this.allEditsFrom = s.allEditsFrom ?? null;
     this.photos = s.photos ?? 0;
     this.newArticles = s.newArticles ?? 0;
     this.newByHuman = s.newByHuman ?? 0;
