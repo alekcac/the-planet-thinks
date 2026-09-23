@@ -10,6 +10,7 @@ import { ReplayBuffer } from './replay.js';
 import { StatsTracker } from './stats.js';
 import { MomentsTracker, buildMomentsRss } from './moments.js';
 import { buildFacts } from './facts.js';
+import { oembedFor } from './oembed.js';
 import { diffUrl, parseSequence, parseOsmChange } from './osm.js';
 import { loadCountries, countryAt } from './countries.js';
 import type { Pulse, ServerMessage } from './protocol.js';
@@ -147,6 +148,16 @@ const server = http.createServer((req, res) => {
     if (!sheet) { res.statusCode = 503; res.end('{"error":"no finished day measured yet"}'); return; }
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify(sheet, null, 2));
+  } else if (route === '/oembed') {
+    // Paste a globe's link into Notion, WordPress or Discourse and it becomes the globe.
+    const params = new URL(req.url ?? '/', 'http://x').searchParams;
+    const format = params.get('format');
+    if (format && format !== 'json') { res.statusCode = 501; res.end(); return; } // xml not offered
+    const n = (v: string | null) => (v && /^\d+$/.test(v) ? Number(v) : undefined);
+    const card = oembedFor(params.get('url') ?? '', n(params.get('maxwidth')), n(params.get('maxheight')));
+    if (!card) { res.statusCode = 404; res.end(); return; }
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify(card));
   } else if (route === '/healthz') {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({
