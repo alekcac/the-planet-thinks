@@ -9,6 +9,7 @@ import { CoordsResolver } from './coords.js';
 import { ReplayBuffer } from './replay.js';
 import { StatsTracker } from './stats.js';
 import { MomentsTracker, buildMomentsRss } from './moments.js';
+import { buildFacts } from './facts.js';
 import { diffUrl, parseSequence, parseOsmChange } from './osm.js';
 import { loadCountries, countryAt } from './countries.js';
 import type { Pulse, ServerMessage } from './protocol.js';
@@ -139,6 +140,13 @@ const server = http.createServer((req, res) => {
     // The feed carries the recent past; the full history stays available as JSON.
     res.setHeader('content-type', 'application/rss+xml; charset=utf-8');
     res.end(buildMomentsRss(moments.snapshot().days.slice(0, RSS_ITEMS)));
+  } else if (route === '/facts.json') {
+    // Yesterday's measurements, one quotable sentence each. Meant to be read by the
+    // assistants that answer "how often is Wikipedia updated" on our behalf.
+    const sheet = buildFacts(moments.snapshot().days);
+    if (!sheet) { res.statusCode = 503; res.end('{"error":"no finished day measured yet"}'); return; }
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify(sheet, null, 2));
   } else if (route === '/healthz') {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({
