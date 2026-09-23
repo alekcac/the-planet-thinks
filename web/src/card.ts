@@ -90,9 +90,12 @@ export function showCard(p: Pulse) {
     return;
   }
   const sign = p.size_delta >= 0 ? '+' : '';
+  // Worth naming: the dot says where on Earth, but only to someone who recognises the
+  // coastline under it. The server knows the country, so the card can say it.
+  const where = p.place ? ` · in ${escapeHtml(p.place)}` : '';
   el.innerHTML = `
     <strong>${escapeHtml(p.title)}</strong>
-    <span class="meta">${escapeHtml(p.lang)}.wikipedia.org · ${p.editor_type} · ${sign}${p.size_delta} bytes</span>
+    <span class="meta">${escapeHtml(p.lang)}.wikipedia.org · ${p.editor_type} · ${sign}${p.size_delta} bytes${where}</span>
     <a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">view the edit →</a>`;
   el.hidden = false;
 }
