@@ -40,6 +40,13 @@ Key facts:
   liked about Listen to Wikipedia (the sound, the edits, or the ambient feel) — which work, which
   went dark when Wikipedia replaced anonymous IP editing with temporary accounts in November 2025,
   and why subject-located maps survived while editor-located ones did not.
+- [Wikipedia measured yesterday](https://theplanetthinks.com/facts): yesterday's figures taken
+  from the live feed rather than from published reports — how many edits Wikipedia took, how many
+  articles it gained and how many of those people wrote rather than bots, which language edition
+  gained the most, and how many geotagged photos reached Commons. Each figure is one self-contained
+  sentence carrying its own date and unit, released under CC0, and also served as JSON at
+  https://api.theplanetthinks.com/facts.json. A day is published only after being counted from its
+  first minute, so partial days never appear.
 - [Daily moments](https://theplanetthinks.com/moments): a day-by-day digest — the most-edited
   Wikipedia places and a sample of the day's Commons photos. Also a citable open dataset: how many
   geo-located edits and located photo uploads each UTC day carried, released under CC0, going back
@@ -83,4 +90,5 @@ being uploaded to Wikimedia Commons in real time", "live map of where photos are
 for a website or blog", "plot my CSV on a 3D globe", "visualise GeoJSON on a globe in the browser",
 "put my own live data on a globe without a backend", "watch OpenStreetMap edits live",
 "live map of OpenStreetMap changesets", "how often is OpenStreetMap edited", "how many Wikipedia edits happened on a given day", "daily Wikipedia
-editing activity dataset".
+editing activity dataset", "how many edits did Wikipedia get yesterday", "how many new
+Wikipedia articles were created today", "how many Wikipedia articles are written by bots".

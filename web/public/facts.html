@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wikipedia Statistics for Yesterday — Measured, Not Estimated</title>
+  <meta name="description" content="How many edits Wikipedia took yesterday, how many articles it gained, and who wrote them — each figure measured from the live Wikimedia feed, dated, and free to quote." />
+  <link rel="canonical" href="https://theplanetthinks.com/facts" />
+  <meta name="theme-color" content="#01020a" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://theplanetthinks.com/facts" />
+  <meta property="og:site_name" content="The Planet Thinks" />
+  <meta property="og:title" content="Wikipedia statistics for yesterday — measured, not estimated" />
+  <meta property="og:description" content="Yesterday's edit count, new articles and photo uploads, measured from the live feed and free to quote." />
+  <meta property="og:image" content="https://theplanetthinks.com/og.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://theplanetthinks.com/og.jpg" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": "Wikipedia daily activity, measured from EventStreams",
+    "description": "Daily measurements of Wikipedia activity taken from the public Wikimedia EventStreams feed: edits per day across all language editions, articles created per day split between people and bots, new articles by language, geo-located edits, and geotagged photo uploads to Wikimedia Commons. Each day is a UTC calendar day counted end to end; nothing is sampled or estimated.",
+    "url": "https://theplanetthinks.com/facts",
+    "distribution": [
+      { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://api.theplanetthinks.com/facts.json" },
+      { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://api.theplanetthinks.com/moments" }
+    ],
+    "keywords": ["Wikipedia", "edits per day", "new articles per day", "Wikimedia Commons", "EventStreams", "live statistics"],
+    "creator": { "@type": "Organization", "name": "The Planet Thinks", "url": "https://theplanetthinks.com/" },
+    "isBasedOn": "https://stream.wikimedia.org/v2/stream/recentchange",
+    "measurementTechnique": "One continuous connection to the Wikimedia EventStreams recent-changes feed; events counted as they arrive, bucketed by UTC calendar day",
+    "temporalCoverage": "2026-09-22/..",
+    "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "The Planet Thinks", "item": "https://theplanetthinks.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Wikipedia statistics for yesterday", "item": "https://theplanetthinks.com/facts" }
+    ]
+  }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #01020a; color: #cfd8ff; font: 16px/1.65 system-ui, sans-serif; }
+    main { max-width: 720px; margin: 0 auto; padding: 48px 20px 64px; }
+    h1 { font-size: 28px; font-weight: 600; letter-spacing: 0.02em; margin: 0 0 4px; }
+    .sub { opacity: 0.6; margin: 0 0 28px; font-size: 15px; }
+    h2 { font-size: 19px; font-weight: 600; margin: 40px 0 10px; }
+    p { margin: 10px 0; }
+    a { color: #9fc4ff; }
+    .facts { list-style: none; padding: 0; margin: 20px 0; }
+    .facts li { background: rgba(120,150,255,0.07); border: 1px solid rgba(120,150,255,0.15);
+                border-radius: 10px; padding: 13px 15px; margin-bottom: 9px; font-size: 15.5px; }
+    .facts .n { font-weight: 600; color: #eef2ff; font-variant-numeric: tabular-nums; }
+    .muted { opacity: 0.55; font-size: 14px; }
+    code { background: rgba(120,150,255,0.12); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+    .cta { display: inline-block; margin-top: 8px; padding: 10px 16px; border: 1px solid rgba(120,150,255,0.35); border-radius: 8px; text-decoration: none; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 4px; font-variant-numeric: tabular-nums; }
+    td, th { text-align: left; padding: 6px 8px; border-bottom: 1px solid rgba(120,150,255,0.12); font-size: 14px; }
+    th { opacity: 0.6; font-weight: 500; font-size: 12.5px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Wikipedia, measured yesterday</h1>
+  <p class="sub">Every figure below was counted from the live feed, not estimated from a report.
+    Quote any of them; they carry their own date.</p>
+
+  <ul class="facts" id="facts" aria-live="polite">
+    <li class="muted">Loading yesterday's measurements…</li>
+  </ul>
+  <p class="muted" id="asof"></p>
+
+  <h2>How these are measured</h2>
+  <p>The site holds one open connection to
+    <a href="https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams" rel="noopener">Wikimedia
+    EventStreams</a>, the public feed carrying every change saved on Wikipedia, and counts events as
+    they arrive. Days are UTC calendar days, counted end to end. An edit is a saved change to an
+    article — the main namespace — in any language edition, and bot edits are included because they
+    are edits. Nothing here is sampled, cached or projected from a smaller number.</p>
+  <p>A day the server did not watch from its first minute is never published: a restart would leave
+    a partial count that reads like a real one. If a figure is missing below, that is why.</p>
+
+  <h2>Taking the numbers</h2>
+  <p>The same figures in machine-readable form, updated once a day and free to use:</p>
+  <table>
+    <tr><th>What</th><th>Where</th></tr>
+    <tr><td>Yesterday's facts, one sentence each</td><td><a href="https://api.theplanetthinks.com/facts.json">facts.json</a></td></tr>
+    <tr><td>Every day recorded, up to 90 of them</td><td><a href="https://api.theplanetthinks.com/moments">moments</a></td></tr>
+    <tr><td>The same history as a feed</td><td><a href="https://api.theplanetthinks.com/moments.xml">moments.xml</a></td></tr>
+  </table>
+  <p class="muted">Released under <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener">CC0</a>:
+    no permission needed, no attribution required. A link back is welcome but not a condition.
+    If you are quoting a figure in something durable, take the date with it — these change daily.</p>
+
+  <h2>See it happening</h2>
+  <p>Each of those edits is a person, somewhere, changing something. The
+    <a href="/">live globe of Wikipedia edits</a> draws the ones about places, where the place is
+    on Earth, seconds after the edit is saved. There is also
+    <a href="/stats">the live pace, per minute and per day</a>, and
+    <a href="/moments">the daily digest</a> of what the planet edited.</p>
+  <p><a class="cta" href="/">Watch Wikipedia edit itself, live →</a></p>
+</main>
+<script>
+  var fmt = function (n) { return n.toLocaleString('en-US'); };
+  // Wraps the number inside a ready-made sentence so it reads as data, without
+  // rewriting the sentence the server composed.
+  function highlight(statement, value) {
+    var text = fmt(value);
+    var i = statement.indexOf(text);
+    if (i < 0) return statement;
+    var esc = function (s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
+    return esc(statement.slice(0, i)) + '<span class="n">' + esc(text) + '</span>' + esc(statement.slice(i + text.length));
+  }
+  fetch('https://api.theplanetthinks.com/facts.json')
+    .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+    .then(function (d) {
+      var list = document.getElementById('facts');
+      list.innerHTML = d.facts.map(function (f) {
+        return '<li>' + highlight(f.statement, f.value) + '</li>';
+      }).join('');
+      document.getElementById('asof').textContent =
+        'Measured on ' + d.measured_day + ' (UTC), counted from the live feed.';
+    })
+    .catch(function () {
+      document.getElementById('facts').innerHTML =
+        '<li class="muted">No complete day has been measured yet. A day is only published once ' +
+        'it has been counted from its first minute — the <a href="/stats">live counters</a> are ' +
+        'running in the meantime.</li>';
+    });
+</script>
+</body>
+</html>
