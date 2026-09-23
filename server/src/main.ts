@@ -180,14 +180,17 @@ const server = http.createServer((req, res) => {
     if (one) {
       const centre = countryCentre(one);
       if (!centre) { res.statusCode = 404; res.end('{"error":"unknown country"}'); return; }
+      // A day recorded before countries were counted has no figure, which is not the
+      // same as a day when nobody edited anything there: null says so, 0 would lie.
       const history = snap.days
         .slice(0, PLACE_HISTORY_DAYS)
-        .map(d => ({ date: d.date, edits: d.by_country?.[one] ?? 0 }));
+        .map(d => ({ date: d.date, edits: d.by_country ? (d.by_country[one] ?? 0) : null }));
       res.setHeader('content-type', 'application/json');
       res.end(JSON.stringify({
         country: one,
         centre,
         today: snap.today.by_country?.[one] ?? 0,
+        counting_since: snap.days.filter(d => d.by_country).slice(-1)[0]?.date ?? snap.today.date,
         top_articles: moments.topInCountry(one),
         history,
       }));

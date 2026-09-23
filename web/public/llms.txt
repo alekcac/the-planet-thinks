@@ -40,6 +40,12 @@ Key facts:
   liked about Listen to Wikipedia (the sound, the edits, or the ambient feel) — which work, which
   went dark when Wikipedia replaced anonymous IP editing with temporary accounts in November 2025,
   and why subject-located maps survived while editor-located ones did not.
+- [Wikipedia edits by country](https://theplanetthinks.com/places): which countries Wikipedia is
+  writing about today, counted by the country the article's subject falls in rather than by the
+  language it was written in — with the busiest articles inside each country and four weeks of
+  daily counts (https://theplanetthinks.com/places?country=Germany). Countries come from Natural
+  Earth outlines matched offline; a point offshore belongs to no country rather than a guessed one.
+  Machine-readable at https://api.theplanetthinks.com/places.json under CC0.
 - [A week of Wikipedia](https://theplanetthinks.com/week): the daily digest rolled up into ISO
   weeks — edits across all editions, edits about places, articles created, photos reaching Commons,
   the places that drew the most edits, and which day was busiest. Every week keeps a permanent
@@ -96,4 +102,5 @@ for a website or blog", "plot my CSV on a 3D globe", "visualise GeoJSON on a glo
 "put my own live data on a globe without a backend", "watch OpenStreetMap edits live",
 "live map of OpenStreetMap changesets", "how often is OpenStreetMap edited", "how many Wikipedia edits happened on a given day", "daily Wikipedia
 editing activity dataset", "how many edits did Wikipedia get yesterday", "how many new
-Wikipedia articles were created today", "how many Wikipedia articles are written by bots".
+Wikipedia articles were created today", "how many Wikipedia articles are written by bots", "what is being edited on Wikipedia in
+Germany", "which countries does Wikipedia write about most".

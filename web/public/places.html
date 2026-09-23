@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Which Countries Wikipedia Is Writing About Today</title>
+  <meta name="description" content="Live count of Wikipedia edits by country — which places are being written about right now, the busiest articles in each country, and how the day compares with the last four weeks." />
+  <link rel="canonical" href="https://theplanetthinks.com/places" />
+  <meta name="theme-color" content="#01020a" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://theplanetthinks.com/places" />
+  <meta property="og:site_name" content="The Planet Thinks" />
+  <meta property="og:title" content="Which countries Wikipedia is writing about today" />
+  <meta property="og:description" content="Wikipedia edits counted by country, live — and the busiest places inside each one." />
+  <meta property="og:image" content="https://theplanetthinks.com/og.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://theplanetthinks.com/og.jpg" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": "Wikipedia edits by country",
+    "description": "Edits to Wikipedia articles about places, counted by the country the article's subject falls in, measured live from the Wikimedia EventStreams feed. Includes the busiest articles inside each country today and up to four weeks of daily counts.",
+    "url": "https://theplanetthinks.com/places",
+    "distribution": [
+      { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://api.theplanetthinks.com/places.json" }
+    ],
+    "keywords": ["Wikipedia", "edits by country", "geotagged edits", "live map", "EventStreams"],
+    "creator": { "@type": "Organization", "name": "The Planet Thinks", "url": "https://theplanetthinks.com/" },
+    "isBasedOn": "https://stream.wikimedia.org/v2/stream/recentchange",
+    "measurementTechnique": "Each edit to an article carrying coordinates is matched against Natural Earth country outlines at 110m resolution",
+    "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "The Planet Thinks", "item": "https://theplanetthinks.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Wikipedia edits by country", "item": "https://theplanetthinks.com/places" }
+    ]
+  }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #01020a; color: #cfd8ff; font: 16px/1.65 system-ui, sans-serif; }
+    main { max-width: 760px; margin: 0 auto; padding: 48px 20px 64px; }
+    h1 { font-size: 28px; font-weight: 600; letter-spacing: 0.02em; margin: 0 0 4px; }
+    .sub { opacity: 0.6; margin: 0 0 24px; font-size: 15px; }
+    h2 { font-size: 19px; font-weight: 600; margin: 36px 0 10px; }
+    p { margin: 10px 0; }
+    a { color: #9fc4ff; }
+    table { width: 100%; border-collapse: collapse; margin: 10px 0 4px; font-variant-numeric: tabular-nums; }
+    td, th { text-align: left; padding: 7px 8px; border-bottom: 1px solid rgba(120,150,255,0.12); font-size: 14.5px; }
+    th { opacity: 0.6; font-weight: 500; font-size: 12.5px; }
+    td.n, th.n { text-align: right; }
+    .bar { display: inline-block; height: 7px; background: rgba(120,150,255,0.5); border-radius: 3px; vertical-align: middle; }
+    .muted { opacity: 0.55; font-size: 14px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 20px 0; }
+    .card { background: rgba(120,150,255,0.07); border: 1px solid rgba(120,150,255,0.15); border-radius: 10px; padding: 14px; }
+    .card .v { font-size: 21px; font-weight: 600; color: #eef2ff; font-variant-numeric: tabular-nums; }
+    .card .l { font-size: 12.5px; opacity: 0.6; margin-top: 2px; }
+    .cta { display: inline-block; margin-top: 8px; padding: 10px 16px; border: 1px solid rgba(120,150,255,0.35); border-radius: 8px; text-decoration: none; }
+    .back { font-size: 14px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1 id="heading">Which countries Wikipedia is writing about today</h1>
+  <p class="sub" id="sub">Counting edits to articles about places, by the country the place is in.</p>
+
+  <div id="country-view" hidden>
+    <div class="cards" id="country-cards"></div>
+    <h2>Busiest places there today</h2>
+    <table>
+      <thead><tr><th>Article</th><th>Edition</th><th class="n">edits</th></tr></thead>
+      <tbody id="country-top"><tr><td colspan="3" class="muted">loading…</td></tr></tbody>
+    </table>
+    <h2>The last four weeks</h2>
+    <table>
+      <thead><tr><th>Day</th><th class="n">edits about places there</th></tr></thead>
+      <tbody id="country-history"></tbody>
+    </table>
+    <p class="muted" id="country-note"></p>
+    <p><a class="cta" id="country-globe" href="/">Watch it on the globe →</a></p>
+    <p class="back"><a href="/places">← every country</a></p>
+  </div>
+
+  <div id="index-view">
+    <table>
+      <thead><tr><th>Country</th><th class="n">edits today</th><th></th></tr></thead>
+      <tbody id="countries"><tr><td colspan="3" class="muted">loading…</td></tr></tbody>
+    </table>
+    <p class="muted">Counted since midnight UTC, so early in the day the list is short. Only edits
+      to articles carrying coordinates can be placed in a country — about a fifth of Wikipedia.
+      Articles about people, ideas and events have no location and are counted
+      <a href="/stats">in the totals</a> instead.</p>
+
+    <h2>How a country is decided</h2>
+    <p>Every article with coordinates is matched against Natural Earth's country outlines, offline
+      and at about a kilometre of resolution. A point just offshore belongs to no country rather
+      than to a guessed one, and the outlines carry no opinion about disputed borders — where the
+      data is ambiguous, the honest answer is nothing.</p>
+    <p class="muted">The same counts are machine-readable at
+      <a href="https://api.theplanetthinks.com/places.json">places.json</a>, and one country at a
+      time at <code>places.json?country=Germany</code>, under
+      <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener">CC0</a>.</p>
+  </div>
+</main>
+<script>
+  var fmt = function (n) { return n.toLocaleString('en-US'); };
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function shortDate(iso) { var p = iso.split('-'); return Number(p[2]) + ' ' + MONTHS[Number(p[1]) - 1]; }
+
+  var want = new URLSearchParams(location.search).get('country');
+
+  if (!want) {
+    fetch('https://api.theplanetthinks.com/places.json')
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var rows = Object.keys(d.countries).map(function (k) { return [k, d.countries[k]]; });
+        if (!rows.length) {
+          document.getElementById('countries').innerHTML =
+            '<tr><td colspan="3" class="muted">Nothing counted yet today — the first located edit ' +
+            'of the UTC day has not arrived.</td></tr>';
+          return;
+        }
+        var max = rows[0][1];
+        document.getElementById('countries').innerHTML = rows.map(function (r) {
+          var w = Math.max(2, Math.round((r[1] / max) * 120));
+          return '<tr><td><a href="/places?country=' + encodeURIComponent(r[0]) + '">' + esc(r[0]) + '</a></td>' +
+                 '<td class="n">' + fmt(r[1]) + '</td>' +
+                 '<td><span class="bar" style="width:' + w + 'px"></span></td></tr>';
+        }).join('');
+        document.getElementById('sub').textContent =
+          rows.length + ' countries have been written about today, counted since midnight UTC.';
+      })
+      .catch(function () {
+        document.getElementById('countries').innerHTML =
+          '<tr><td colspan="3" class="muted">The counts could not be loaded just now.</td></tr>';
+      });
+  } else {
+    document.getElementById('index-view').hidden = true;
+    document.getElementById('country-view').hidden = false;
+    fetch('https://api.theplanetthinks.com/places.json?country=' + encodeURIComponent(want))
+      .then(function (r) { if (!r.ok) throw new Error('unknown'); return r.json(); })
+      .then(function (d) {
+        document.title = 'Wikipedia edits about ' + d.country + ' — The Planet Thinks';
+        document.getElementById('heading').textContent = 'Wikipedia is writing about ' + d.country;
+        document.getElementById('sub').textContent =
+          'Edits to articles about places inside ' + d.country + ', counted since midnight UTC.';
+
+        var recorded = d.history.filter(function (h) { return h.edits !== null; });
+        var week = recorded.slice(0, 7).reduce(function (n, h) { return n + h.edits; }, 0);
+        document.getElementById('country-cards').innerHTML =
+          '<div class="card"><div class="v">' + fmt(d.today) + '</div><div class="l">edits so far today</div></div>' +
+          (recorded.length ? '<div class="card"><div class="v">' + fmt(week) + '</div><div class="l">over the last ' +
+            Math.min(7, recorded.length) + ' recorded days</div></div>' : '');
+
+        document.getElementById('country-top').innerHTML = d.top_articles.length
+          ? d.top_articles.map(function (a) {
+              return '<tr><td><a href="' + esc(a.url) + '" rel="noopener">' + esc(a.title) + '</a></td>' +
+                     '<td>' + esc(a.lang) + '</td><td class="n">' + fmt(a.count) + '</td></tr>';
+            }).join('')
+          : '<tr><td colspan="3" class="muted">nothing there yet today</td></tr>';
+
+        var max = Math.max.apply(null, recorded.map(function (h) { return h.edits; }).concat([1]));
+        document.getElementById('country-history').innerHTML = recorded.length
+          ? recorded.map(function (h) {
+              var w = Math.max(2, Math.round((h.edits / max) * 140));
+              return '<tr><td>' + shortDate(h.date) + '</td><td class="n">' + fmt(h.edits) +
+                     ' <span class="bar" style="width:' + w + 'px"></span></td></tr>';
+            }).join('')
+          : '<tr><td colspan="2" class="muted">no earlier day has been counted by country yet</td></tr>';
+
+        var missing = d.history.length - recorded.length;
+        document.getElementById('country-note').textContent = missing
+          ? missing + ' earlier days are missing from this table: they were recorded before edits ' +
+            'were counted by country, and showing them as zero would read as silence rather than ' +
+            'as an absence of data.'
+          : '';
+
+        var g = document.getElementById('country-globe');
+        g.href = '/?view=' + d.centre.lat + ',' + d.centre.lon + ',1.6&follow=off';
+        g.textContent = 'Watch ' + d.country + ' on the globe →';
+      })
+      .catch(function () {
+        document.getElementById('country-view').hidden = true;
+        document.getElementById('sub').innerHTML =
+          'No country by that name is in the outlines. <a href="/places">See the list</a>.';
+      });
+  }
+</script>
+</body>
+</html>
