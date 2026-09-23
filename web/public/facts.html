@@ -24,7 +24,8 @@
     "url": "https://theplanetthinks.com/facts",
     "distribution": [
       { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://api.theplanetthinks.com/facts.json" },
-      { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://api.theplanetthinks.com/moments" }
+      { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://api.theplanetthinks.com/moments" },
+      { "@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": "https://api.theplanetthinks.com/history.csv" }
     ],
     "keywords": ["Wikipedia", "edits per day", "new articles per day", "Wikimedia Commons", "EventStreams", "live statistics"],
     "creator": { "@type": "Organization", "name": "The Planet Thinks", "url": "https://theplanetthinks.com/" },
@@ -94,7 +95,14 @@
     <tr><td>Yesterday's facts, one sentence each</td><td><a href="https://api.theplanetthinks.com/facts.json">facts.json</a></td></tr>
     <tr><td>Every day recorded, up to 90 of them</td><td><a href="https://api.theplanetthinks.com/moments">moments</a></td></tr>
     <tr><td>The same history as a feed</td><td><a href="https://api.theplanetthinks.com/moments.xml">moments.xml</a></td></tr>
+    <tr><td>Every day as a spreadsheet</td><td><a href="https://api.theplanetthinks.com/history.csv">history.csv</a></td></tr>
+    <tr><td>Weekly totals</td><td><a href="https://api.theplanetthinks.com/weeks.json">weeks.json</a></td></tr>
   </table>
+  <p class="muted">The CSV carries one row per day with <code>all_edits</code>,
+    <code>located_edits</code>, <code>new_articles</code>, <code>new_articles_by_people</code>,
+    <code>geotagged_photos</code> and the day's most-edited place. Where a day was not watched
+    from its first minute the edit count is left empty and <code>all_edits_complete</code> reads
+    <code>false</code>, because a short count is worse than a missing one.</p>
   <p class="muted">Released under <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener">CC0</a>:
     no permission needed, no attribution required. A link back is welcome but not a condition.
     If you are quoting a figure in something durable, take the date with it — these change daily.</p>

@@ -12,6 +12,7 @@ import { MomentsTracker, buildMomentsRss } from './moments.js';
 import { buildFacts } from './facts.js';
 import { oembedFor } from './oembed.js';
 import { buildWeeks } from './weeks.js';
+import { historyCsv } from './csv.js';
 import { diffUrl, parseSequence, parseOsmChange } from './osm.js';
 import { loadCountries, countryAt } from './countries.js';
 import type { Pulse, ServerMessage } from './protocol.js';
@@ -163,6 +164,11 @@ const server = http.createServer((req, res) => {
     // The daily digest rolled up into weeks — the unit other people cite and link to.
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({ weeks: buildWeeks(moments.snapshot().days) }));
+  } else if (route === '/history.csv') {
+    // A file, not a query: the places that give a dataset a life of its own want one.
+    res.setHeader('content-type', 'text/csv; charset=utf-8');
+    res.setHeader('content-disposition', 'attachment; filename="the-planet-thinks-daily.csv"');
+    res.end(historyCsv(moments.snapshot().days));
   } else if (route === '/healthz') {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({
