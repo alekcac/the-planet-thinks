@@ -34,30 +34,42 @@ describe('buildStatus', () => {
   const days = [day('2026-09-27', 1800), day('2026-09-26', 1800), day('2026-09-25', 1800)];
 
   it('calls it up when the pace matches the hour', () => {
-    const s = buildStatus({ perMinute: 28, lastEventAt: NOON - 1000, days, site }, NOON);
+    const s = buildStatus({ perMinute: 28, countingSince: NOON - 600_000, lastEventAt: NOON - 1000, days, site }, NOON);
     expect(s.verdict).toBe('up');
     expect(s.edits.usual_per_minute).toBe(30);
     expect(s.summary).toContain('being edited normally');
   });
 
   it('calls it quiet when the pace collapses against that hour', () => {
-    const s = buildStatus({ perMinute: 6, lastEventAt: NOON - 1000, days, site }, NOON);
+    const s = buildStatus({ perMinute: 6, countingSince: NOON - 600_000, lastEventAt: NOON - 1000, days, site }, NOON);
     expect(s.verdict).toBe('quiet');
     expect(s.edits.ratio).toBe(0.2);
   });
 
   it('will not blame Wikipedia for its own lost connection', () => {
-    const s = buildStatus({ perMinute: 0, lastEventAt: NOON - 300_000, days, site }, NOON);
+    const s = buildStatus({ perMinute: 0, countingSince: NOON - 600_000, lastEventAt: NOON - 300_000, days, site }, NOON);
     expect(s.verdict).toBe('stalled');
     // The honest reading of silence: two causes, indistinguishable from this end.
     expect(s.summary).toContain('lost its connection');
   });
 
   it('says nothing about a pace it has no baseline for', () => {
-    const s = buildStatus({ perMinute: 3, lastEventAt: NOON - 1000, days: [], site }, NOON);
+    const s = buildStatus({ perMinute: 3, countingSince: NOON - 600_000, lastEventAt: NOON - 1000, days: [], site }, NOON);
     expect(s.edits.usual_per_minute).toBeNull();
     expect(s.edits.ratio).toBeNull();
     expect(s.verdict).toBe('up'); // edits are arriving; we simply cannot rate the pace
     expect(s.summary).toContain('not yet enough history');
+  });
+
+  it('does not rate a pace measured over less than a minute', () => {
+    // Just after a restart the counter has only seconds of data, so 6/min is an artefact
+    // of the window, not a quiet Wikipedia. Reporting it as "quiet" would be this page
+    // blaming Wikipedia for its own restart.
+    const s = buildStatus(
+      { perMinute: 6, countingSince: NOON - 20_000, lastEventAt: NOON - 1000, days, site }, NOON);
+    expect(s.edits.warming_up).toBe(true);
+    expect(s.edits.ratio).toBeNull();
+    expect(s.verdict).toBe('up');
+    expect(s.summary).toContain('restarted moments ago');
   });
 });

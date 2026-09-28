@@ -31,6 +31,13 @@ export interface Status {
     ratio: number | null;
     /** Seconds since anything at all arrived on the feed */
     last_event_seconds_ago: number;
+    /**
+     * True while the per-minute counter has been running for less than a minute, which
+     * it always is just after a restart. The rate is real but covers a shorter window,
+     * so it reads low through no fault of Wikipedia's and must not be rated against the
+     * baseline.
+     */
+    warming_up: boolean;
   };
   checked_at: string;
 }
@@ -70,6 +77,8 @@ export function usualForHour(days: DaySummary[], hour: number): number | null {
 
 export interface StatusInput {
   perMinute: number;
+  /** When this process began counting; the rate covers at most the time since then. */
+  countingSince: number;
   lastEventAt: number;
   days: DaySummary[];
   site: { reachable: boolean | null; ms: number | null; checkedAt: number | null };
@@ -77,9 +86,13 @@ export interface StatusInput {
 
 export function buildStatus(input: StatusInput, now = Date.now()): Status {
   const silentFor = Math.round((now - input.lastEventAt) / 1000);
+  const warming = now - input.countingSince < 60_000;
   const hour = new Date(now).getUTCHours();
   const usual = usualForHour(input.days, hour);
-  const ratio = usual && usual > 0 ? Math.round((input.perMinute / usual) * 100) / 100 : null;
+  // A rate measured over forty seconds is not a rate per minute. Comparing it to the
+  // baseline would report a freshly restarted server as a quiet Wikipedia.
+  const ratio = !warming && usual && usual > 0
+    ? Math.round((input.perMinute / usual) * 100) / 100 : null;
 
   let verdict: Verdict;
   if (silentFor >= SILENT_SECONDS) verdict = 'stalled';
@@ -87,10 +100,14 @@ export function buildStatus(input: StatusInput, now = Date.now()): Status {
   else if (ratio < QUIET_RATIO) verdict = 'quiet';
   else verdict = 'up';
 
-  const pace = `${input.perMinute} edits a minute are arriving right now`;
-  const against = usual === null
-    ? ', and there is not yet enough history here to say what this hour usually carries'
-    : `, against the ${usual} a minute this hour usually carries`;
+  const pace = warming
+    ? 'edits are arriving'
+    : `${input.perMinute} edits a minute are arriving right now`;
+  const against = warming
+    ? ', though this checker restarted moments ago and its per-minute figure is still filling up'
+    : usual === null
+      ? ', and there is not yet enough history here to say what this hour usually carries'
+      : `, against the ${usual} a minute this hour usually carries`;
 
   const summary =
     verdict === 'stalled'
@@ -117,6 +134,7 @@ export function buildStatus(input: StatusInput, now = Date.now()): Status {
       usual_per_minute: usual,
       ratio,
       last_event_seconds_ago: silentFor,
+      warming_up: warming,
     },
     checked_at: new Date(now).toISOString(),
   };

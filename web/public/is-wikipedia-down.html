@@ -193,7 +193,9 @@
     $('summary').textContent = d.summary;
     $('site').textContent = d.site.reachable === null ? '—'
       : d.site.reachable ? (d.site.ms === null ? 'yes' : 'yes · ' + d.site.ms + 'ms') : 'no';
-    $('rate').textContent = d.edits.per_minute;
+    // Straight after a restart the per-minute figure covers less than a minute; showing
+    // it would understate the pace without anything being wrong at Wikipedia's end.
+    $('rate').textContent = d.edits.warming_up ? 'measuring…' : d.edits.per_minute;
     $('usual').textContent = d.edits.usual_per_minute === null ? 'not yet known' : d.edits.usual_per_minute;
     $('gap').textContent = ago(d.edits.last_event_seconds_ago);
     $('stamp').textContent = 'Checked ' + d.checked_at.slice(11, 19) + ' UTC. This page rechecks itself every 15 seconds.';

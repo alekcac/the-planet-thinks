@@ -210,6 +210,7 @@ const server = http.createServer((req, res) => {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify(buildStatus({
       perMinute: stats.snapshot().total_rate,
+      countingSince: startedAt,
       lastEventAt,
       days: snap.days,
       site: wikipediaSite,
@@ -271,6 +272,7 @@ setInterval(() => {
 
 let es: EventSource | null = null;
 let lastEventAt = Date.now();
+const startedAt = Date.now();
 
 // Half the answer to "is Wikipedia down" is the ordinary one: can a reader load a page.
 // Checked here rather than in the browser because a visitor's own network problem would
