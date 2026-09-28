@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { classify, classifyCommonsUpload, editorType } from '../src/classify.js';
+import { classify, classifyCommonsUpload, editorType, isRevert } from '../src/classify.js';
 import { fx } from './fixtures/recentchange.js';
 
 describe('classify', () => {
@@ -47,4 +47,37 @@ describe('classifyCommonsUpload', () => {
   it('drops wikipedia edits', () => expect(classifyCommonsUpload(fx.humanEdit)).toBeNull());
   it('never matches in the wikipedia classifier', () =>
     expect(classify(fx.commonsUpload)).toBeNull());
+});
+
+describe('isRevert', () => {
+  it('recognises the summaries the revert tools write', () => {
+    // Sampled from the live feed on 27 September 2026.
+    expect(isRevert('Undid revision [[Special:Diff/1377036483|1377036483]] by [[Special:Contributions/~2026-52030-02|x]]')).toBe(true);
+    expect(isRevert('Reverted edits by 203.0.113.7 to last version by Someone')).toBe(true);
+    expect(isRevert('Reverted 1 edit by Example (talk)')).toBe(true);
+    expect(isRevert('Reverted good faith edits by Newcomer')).toBe(true);
+    expect(isRevert('Reverted to revision 1377049192 by Bot')).toBe(true);
+    expect(isRevert('rvv')).toBe(true);
+    expect(isRevert('/* History */ Undid revision 12345 by Someone')).toBe(true);
+  });
+
+  it('does not count an edit that merely mentions reverting', () => {
+    expect(isRevert('expanded the section on revert wars')).toBe(false);
+    expect(isRevert('I will revert this if nobody objects')).toBe(false);
+    expect(isRevert('added a source')).toBe(false);
+    expect(isRevert('')).toBe(false);
+    expect(isRevert(undefined)).toBe(false);
+  });
+
+  it('flags reverts on the English Wikipedia only', () => {
+    const base = {
+      type: 'edit', namespace: 0, title: 'Berlin',
+      length: { old: 10, new: 12 }, revision: { old: 1, new: 2 },
+      comment: 'Undid revision 999 by Someone',
+    };
+    expect(classify({ ...base, server_name: 'en.wikipedia.org' })?.is_revert).toBe(true);
+    // Same summary text, different edition: the detector has no German patterns, so
+    // claiming to know is worse than staying silent.
+    expect(classify({ ...base, server_name: 'de.wikipedia.org' })?.is_revert).toBeUndefined();
+  });
 });

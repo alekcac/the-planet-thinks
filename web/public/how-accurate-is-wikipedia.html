@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How Accurate Is Wikipedia? Watch It Correct Itself, Live</title>
+  <meta name="description" content="Is Wikipedia reliable? Instead of arguing, we count: how many of today's edits undid an earlier one, how much is written by people rather than bots, and how much comes from anonymous editors. Measured live." />
+  <link rel="canonical" href="https://theplanetthinks.com/how-accurate-is-wikipedia" />
+  <meta name="theme-color" content="#01020a" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://theplanetthinks.com/how-accurate-is-wikipedia" />
+  <meta property="og:site_name" content="The Planet Thinks" />
+  <meta property="og:title" content="How accurate is Wikipedia? Watch it correct itself, live" />
+  <meta property="og:description" content="Everyone answers this with an opinion. We answer it with a number: how many of today's edits undid an earlier one." />
+  <meta property="og:image" content="https://theplanetthinks.com/og.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://theplanetthinks.com/og.jpg" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": "https://theplanetthinks.com/how-accurate-is-wikipedia",
+    "url": "https://theplanetthinks.com/how-accurate-is-wikipedia",
+    "name": "How accurate is Wikipedia?",
+    "speakable": { "@type": "SpeakableSpecification", "cssSelector": ["h1", "#answer"] }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "The Planet Thinks", "item": "https://theplanetthinks.com/" },
+      { "@type": "ListItem", "position": 2, "name": "How accurate is Wikipedia?", "item": "https://theplanetthinks.com/how-accurate-is-wikipedia" }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How accurate is Wikipedia?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Accurate enough that it corrects itself constantly, which is the part you can actually measure. A small percentage of edits to the English Wikipedia are reverts — edits whose entire purpose is to undo an earlier one. That rate is the encyclopedia's immune system working in public, and this page counts it live from the feed of every saved change." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Wikipedia a reliable source?",
+        "acceptedAnswer": { "@type": "Answer", "text": "For a first orientation and for its citations, yes. As a source to cite directly in academic work, no — and Wikipedia itself says so. The useful question is not whether it is perfect but how fast it fixes itself, because unlike a printed encyclopedia every error has a timestamp, an author and a public record of being corrected." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can anyone edit Wikipedia?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes, and most articles can be edited without an account at all. That is why the share of edits coming from anonymous and temporary accounts is worth counting rather than guessing: it is usually a modest slice of the day, and those edits are the most heavily watched of all." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Wikipedia written by bots?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Partly. Bots do a large share of the routine work — fixing links, tidying formatting, importing structured data — and on some smaller language editions they create most new articles. This page counts the split between people and bots for every edit saved today, across every language edition." }
+      },
+      {
+        "@type": "Question",
+        "name": "What is a revert on Wikipedia?",
+        "acceptedAnswer": { "@type": "Answer", "text": "A revert is an edit that undoes an earlier edit, restoring the page to how it was. Editors perform them with standard tools — undo, rollback, Twinkle, Huggle — and each tool writes a recognisable edit summary. Counting those summaries as they arrive gives a live measure of how much of Wikipedia's work is correction rather than addition." }
+      },
+      {
+        "@type": "Question",
+        "name": "How quickly is vandalism removed from Wikipedia?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Usually in minutes, often in seconds, because reverting is automated and watchlists are widely used. What this page shows is the aggregate of that work: the number of undo operations performed across the English Wikipedia in a day." }
+      }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": "Wikipedia self-correction rate",
+    "description": "How many edits to the English Wikipedia undo an earlier edit, counted live from the Wikimedia EventStreams feed, together with the split of all Wikipedia edits between signed-in people, anonymous editors and bots.",
+    "url": "https://theplanetthinks.com/how-accurate-is-wikipedia",
+    "distribution": [
+      { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://api.theplanetthinks.com/facts.json" },
+      { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://api.theplanetthinks.com/moments" }
+    ],
+    "keywords": ["Wikipedia", "reliability", "revert rate", "vandalism", "bots", "anonymous edits"],
+    "creator": { "@type": "Organization", "name": "The Planet Thinks", "url": "https://theplanetthinks.com/" },
+    "isBasedOn": "https://stream.wikimedia.org/v2/stream/recentchange",
+    "measurementTechnique": "Every saved edit is read from the public EventStreams feed as it happens. An edit counts as a revert when its summary matches one written by the standard revert tools; only the English Wikipedia is measured, because those summaries are English.",
+    "variableMeasured": [
+      { "@type": "PropertyValue", "name": "Reverts per day on the English Wikipedia" },
+      { "@type": "PropertyValue", "name": "Share of edits that are reverts" },
+      { "@type": "PropertyValue", "name": "Edits by people, anonymous editors and bots" }
+    ],
+    "license": "https://creativecommons.org/publicdomain/zero/1.0/"
+  }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #01020a; color: #cfd8ff; font: 16px/1.65 system-ui, sans-serif; }
+    main { max-width: 760px; margin: 0 auto; padding: 48px 20px 64px; }
+    h1 { font-size: 28px; font-weight: 600; letter-spacing: 0.02em; margin: 0 0 4px; }
+    .sub { opacity: 0.6; margin: 0 0 24px; font-size: 15px; }
+    h2 { font-size: 19px; font-weight: 600; margin: 40px 0 10px; }
+    h3 { font-size: 16px; font-weight: 600; margin: 22px 0 6px; color: #e2e8ff; }
+    p { margin: 10px 0; }
+    a { color: #9fc4ff; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 24px 0; }
+    .card { background: rgba(120,150,255,0.07); border: 1px solid rgba(120,150,255,0.15); border-radius: 10px; padding: 14px; min-width: 0; }
+    .card .v { font-size: 20px; font-weight: 600; color: #eef2ff; font-variant-numeric: tabular-nums; letter-spacing: -0.3px; white-space: nowrap; }
+    .card .l { font-size: 12.5px; opacity: 0.6; margin-top: 2px; }
+    .status { font-size: 13px; opacity: 0.55; margin: -12px 0 0; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 4px; font-variant-numeric: tabular-nums; }
+    td, th { text-align: left; padding: 6px 8px; border-bottom: 1px solid rgba(120,150,255,0.12); font-size: 14.5px; }
+    th { opacity: 0.6; font-weight: 500; font-size: 12.5px; }
+    td.n, th.n { text-align: right; }
+    .muted { opacity: 0.55; font-size: 14px; }
+    .bar { display: inline-block; height: 7px; background: rgba(120,150,255,0.5); border-radius: 3px; vertical-align: middle; }
+    .cta { display: inline-block; margin-top: 8px; padding: 10px 16px; border: 1px solid rgba(120,150,255,0.35); border-radius: 8px; text-decoration: none; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>How accurate is Wikipedia?</h1>
+  <p class="sub">Everyone answers this with an opinion. Here is a number instead.</p>
+
+  <div class="cards">
+    <div class="card"><div class="v" id="rate">—</div><div class="l">of today's English edits undid an earlier one</div></div>
+    <div class="card"><div class="v" id="reverts">—</div><div class="l">reverts so far today</div></div>
+    <div class="card"><div class="v" id="human">—</div><div class="l">of today's edits made by people</div></div>
+    <div class="card"><div class="v" id="anon">—</div><div class="l">made by editors who were not signed in</div></div>
+  </div>
+  <p class="status" id="status">reading the live count…</p>
+
+  <p id="answer">Wikipedia's accuracy is not a fixed property you can look up — it is the result of a
+    continuous argument, and that argument leaves a trace. Every time an editor undoes someone
+    else's work, the software records it. So instead of asking whether Wikipedia is reliable,
+    this page counts <b>how often it corrects itself</b>: what share of the English Wikipedia's
+    edits exist purely to undo an earlier edit, who is doing the writing, and how much of it
+    comes from people with no account at all. The figures above are counted from
+    <a href="https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams" rel="noopener">Wikimedia EventStreams</a>,
+    the public feed carrying every change saved on Wikipedia, and they reset at midnight UTC.</p>
+
+  <p class="muted">Want scale rather than reliability? See
+    <a href="/how-many-articles">how many articles Wikipedia has</a>,
+    <a href="/stats">how often it is updated</a>,
+    <a href="/facts">yesterday counted in full</a>, or
+    <a href="/places">which countries it wrote about today</a>.</p>
+
+  <h2>Yesterday, counted end to end</h2>
+  <p class="muted">Today's figures above are still running. These are from the last day the
+    counter saw from its first minute to its last — a partial day would be a wrong number with a
+    date attached.</p>
+  <table aria-live="polite">
+    <tbody id="yesterday"><tr><td class="muted">loading…</td></tr></tbody>
+  </table>
+
+  <h2>Who actually writes Wikipedia</h2>
+  <p class="muted">Every edit saved today, in any language edition, by the kind of account behind it.</p>
+  <table aria-live="polite">
+    <thead><tr><th>Editor</th><th class="n">edits today</th><th></th></tr></thead>
+    <tbody id="editors"><tr><td colspan="3" class="muted">waiting for data…</td></tr></tbody>
+  </table>
+  <p class="muted">"Not signed in" covers both plain IP addresses and the temporary accounts
+    Wikipedia now issues to logged-out editors. These are the edits people have in mind when they
+    say anyone can change anything — and they are also the most closely watched, which is why
+    they are worth counting rather than imagining.</p>
+
+  <h2>What a revert is, and why it is the honest measure</h2>
+  <p>A revert is an edit whose only purpose is to undo an earlier edit. Editors rarely type these
+    by hand: they press a button in one of the standard tools — undo, rollback, Twinkle, Huggle —
+    and each tool writes its own recognisable summary, like
+    <i>Undid revision 1377036483 by&nbsp;…</i>. Counting those summaries as they stream past gives
+    something no opinion piece can: a daily figure for how much of Wikipedia's work is correction
+    rather than addition.</p>
+  <p>It is a better measure than a spot-check of articles because it is unfiltered. Nobody chose
+    which pages to examine, there is no sample and no scoring rubric — every saved edit on the
+    English Wikipedia passes through the same count, all day, including the ones nobody was
+    watching.</p>
+
+  <h2>How this is measured, and what it misses</h2>
+  <p>One open connection to the public EventStreams feed, counting events as they arrive. Days are
+    UTC calendar days. An edit counts as a revert when its summary begins the way the revert tools
+    begin theirs.</p>
+  <p><b>Only the English Wikipedia is measured</b> for reverts, because every one of those summary
+    patterns is English. Applying them to the German or Japanese editions would quietly report
+    almost no reverts there, which would be worse than reporting nothing. The people-versus-bots
+    split below has no such limit and covers every language edition.</p>
+  <p><b>The revert count is a floor, not an estimate.</b> An editor who undoes something and types
+    their own summary from scratch is invisible to this count. There is no correction factor
+    applied to make up for it: a measured minimum is worth more than a guess dressed up as a
+    total.</p>
+  <p class="muted">The same numbers are machine-readable at
+    <a href="https://api.theplanetthinks.com/facts.json">facts.json</a>, one quotable sentence
+    each, under <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener">CC0</a>.</p>
+
+  <h2>The questions people actually ask</h2>
+  <h3>Is Wikipedia a reliable source?</h3>
+  <p>For getting oriented on a subject and for finding the real sources, yes. For citing directly
+    in academic work, no — and Wikipedia says so itself. The distinction that matters is that a
+    printed encyclopedia's errors sit there for a decade, while Wikipedia's have a timestamp, an
+    author, and a public record of being fixed. The rate at which that fixing happens is the
+    number at the top of this page.</p>
+  <h3>Can anyone edit Wikipedia?</h3>
+  <p>Yes. Most articles can be edited without an account, and a minority are protected because
+    they attract persistent trouble. The share of a day's edits that comes from editors who are
+    not signed in is in the table above — it is usually a modest slice, and it is the slice that
+    gets checked hardest.</p>
+  <h3>Is Wikipedia written by bots?</h3>
+  <p>Partly, and more than most people expect. Bots repair links, tidy formatting and import
+    structured data, and on several smaller language editions they create the majority of new
+    articles. The split for today, across every edition, is counted above.</p>
+  <h3>How fast does Wikipedia fix vandalism?</h3>
+  <p>Typically in minutes and often in seconds, because reverting is one keystroke and watchlists
+    are widely used. This page does not time individual reverts; it counts how many were performed,
+    which is the part that can be measured continuously rather than anecdotally.</p>
+  <h3>Why is Wikipedia not allowed as a source at school?</h3>
+  <p>Because it is a tertiary source — a summary of other sources — and because it can change
+    between the moment you read it and the moment someone checks. The practical answer is to use
+    it the way researchers do: read the article, then follow its citations and cite those.</p>
+
+  <p><a class="cta" href="/">Watch the edits happen on the globe →</a></p>
+</main>
+<script>
+  var fmt = function (n) { return n.toLocaleString('en-US'); };
+  var pct = function (n, d) { return d > 0 ? Math.round((n / d) * 1000) / 10 : 0; };
+  var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  function longDate(iso) { var p = iso.split('-'); return Number(p[2]) + ' ' + MONTHS[Number(p[1]) - 1] + ' ' + p[0]; }
+
+  // A day only counts as complete when the counter was running from its first minute;
+  // the server marks that with measured_from. Same rule as facts.json, so the two agree.
+  function complete(d) {
+    if (!d || typeof d.all_edits !== 'number' || d.all_edits <= 0 || !d.measured_from) return false;
+    var began = Date.parse(d.measured_from) - Date.parse(d.date + 'T00:00:00Z');
+    return began >= 0 && began <= 120000;
+  }
+
+  function row(label, value, extra) {
+    return '<tr><td>' + label + '</td><td class="n">' + value + '</td>' +
+           (extra === undefined ? '' : '<td>' + extra + '</td>') + '</tr>';
+  }
+
+  fetch('https://api.theplanetthinks.com/moments')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      var t = d.today || {};
+      var by = t.edits_by_editor;
+      var en = t.en_edits || 0, rev = t.en_reverts || 0;
+
+      if (en > 0) {
+        document.getElementById('rate').textContent = pct(rev, en) + '%';
+        document.getElementById('reverts').textContent = fmt(rev);
+      }
+      if (by) {
+        var all = by.user + by.anon + by.bot;
+        document.getElementById('human').textContent = pct(by.user + by.anon, all) + '%';
+        document.getElementById('anon').textContent = pct(by.anon, all) + '%';
+        document.getElementById('editors').innerHTML =
+          row('Signed-in people', fmt(by.user), pct(by.user, all) + '%') +
+          row('Not signed in', fmt(by.anon), pct(by.anon, all) + '%') +
+          row('Bots', fmt(by.bot), pct(by.bot, all) + '%');
+      }
+      document.getElementById('status').textContent = en > 0
+        ? fmt(en) + ' edits to the English Wikipedia counted so far today, since midnight UTC.'
+        : 'Counting began a moment ago — the first figures appear within the minute.';
+
+      var done = (d.days || []).filter(complete)[0];
+      var box = document.getElementById('yesterday');
+      if (!done || typeof done.en_edits !== 'number' || done.en_edits <= 0) {
+        box.innerHTML = '<tr><td class="muted">No day has yet been counted from its first minute ' +
+          'since this measurement started. The first complete day appears here tomorrow.</td></tr>';
+        return;
+      }
+      var when = longDate(done.date);
+      var dby = done.edits_by_editor || { user: 0, anon: 0, bot: 0 };
+      var dall = dby.user + dby.anon + dby.bot;
+      box.innerHTML =
+        row('Reverts on the English Wikipedia, ' + when, fmt(done.en_reverts || 0)) +
+        row('Share of its edits that were reverts', pct(done.en_reverts || 0, done.en_edits) + '%') +
+        row('One undone edit in every', fmt(Math.round(done.en_edits / Math.max(1, done.en_reverts || 0)))) +
+        (dall > 0 ? row('Edits by people, all editions', pct(dby.user + dby.anon, dall) + '%') : '');
+    })
+    .catch(function () {
+      document.getElementById('status').textContent = 'The live count could not be reached just now.';
+    });
+</script>
+</body>
+</html>

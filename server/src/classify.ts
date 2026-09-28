@@ -6,6 +6,7 @@ export interface RcEvent {
   title?: string;
   bot?: boolean;
   user?: string;
+  comment?: string;
   server_name?: string;
   length?: { old?: number; new?: number };
   revision?: { old?: number; new?: number };
@@ -22,6 +23,8 @@ export interface ArticleEdit {
   editor_type: EditorType;
   /** True when this edit created the article */
   is_new?: boolean;
+  /** True when this edit undid an earlier one; only ever set on English Wikipedia */
+  is_revert?: boolean;
   size_delta: number;
   ts: number;
 }
@@ -29,6 +32,39 @@ export interface ArticleEdit {
 const IPV4 = /^(\d{1,3}\.){3}\d{1,3}$/;
 const IPV6 = /^[0-9a-f:]+$/i;
 const TEMP_ACCOUNT = /^~\d{4}-/;
+
+// MediaWiki prefixes a summary with the section being edited: "/* History */ fixed date".
+const SECTION = /^\s*\/\*.*?\*\/\s*/;
+
+// The revert tools write their own summary, and each one has a fixed opening. Matching
+// only at the start is deliberate: an editor who writes "I reverted this last week" in
+// the middle of a summary has not reverted anything now. The patterns below cover undo,
+// rollback, Twinkle and Huggle — between them, how reverts are actually performed.
+//
+// This misses a revert whose author retyped the summary by hand, so the figure is a
+// floor rather than an estimate. Saying "at least this many" is worth more than a
+// guessed correction factor.
+const REVERT = new RegExp(
+  '^(?:' +
+  'undid revision\\b' +
+  '|undo revision\\b' +
+  '|reverted (?:\\d+ )?(?:edits?|good faith edits?|to revision|to last revision|unexplained|vandalism)\\b' +
+  '|restored revision\\b' +
+  '|rv\\b|rvv\\b|revert\\b' +
+  ')', 'i');
+
+/**
+ * Whether an edit summary says the edit undid an earlier one.
+ *
+ * The EventStreams feed carries no change tags — the `tags` field simply is not in the
+ * payload — so the summary is the only signal available live. Since every pattern here
+ * is English, this is meaningful on en.wikipedia.org and nowhere else, and the caller
+ * is responsible for not applying it to other editions.
+ */
+export function isRevert(comment: string | undefined): boolean {
+  if (!comment) return false;
+  return REVERT.test(comment.replace(SECTION, ''));
+}
 
 export function editorType(rc: RcEvent): EditorType {
   if (rc.bot) return 'bot';
@@ -88,6 +124,11 @@ export function classify(rc: RcEvent): ArticleEdit | null {
     // Only set when true: an absent field keeps the payload small and lets older
     // clients ignore it entirely.
     ...(rc.type === 'new' ? { is_new: true as const } : {}),
+    // English only, because every pattern the detector knows is an English summary.
+    // Marking edits on other editions would quietly report zero reverts for them.
+    ...(rc.server_name === 'en.wikipedia.org' && isRevert(rc.comment)
+      ? { is_revert: true as const }
+      : {}),
     size_delta: (rc.length?.new ?? 0) - (rc.length?.old ?? 0),
     ts: rc.meta?.dt ? Date.parse(rc.meta.dt) : Date.now(),
   };

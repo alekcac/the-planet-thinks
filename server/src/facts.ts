@@ -97,6 +97,32 @@ export function buildFacts(days: DaySummary[], now = Date.now()): FactSheet | nu
     }
   }
 
+  const by = day.edits_by_editor;
+  if (by && edits > 0) {
+    const pct = (n: number) => Math.round((n / edits) * 1000) / 10;
+    add('edits_by_people', by.user + by.anon, 'edits',
+      `${num(by.user + by.anon)} of the ${num(edits)} edits Wikipedia took on ${when} were made by ` +
+      `people rather than bots, or ${pct(by.user + by.anon)}% of the day.`);
+    add('edits_by_anonymous', by.anon, 'edits',
+      `${num(by.anon)} edits on ${when} came from people who were not signed in — ` +
+      `${pct(by.anon)}% of everything saved that day.`);
+    add('edits_by_bots', by.bot, 'edits',
+      `${num(by.bot)} of ${when}'s edits were made by bots, ${pct(by.bot)}% of the day's total.`);
+  }
+
+  if (typeof day.en_edits === 'number' && day.en_edits > 0 && typeof day.en_reverts === 'number') {
+    const rate = Math.round((day.en_reverts / day.en_edits) * 1000) / 10;
+    add('en_edits_per_day', day.en_edits, 'edits',
+      `The English Wikipedia alone took ${num(day.en_edits)} edits on ${when}.`);
+    add('reverts_per_day', day.en_reverts, 'edits',
+      `${num(day.en_reverts)} edits to the English Wikipedia on ${when} undid an earlier edit, ` +
+      `counted from the summaries the revert tools write.`);
+    add('revert_rate', rate, 'percent',
+      `${rate}% of the English Wikipedia's edits on ${when} were reverts — about one undone ` +
+      `edit in every ${Math.round(day.en_edits / Math.max(1, day.en_reverts))}. Reverts performed ` +
+      `without one of the standard tools are not counted, so the real rate is a little higher.`);
+  }
+
   add('located_edits_per_day', day.edits, 'edits',
     `${num(day.edits)} of ${when}'s edits were to articles about places, which is what the globe draws.`);
   if (day.photos > 0) {

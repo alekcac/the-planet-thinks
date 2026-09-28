@@ -1,5 +1,12 @@
 import type { EditorType, Pulse } from './protocol.js';
 
+/** The little an edit has to say about itself for the day's totals. */
+export interface AnyEdit {
+  wiki: string;
+  editor_type: EditorType;
+  is_revert?: boolean;
+}
+
 // Daily digest: which places got edited the most, and a fair sample of the day's
 // photos. Everything is bucketed by UTC calendar day; when the first event of a
 // new day arrives, the finished day is sealed into `history` and served via the
@@ -28,6 +35,20 @@ export interface DaySummary {
   new_articles?: number;
   /** How many of those a person created; the rest came from bots */
   new_by_human?: number;
+  /**
+   * Article edits that day split by who made them: a signed-in person, an anonymous or
+   * temporary account, or a bot. This is the other half of "can anyone edit Wikipedia" —
+   * the answer is yes, and this is how much of a day that actually accounts for.
+   */
+  edits_by_editor?: { user: number; anon: number; bot: number };
+  /**
+   * English Wikipedia article edits that day, and how many of them undid an earlier one.
+   * Kept apart from `all_edits` because reverts are read from the edit summary and every
+   * pattern the detector knows is English: dividing English reverts by a whole-Wikipedia
+   * total would understate the rate several times over.
+   */
+  en_edits?: number;
+  en_reverts?: number;
   /** New articles per language edition that day, largest first */
   new_by_lang?: Record<string, number>;
   /**
@@ -76,6 +97,9 @@ export class MomentsTracker {
   private photos = 0;
   private newArticles = 0;
   private newByHuman = 0;
+  private editsByEditor = { user: 0, anon: 0, bot: 0 };
+  private enEdits = 0;
+  private enReverts = 0;
   private newLangs = new Map<string, number>();
   private countryEdits = new Map<string, number>();
   private countryTitles = new Map<string, Map<string, HotArticle>>();
@@ -126,10 +150,17 @@ export class MomentsTracker {
    * Called for every event the classifier accepts, so the day's total matches what the
    * per-minute counter on the stats page adds up to.
    */
-  recordAnyEdit(now = Date.now()) {
+  recordAnyEdit(edit: AnyEdit, now = Date.now()) {
     this.roll(now);
     if (this.allEditsFrom === null) this.allEditsFrom = now;
     this.allEdits++;
+    this.editsByEditor[edit.editor_type]++;
+    // English is counted on its own so the revert rate has a denominator the detector
+    // actually covers.
+    if (edit.wiki === 'en.wikipedia.org') {
+      this.enEdits++;
+      if (edit.is_revert) this.enReverts++;
+    }
   }
 
   /**
@@ -178,6 +209,9 @@ export class MomentsTracker {
     this.photos = 0;
     this.newArticles = 0;
     this.newByHuman = 0;
+    this.editsByEditor = { user: 0, anon: 0, bot: 0 };
+    this.enEdits = 0;
+    this.enReverts = 0;
     this.newLangs.clear();
     this.countryEdits.clear();
     this.countryTitles.clear();
@@ -196,6 +230,9 @@ export class MomentsTracker {
       photos: this.photos,
       new_articles: this.newArticles,
       new_by_human: this.newByHuman,
+      edits_by_editor: { ...this.editsByEditor },
+      en_edits: this.enEdits,
+      en_reverts: this.enReverts,
       new_by_lang: Object.fromEntries(langs),
       by_country: Object.fromEntries([...this.countryEdits.entries()].sort((a, b) => b[1] - a[1])),
       top_articles: top,
@@ -216,6 +253,9 @@ export class MomentsTracker {
       photos: this.photos,
       newArticles: this.newArticles,
       newByHuman: this.newByHuman,
+      editsByEditor: this.editsByEditor,
+      enEdits: this.enEdits,
+      enReverts: this.enReverts,
       newLangs: [...this.newLangs.entries()],
       countryEdits: [...this.countryEdits.entries()],
       photoSeen: this.photoSeen,
@@ -234,6 +274,12 @@ export class MomentsTracker {
     this.photos = s.photos ?? 0;
     this.newArticles = s.newArticles ?? 0;
     this.newByHuman = s.newByHuman ?? 0;
+    const by = s.editsByEditor;
+    this.editsByEditor = {
+      user: by?.user ?? 0, anon: by?.anon ?? 0, bot: by?.bot ?? 0,
+    };
+    this.enEdits = s.enEdits ?? 0;
+    this.enReverts = s.enReverts ?? 0;
     this.newLangs = new Map(Array.isArray(s.newLangs) ? s.newLangs : []);
     this.countryEdits = new Map(Array.isArray(s.countryEdits) ? s.countryEdits : []);
     this.photoSeen = s.photoSeen ?? 0;

@@ -55,11 +55,26 @@ describe('MomentsTracker', () => {
 
   it('counts every edit, not just the ones it can map', () => {
     const m = new MomentsTracker(DAY1);
-    for (let i = 0; i < 5; i++) m.recordAnyEdit(DAY1);
+    for (let i = 0; i < 5; i++) m.recordAnyEdit({ wiki: 'fr.wikipedia.org', editor_type: 'user' }, DAY1);
     m.recordEdit(edit('Paris'), DAY1); // one of those five also had coordinates
     const { today } = m.snapshot(DAY1 + 1000);
     expect(today.all_edits).toBe(5);
     expect(today.edits).toBe(1);
+  });
+
+  it('counts the English revert rate against an English denominator', () => {
+    const m = new MomentsTracker(DAY1);
+    const en = (is_revert?: boolean) =>
+      m.recordAnyEdit({ wiki: 'en.wikipedia.org', editor_type: 'user', ...(is_revert ? { is_revert } : {}) }, DAY1);
+    en(); en(); en(true);
+    // Another edition's edits count towards the day's total but never towards the rate:
+    // the detector reads English summaries, so a German edit can only ever look clean.
+    m.recordAnyEdit({ wiki: 'de.wikipedia.org', editor_type: 'bot' }, DAY1);
+    const { today } = m.snapshot(DAY1 + 1000);
+    expect(today.all_edits).toBe(4);
+    expect(today.en_edits).toBe(3);
+    expect(today.en_reverts).toBe(1);
+    expect(today.edits_by_editor).toEqual({ user: 3, anon: 0, bot: 1 });
   });
 
   it('counts new articles across all wikis, splitting people from bots', () => {
