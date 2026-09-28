@@ -67,3 +67,38 @@ describe('buildFacts', () => {
     expect(ids).toContain('edits_per_day');
   });
 });
+
+describe('accuracy facts', () => {
+  const measured = (over: Partial<DaySummary> = {}) => day({
+    edits_by_editor: { user: 200_000, anon: 71_032, bot: 200_000 },
+    en_edits: 100_000,
+    en_reverts: 700,
+    split_from: '2026-09-22T00:00:31.000Z',
+    ...over,
+  });
+
+  it('reports the revert rate against an English denominator', () => {
+    const byId = Object.fromEntries(buildFacts([measured()])!.facts.map(f => [f.id, f]));
+    expect(byId.en_edits_per_day.value).toBe(100_000);
+    expect(byId.reverts_per_day.value).toBe(700);
+    // 700 of 100,000 English edits — not of the 471,032 across every edition.
+    expect(byId.revert_rate.value).toBe(0.7);
+    expect(byId.revert_rate.statement).toContain('one undone edit in every 143');
+    expect(byId.edits_by_bots.statement).toContain('42.5%');
+  });
+
+  it('publishes nothing about the split on a day it only saw part of', () => {
+    // The counters shipped mid-day: all_edits ran from midnight, these did not. A share
+    // of the day computed from them would be wrong by the hours that went uncounted.
+    const sheet = buildFacts([measured({ split_from: '2026-09-22T13:45:00.000Z' })])!;
+    const ids = sheet.facts.map(f => f.id);
+    expect(ids).toContain('edits_per_day'); // the whole-day figures are unaffected
+    expect(ids).not.toContain('revert_rate');
+    expect(ids).not.toContain('edits_by_bots');
+  });
+
+  it('publishes nothing about the split on a day recorded before it was tracked', () => {
+    const sheet = buildFacts([measured({ split_from: undefined })])!;
+    expect(sheet.facts.map(f => f.id)).not.toContain('revert_rate');
+  });
+});

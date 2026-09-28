@@ -52,6 +52,18 @@ const num = (n: number) => n.toLocaleString('en-US');
 /** A day counted from its first minute; anything else holds a partial total. */
 const COVERED_FROM_MS = 120_000; // counting must have begun within two minutes of midnight UTC
 
+/**
+ * Whether the editor split and revert count covered this whole day too. They began
+ * being counted after `all_edits` did, so a day can be complete for one and partial
+ * for the other; publishing a share of the day from a counter that only saw part of
+ * it is the same mistake as publishing a partial total.
+ */
+export function splitComplete(d: DaySummary): boolean {
+  if (!d.split_from) return false;
+  const began = Date.parse(d.split_from) - Date.parse(`${d.date}T00:00:00Z`);
+  return began >= 0 && began <= COVERED_FROM_MS;
+}
+
 export function complete(d: DaySummary): boolean {
   if (typeof d.all_edits !== 'number' || d.all_edits <= 0) return false;
   if (!d.measured_from) return false; // recorded before coverage was tracked: unknowable
@@ -97,8 +109,9 @@ export function buildFacts(days: DaySummary[], now = Date.now()): FactSheet | nu
     }
   }
 
+  const covered = splitComplete(day);
   const by = day.edits_by_editor;
-  if (by && edits > 0) {
+  if (by && covered && edits > 0) {
     const pct = (n: number) => Math.round((n / edits) * 1000) / 10;
     add('edits_by_people', by.user + by.anon, 'edits',
       `${num(by.user + by.anon)} of the ${num(edits)} edits Wikipedia took on ${when} were made by ` +
@@ -110,7 +123,8 @@ export function buildFacts(days: DaySummary[], now = Date.now()): FactSheet | nu
       `${num(by.bot)} of ${when}'s edits were made by bots, ${pct(by.bot)}% of the day's total.`);
   }
 
-  if (typeof day.en_edits === 'number' && day.en_edits > 0 && typeof day.en_reverts === 'number') {
+  if (covered && typeof day.en_edits === 'number' && day.en_edits > 0 &&
+      typeof day.en_reverts === 'number') {
     const rate = Math.round((day.en_reverts / day.en_edits) * 1000) / 10;
     add('en_edits_per_day', day.en_edits, 'edits',
       `The English Wikipedia alone took ${num(day.en_edits)} edits on ${when}.`);

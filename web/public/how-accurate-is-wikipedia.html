@@ -228,13 +228,16 @@
   var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   function longDate(iso) { var p = iso.split('-'); return Number(p[2]) + ' ' + MONTHS[Number(p[1]) - 1] + ' ' + p[0]; }
 
-  // A day only counts as complete when the counter was running from its first minute;
-  // the server marks that with measured_from. Same rule as facts.json, so the two agree.
-  function complete(d) {
-    if (!d || typeof d.all_edits !== 'number' || d.all_edits <= 0 || !d.measured_from) return false;
-    var began = Date.parse(d.measured_from) - Date.parse(d.date + 'T00:00:00Z');
+  // A day only counts as complete when the counter was running from its first minute.
+  // These counters started later than the whole-day total, so they carry their own
+  // marker: split_from. Same rule as facts.json, so page and JSON never disagree.
+  function covered(d) {
+    if (!d || !d.split_from) return false;
+    var began = Date.parse(d.split_from) - Date.parse(d.date + 'T00:00:00Z');
     return began >= 0 && began <= 120000;
   }
+
+  function clock(iso) { return iso.slice(11, 16) + ' UTC'; }
 
   function row(label, value, extra) {
     return '<tr><td>' + label + '</td><td class="n">' + value + '</td>' +
@@ -261,11 +264,14 @@
           row('Not signed in', fmt(by.anon), pct(by.anon, all) + '%') +
           row('Bots', fmt(by.bot), pct(by.bot, all) + '%');
       }
+      var since = covered(t) ? 'since midnight UTC'
+        : t.split_from ? 'since ' + clock(t.split_from) + ', when counting last restarted'
+        : '';
       document.getElementById('status').textContent = en > 0
-        ? fmt(en) + ' edits to the English Wikipedia counted so far today, since midnight UTC.'
+        ? fmt(en) + ' edits to the English Wikipedia counted so far today, ' + since + '.'
         : 'Counting began a moment ago — the first figures appear within the minute.';
 
-      var done = (d.days || []).filter(complete)[0];
+      var done = (d.days || []).filter(covered)[0];
       var box = document.getElementById('yesterday');
       if (!done || typeof done.en_edits !== 'number' || done.en_edits <= 0) {
         box.innerHTML = '<tr><td class="muted">No day has yet been counted from its first minute ' +

@@ -49,6 +49,14 @@ export interface DaySummary {
    */
   en_edits?: number;
   en_reverts?: number;
+  /**
+   * When the editor split and the revert count began for this day, ISO 8601. Separate
+   * from `measured_from` because these counters were added later: on the day they
+   * shipped, `all_edits` had been running since midnight while these started at the
+   * restart, and dividing one by the other would have produced a confident wrong
+   * percentage. Absent on days recorded before they existed.
+   */
+  split_from?: string;
   /** New articles per language edition that day, largest first */
   new_by_lang?: Record<string, number>;
   /**
@@ -100,6 +108,7 @@ export class MomentsTracker {
   private editsByEditor = { user: 0, anon: 0, bot: 0 };
   private enEdits = 0;
   private enReverts = 0;
+  private splitFrom: number | null = null;
   private newLangs = new Map<string, number>();
   private countryEdits = new Map<string, number>();
   private countryTitles = new Map<string, Map<string, HotArticle>>();
@@ -154,6 +163,7 @@ export class MomentsTracker {
     this.roll(now);
     if (this.allEditsFrom === null) this.allEditsFrom = now;
     this.allEdits++;
+    if (this.splitFrom === null) this.splitFrom = now;
     this.editsByEditor[edit.editor_type]++;
     // English is counted on its own so the revert rate has a denominator the detector
     // actually covers.
@@ -212,6 +222,7 @@ export class MomentsTracker {
     this.editsByEditor = { user: 0, anon: 0, bot: 0 };
     this.enEdits = 0;
     this.enReverts = 0;
+    this.splitFrom = null;
     this.newLangs.clear();
     this.countryEdits.clear();
     this.countryTitles.clear();
@@ -233,6 +244,7 @@ export class MomentsTracker {
       edits_by_editor: { ...this.editsByEditor },
       en_edits: this.enEdits,
       en_reverts: this.enReverts,
+      ...(this.splitFrom === null ? {} : { split_from: new Date(this.splitFrom).toISOString() }),
       new_by_lang: Object.fromEntries(langs),
       by_country: Object.fromEntries([...this.countryEdits.entries()].sort((a, b) => b[1] - a[1])),
       top_articles: top,
@@ -256,6 +268,7 @@ export class MomentsTracker {
       editsByEditor: this.editsByEditor,
       enEdits: this.enEdits,
       enReverts: this.enReverts,
+      splitFrom: this.splitFrom,
       newLangs: [...this.newLangs.entries()],
       countryEdits: [...this.countryEdits.entries()],
       photoSeen: this.photoSeen,
@@ -280,6 +293,9 @@ export class MomentsTracker {
     };
     this.enEdits = s.enEdits ?? 0;
     this.enReverts = s.enReverts ?? 0;
+    // Deliberately null when the saved state predates these counters: the next edit
+    // stamps it with the real start, so today is correctly reported as partial.
+    this.splitFrom = s.splitFrom ?? null;
     this.newLangs = new Map(Array.isArray(s.newLangs) ? s.newLangs : []);
     this.countryEdits = new Map(Array.isArray(s.countryEdits) ? s.countryEdits : []);
     this.photoSeen = s.photoSeen ?? 0;
