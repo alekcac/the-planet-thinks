@@ -43,7 +43,9 @@ Key facts:
 - [Wikipedia edits by country](https://theplanetthinks.com/places): which countries Wikipedia is
   writing about today, counted by the country the article's subject falls in rather than by the
   language it was written in — with the busiest articles inside each country and four weeks of
-  daily counts (https://theplanetthinks.com/places?country=Germany). Countries come from Natural
+  daily counts. Every country has its own address, for example
+  https://theplanetthinks.com/places/germany or https://theplanetthinks.com/places/japan — the
+  slug is the country's name lowercased with hyphens. Countries come from Natural
   Earth outlines matched offline; a point offshore belongs to no country rather than a guessed one.
   Machine-readable at https://api.theplanetthinks.com/places.json under CC0.
 - [A week of Wikipedia](https://theplanetthinks.com/week): the daily digest rolled up into ISO

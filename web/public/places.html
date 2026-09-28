@@ -85,6 +85,22 @@
     </table>
     <p class="muted" id="country-note"></p>
     <p><a class="cta" id="country-globe" href="/">Watch it on the globe →</a></p>
+
+    <h2>How the count is made</h2>
+    <p>An edit lands here when the article it changed carries coordinates that fall inside
+      this country's outline. Outlines come from Natural Earth at about a kilometre of
+      resolution, matched offline against every edit as it arrives — no geocoding service is
+      asked, and no border dispute is adjudicated. A point just offshore belongs to no country
+      rather than to a guessed one.</p>
+    <p>Only articles with coordinates can be placed at all, which is roughly a fifth of
+      Wikipedia. Articles about people, ideas and events have no location and are counted
+      <a href="/stats">in the totals</a> instead. So this is a count of writing about
+      <i>places</i> in this country, not of writing about the country.</p>
+    <p class="muted">The same figures are machine-readable at
+      <a id="country-json" href="https://api.theplanetthinks.com/places.json">places.json</a>,
+      under <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener">CC0</a>.
+      See also <a href="/facts">yesterday counted in full</a> and
+      <a href="/how-accurate-is-wikipedia">how accurate Wikipedia is</a>.</p>
     <p class="back"><a href="/places">← every country</a></p>
   </div>
 
@@ -115,7 +131,17 @@
   var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   function shortDate(iso) { var p = iso.split('-'); return Number(p[2]) + ' ' + MONTHS[Number(p[1]) - 1]; }
 
-  var want = new URLSearchParams(location.search).get('country');
+  // Country pages are generated one per country and name their own subject; the query
+  // string is kept working because links to ?country= are already out in the world.
+  function slug(n) {
+    return n.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+  var asked = new URLSearchParams(location.search).get('country');
+  var want = window.__COUNTRY__ || asked;
+  // One country, one address: send the old form to the page that owns the subject
+  // rather than answering from two URLs at once.
+  if (!window.__COUNTRY__ && asked) location.replace('/places/' + slug(asked));
 
   if (!want) {
     fetch('https://api.theplanetthinks.com/places.json')
@@ -131,7 +157,7 @@
         var max = rows[0][1];
         document.getElementById('countries').innerHTML = rows.map(function (r) {
           var w = Math.max(2, Math.round((r[1] / max) * 120));
-          return '<tr><td><a href="/places?country=' + encodeURIComponent(r[0]) + '">' + esc(r[0]) + '</a></td>' +
+          return '<tr><td><a href="/places/' + slug(r[0]) + '">' + esc(r[0]) + '</a></td>' +
                  '<td class="n">' + fmt(r[1]) + '</td>' +
                  '<td><span class="bar" style="width:' + w + 'px"></span></td></tr>';
         }).join('');
@@ -143,12 +169,17 @@
           '<tr><td colspan="3" class="muted">The counts could not be loaded just now.</td></tr>';
       });
   } else {
-    document.getElementById('index-view').hidden = true;
+    // The generated country pages ship without the index view at all, so this has to
+    // tolerate its absence rather than throwing before any figure is drawn.
+    var idx = document.getElementById('index-view');
+    if (idx) idx.hidden = true;
     document.getElementById('country-view').hidden = false;
     fetch('https://api.theplanetthinks.com/places.json?country=' + encodeURIComponent(want))
       .then(function (r) { if (!r.ok) throw new Error('unknown'); return r.json(); })
       .then(function (d) {
-        document.title = 'Wikipedia edits about ' + d.country + ' — The Planet Thinks';
+        // The title is not touched: each country page ships with one written for it, and
+        // the query-string form redirects here rather than rendering, so there is nothing
+        // left for this to fix — only a better title to overwrite.
         document.getElementById('heading').textContent = 'Wikipedia is writing about ' + d.country;
         document.getElementById('sub').textContent =
           'Edits to articles about places inside ' + d.country + ', counted since midnight UTC.';
@@ -183,6 +214,8 @@
             'as an absence of data.'
           : '';
 
+        var j = document.getElementById('country-json');
+        if (j) j.href = 'https://api.theplanetthinks.com/places.json?country=' + encodeURIComponent(d.country);
         var g = document.getElementById('country-globe');
         g.href = '/?view=' + d.centre.lat + ',' + d.centre.lon + ',1.6&follow=off';
         g.textContent = 'Watch ' + d.country + ' on the globe →';
