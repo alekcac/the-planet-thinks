@@ -126,7 +126,7 @@
   <p class="sub">Everyone answers this with an opinion. Here is a number instead.</p>
 
   <div class="cards">
-    <div class="card"><div class="v" id="rate">—</div><div class="l">of today's English edits undid an earlier one</div></div>
+    <div class="card"><div class="v" id="rate">—</div><div class="l" id="rate-label">of the English Wikipedia's edits undid an earlier one</div></div>
     <div class="card"><div class="v" id="reverts">—</div><div class="l">reverts so far today</div></div>
     <div class="card"><div class="v" id="human">—</div><div class="l">of today's edits made by people</div></div>
     <div class="card"><div class="v" id="anon">—</div><div class="l">made by editors who were not signed in</div></div>
@@ -227,6 +227,7 @@
   var pct = function (n, d) { return d > 0 ? Math.round((n / d) * 1000) / 10 : 0; };
   var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   function longDate(iso) { var p = iso.split('-'); return Number(p[2]) + ' ' + MONTHS[Number(p[1]) - 1] + ' ' + p[0]; }
+  function shortDate(iso) { var p = iso.split('-'); return Number(p[2]) + ' ' + MONTHS[Number(p[1]) - 1].slice(0, 3); }
 
   // A day only counts as complete when the counter was running from its first minute.
   // These counters started later than the whole-day total, so they carry their own
@@ -251,9 +252,16 @@
       var by = t.edits_by_editor;
       var en = t.en_edits || 0, rev = t.en_reverts || 0;
 
-      if (en > 0) {
+      // A percentage needs a denominator worth dividing by. Reverts run under one
+      // edit in a hundred, so in the first minutes of a day the honest rate is "not
+      // yet" — printing 0% would say Wikipedia never corrects itself, which is the
+      // opposite of what the page measures.
+      var MIN_DENOMINATOR = 1000;
+      if (en > 0) document.getElementById('reverts').textContent = fmt(rev);
+      if (en >= MIN_DENOMINATOR) {
         document.getElementById('rate').textContent = pct(rev, en) + '%';
-        document.getElementById('reverts').textContent = fmt(rev);
+        document.getElementById('rate-label').textContent =
+          "of today's English Wikipedia edits undid an earlier one";
       }
       if (by) {
         var all = by.user + by.anon + by.bot;
@@ -278,6 +286,12 @@
           'since this measurement started. The first complete day appears here tomorrow.</td></tr>';
         return;
       }
+      // A finished day beats a running one for the headline: it is the figure that can
+      // be quoted with a date on it.
+      document.getElementById('rate').textContent = pct(done.en_reverts || 0, done.en_edits) + '%';
+      document.getElementById('rate-label').textContent =
+        "of the English Wikipedia's edits on " + shortDate(done.date) + ' undid an earlier one';
+
       var when = longDate(done.date);
       var dby = done.edits_by_editor || { user: 0, anon: 0, bot: 0 };
       var dall = dby.user + dby.anon + dby.bot;
