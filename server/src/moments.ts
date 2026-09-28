@@ -57,6 +57,13 @@ export interface DaySummary {
    * percentage. Absent on days recorded before they existed.
    */
   split_from?: string;
+  /**
+   * Article edits per UTC hour of the day, 24 entries. Wikipedia's pace follows daylight
+   * around the planet, so "is this quiet?" has no answer without knowing which hour it is:
+   * 03:00 UTC runs at a fraction of 15:00 and both are perfectly normal. Absent on days
+   * recorded before this was tracked.
+   */
+  by_hour?: number[];
   /** New articles per language edition that day, largest first */
   new_by_lang?: Record<string, number>;
   /**
@@ -109,6 +116,7 @@ export class MomentsTracker {
   private enEdits = 0;
   private enReverts = 0;
   private splitFrom: number | null = null;
+  private byHour: number[] = new Array(24).fill(0);
   private newLangs = new Map<string, number>();
   private countryEdits = new Map<string, number>();
   private countryTitles = new Map<string, Map<string, HotArticle>>();
@@ -163,6 +171,7 @@ export class MomentsTracker {
     this.roll(now);
     if (this.allEditsFrom === null) this.allEditsFrom = now;
     this.allEdits++;
+    this.byHour[new Date(now).getUTCHours()]++;
     if (this.splitFrom === null) this.splitFrom = now;
     this.editsByEditor[edit.editor_type]++;
     // English is counted on its own so the revert rate has a denominator the detector
@@ -223,6 +232,7 @@ export class MomentsTracker {
     this.enEdits = 0;
     this.enReverts = 0;
     this.splitFrom = null;
+    this.byHour = new Array(24).fill(0);
     this.newLangs.clear();
     this.countryEdits.clear();
     this.countryTitles.clear();
@@ -245,6 +255,7 @@ export class MomentsTracker {
       en_edits: this.enEdits,
       en_reverts: this.enReverts,
       ...(this.splitFrom === null ? {} : { split_from: new Date(this.splitFrom).toISOString() }),
+      by_hour: [...this.byHour],
       new_by_lang: Object.fromEntries(langs),
       by_country: Object.fromEntries([...this.countryEdits.entries()].sort((a, b) => b[1] - a[1])),
       top_articles: top,
@@ -269,6 +280,7 @@ export class MomentsTracker {
       enEdits: this.enEdits,
       enReverts: this.enReverts,
       splitFrom: this.splitFrom,
+      byHour: this.byHour,
       newLangs: [...this.newLangs.entries()],
       countryEdits: [...this.countryEdits.entries()],
       photoSeen: this.photoSeen,
@@ -296,6 +308,8 @@ export class MomentsTracker {
     // Deliberately null when the saved state predates these counters: the next edit
     // stamps it with the real start, so today is correctly reported as partial.
     this.splitFrom = s.splitFrom ?? null;
+    this.byHour = Array.isArray(s.byHour) && s.byHour.length === 24
+      ? s.byHour.slice() : new Array(24).fill(0);
     this.newLangs = new Map(Array.isArray(s.newLangs) ? s.newLangs : []);
     this.countryEdits = new Map(Array.isArray(s.countryEdits) ? s.countryEdits : []);
     this.photoSeen = s.photoSeen ?? 0;

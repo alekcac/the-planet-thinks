@@ -10,6 +10,7 @@ import { ReplayBuffer } from './replay.js';
 import { StatsTracker } from './stats.js';
 import { MomentsTracker, buildMomentsRss } from './moments.js';
 import { buildFacts } from './facts.js';
+import { buildStatus } from './status.js';
 import { oembedFor } from './oembed.js';
 import { buildWeeks } from './weeks.js';
 import { historyCsv } from './csv.js';
@@ -202,6 +203,17 @@ const server = http.createServer((req, res) => {
       countries: snap.today.by_country ?? {},
       yesterday: snap.days[0]?.by_country ?? {},
     }));
+  } else if (route === '/status.json') {
+    // What every "is it down" site cannot answer: whether Wikipedia is still taking edits,
+    // not merely whether it is still serving pages.
+    const snap = moments.snapshot();
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify(buildStatus({
+      perMinute: stats.snapshot().total_rate,
+      lastEventAt,
+      days: snap.days,
+      site: wikipediaSite,
+    }), null, 2));
   } else if (route === '/healthz') {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({
@@ -259,6 +271,39 @@ setInterval(() => {
 
 let es: EventSource | null = null;
 let lastEventAt = Date.now();
+
+// Half the answer to "is Wikipedia down" is the ordinary one: can a reader load a page.
+// Checked here rather than in the browser because a visitor's own network problem would
+// otherwise be reported as Wikipedia's.
+const wikipediaSite: { reachable: boolean | null; ms: number | null; checkedAt: number | null } =
+  { reachable: null, ms: null, checkedAt: null };
+const SITE_CHECK_MS = 60_000;
+const SITE_TIMEOUT_MS = 8_000;
+
+async function checkWikipedia() {
+  const started = Date.now();
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), SITE_TIMEOUT_MS);
+  try {
+    const res = await fetch('https://en.wikipedia.org/wiki/Main_Page', {
+      method: 'HEAD',
+      signal: ctl.signal,
+      headers: { 'User-Agent': USER_AGENT },
+    });
+    wikipediaSite.reachable = res.ok;
+    wikipediaSite.ms = Date.now() - started;
+  } catch {
+    // A timeout or a refused connection is a real answer here, not an error to swallow.
+    wikipediaSite.reachable = false;
+    wikipediaSite.ms = null;
+  } finally {
+    clearTimeout(timer);
+    wikipediaSite.checkedAt = Date.now();
+  }
+}
+
+void checkWikipedia();
+setInterval(() => { void checkWikipedia(); }, SITE_CHECK_MS).unref();
 
 function startStream() {
   es?.close();

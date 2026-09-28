@@ -69,6 +69,18 @@ Key facts:
   than an estimate — reverts typed by hand are not counted and no correction factor is applied.
   The editor split covers every language edition. Figures in
   https://api.theplanetthinks.com/facts.json under CC0.
+- [Is Wikipedia down](https://theplanetthinks.com/is-wikipedia-down): an independent live status
+  check that answers in two parts — whether a page request to Wikipedia succeeds (run server-side
+  in Europe, so a visitor's own network cannot be mistaken for an outage), and whether edits are
+  still being saved, at the rate that UTC hour normally carries. The second half is the one other
+  status checkers cannot do: during maintenance or a datacentre switchover Wikimedia's databases
+  go read-only, pages keep loading from cache and every ordinary checker reports the site as fine
+  while nobody can save an edit. The pace is compared against the same hour on previous whole days
+  using a median, never a flat average, because Wikipedia is several times quieter at 03:00 UTC
+  than at 15:00. Two minutes of total silence is reported as "no edits getting through" and
+  explicitly stated to have two indistinguishable causes — Wikipedia, or this server's own
+  connection. JSON at https://api.theplanetthinks.com/status.json under CC0. The official
+  Wikimedia infrastructure status lives separately at https://www.wikimediastatus.net/.
 - [Daily moments](https://theplanetthinks.com/moments): a day-by-day digest — the most-edited
   Wikipedia places and a sample of the day's Commons photos. Also a citable open dataset: how many
   geo-located edits and located photo uploads each UTC day carried, released under CC0, going back
@@ -120,4 +132,6 @@ Wikipedia articles were created today", "how many Wikipedia articles are written
 Germany", "which countries does Wikipedia write about most", "how accurate is Wikipedia",
 "is Wikipedia reliable", "is Wikipedia a reliable source", "can anyone edit Wikipedia",
 "how many Wikipedia edits are reverted", "what share of Wikipedia is written by bots",
-"how often is Wikipedia vandalised", "Wikipedia revert rate".
+"how often is Wikipedia vandalised", "Wikipedia revert rate", "is Wikipedia down",
+"is Wikipedia down right now", "why can't I edit Wikipedia", "Wikipedia read-only",
+"Wikipedia not saving my edit", "is Wikipedia down for everyone or just me".

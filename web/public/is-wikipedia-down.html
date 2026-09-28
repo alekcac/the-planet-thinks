@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Is Wikipedia Down? Live Check — Pages and Edits</title>
+  <meta name="description" content="Live status for Wikipedia. Not just whether the site loads — whether it is still accepting edits, checked against the rate this hour normally runs at. Updates every few seconds." />
+  <link rel="canonical" href="https://theplanetthinks.com/is-wikipedia-down" />
+  <meta name="theme-color" content="#01020a" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://theplanetthinks.com/is-wikipedia-down" />
+  <meta property="og:site_name" content="The Planet Thinks" />
+  <meta property="og:title" content="Is Wikipedia down? A live check that watches the edits" />
+  <meta property="og:description" content="Other status pages ask whether the site loads. This one also asks whether edits are still arriving — Wikipedia can serve pages while refusing to save anything." />
+  <meta property="og:image" content="https://theplanetthinks.com/og.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://theplanetthinks.com/og.jpg" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": "https://theplanetthinks.com/is-wikipedia-down",
+    "url": "https://theplanetthinks.com/is-wikipedia-down",
+    "name": "Is Wikipedia down?",
+    "speakable": { "@type": "SpeakableSpecification", "cssSelector": ["h1", "#verdict", "#summary"] }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "The Planet Thinks", "item": "https://theplanetthinks.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Is Wikipedia down?", "item": "https://theplanetthinks.com/is-wikipedia-down" }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is Wikipedia down right now?",
+        "acceptedAnswer": { "@type": "Answer", "text": "This page answers live, and in two parts: whether a page request to Wikipedia succeeds, and whether edits are still arriving on the public feed at the rate this hour normally carries. Both have to hold for Wikipedia to be working — it can serve pages perfectly while a database lock stops anyone saving a change." }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does Wikipedia look up but nothing can be edited?",
+        "acceptedAnswer": { "@type": "Answer", "text": "During maintenance or a datacentre switchover, Wikimedia puts the databases into read-only mode. Pages continue to load from cache and from read replicas, so every ordinary status checker reports the site as fine, while editors see an error on save. A drop in the edit rate is the signal that catches this." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is it down for everyone or just me?",
+        "acceptedAnswer": { "@type": "Answer", "text": "The check on this page runs on a server in Europe, not in your browser, so it is not affected by your own network, DNS or captive portal. If this page says Wikipedia is reachable and you cannot open it, the problem is between you and Wikipedia rather than at Wikipedia." }
+      },
+      {
+        "@type": "Question",
+        "name": "How quiet is too quiet for Wikipedia?",
+        "acceptedAnswer": { "@type": "Answer", "text": "There is no single number, because the pace follows daylight around the planet: the quietest hour runs at a small fraction of the busiest, and both are normal. The comparison here is always against the same UTC hour on previous whole days, so a calm night is never mistaken for an outage." }
+      },
+      {
+        "@type": "Question",
+        "name": "Where does the official Wikimedia status page live?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Wikimedia publishes its own status at wikimediastatus.net, which reports on the foundation's infrastructure. This page is independent and measures the observable result rather than the infrastructure: whether pages load and whether edits are being saved." }
+      }
+    ]
+  }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #01020a; color: #cfd8ff; font: 16px/1.65 system-ui, sans-serif; }
+    main { max-width: 760px; margin: 0 auto; padding: 48px 20px 64px; }
+    h1 { font-size: 28px; font-weight: 600; letter-spacing: 0.02em; margin: 0 0 4px; }
+    .sub { opacity: 0.6; margin: 0 0 24px; font-size: 15px; }
+    h2 { font-size: 19px; font-weight: 600; margin: 40px 0 10px; }
+    h3 { font-size: 16px; font-weight: 600; margin: 22px 0 6px; color: #e2e8ff; }
+    p { margin: 10px 0; }
+    a { color: #9fc4ff; }
+    .muted { opacity: 0.55; font-size: 14px; }
+    .verdict { display: flex; align-items: center; gap: 13px; background: rgba(120,150,255,0.07);
+               border: 1px solid rgba(120,150,255,0.18); border-radius: 12px; padding: 18px 20px; margin: 22px 0 10px; }
+    .dot { width: 14px; height: 14px; border-radius: 50%; background: #6b7899; flex: none; }
+    .dot.up { background: #4ade80; box-shadow: 0 0 12px rgba(74,222,128,0.6); }
+    .dot.quiet { background: #fbbf24; box-shadow: 0 0 12px rgba(251,191,36,0.5); }
+    .dot.stalled { background: #f87171; box-shadow: 0 0 12px rgba(248,113,113,0.6); }
+    .verdict .t { font-size: 20px; font-weight: 600; color: #eef2ff; }
+    .verdict .s { font-size: 14px; opacity: 0.68; margin-top: 2px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 16px 0 6px; }
+    .card { background: rgba(120,150,255,0.07); border: 1px solid rgba(120,150,255,0.15); border-radius: 10px; padding: 14px; min-width: 0; }
+    .card .v { font-size: 20px; font-weight: 600; color: #eef2ff; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .card .l { font-size: 12.5px; opacity: 0.6; margin-top: 2px; }
+    .cta { display: inline-block; margin-top: 8px; padding: 10px 16px; border: 1px solid rgba(120,150,255,0.35); border-radius: 8px; text-decoration: none; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Is Wikipedia down?</h1>
+  <p class="sub">Checked from a server in Europe, not from your browser — and it watches the edits, not just the pages.</p>
+
+  <div class="verdict">
+    <span class="dot" id="dot"></span>
+    <span>
+      <span class="t" id="verdict">checking…</span>
+      <span class="s" id="summary">asking the live feed and requesting a page from Wikipedia</span>
+    </span>
+  </div>
+  <p class="muted" id="stamp">&nbsp;</p>
+
+  <div class="cards">
+    <div class="card"><div class="v" id="site">—</div><div class="l">pages loading</div></div>
+    <div class="card"><div class="v" id="rate">—</div><div class="l">edits arriving per minute</div></div>
+    <div class="card"><div class="v" id="usual">—</div><div class="l">usual for this hour</div></div>
+    <div class="card"><div class="v" id="gap">—</div><div class="l">since the last edit reached us</div></div>
+  </div>
+
+  <h2>Why this answers differently from the other checkers</h2>
+  <p>Every "is it down" site works the same way: request a page, report whether it came back.
+    That is a real signal, and this page does it too. But it only tells you the web servers are
+    answering, and Wikipedia has a failure mode where they answer perfectly while nothing can be
+    saved — during maintenance or a datacentre switchover the databases go read-only, pages keep
+    loading from cache, and editors get an error the moment they press publish.</p>
+  <p>This server already holds an open connection to
+    <a href="https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams" rel="noopener">Wikimedia EventStreams</a>,
+    the public feed carrying every change saved across Wikipedia, because it draws them on
+    <a href="/">a globe</a>. So it can watch the other half: are edits still being saved, and how
+    many a minute. When the pages load and the edits stop, that gap is the whole story.</p>
+
+  <h2>Quiet is not the same as down</h2>
+  <p>Wikipedia's pace follows daylight around the planet. The quietest hour of the UTC day runs at
+    a fraction of the busiest one, and nothing is wrong with either. So the rate above is never
+    compared against a flat average — it is compared against <b>the same hour on previous whole
+    days</b>, using the median so that one unusual day cannot move the bar. A calm night reads as
+    a calm night.</p>
+  <p class="muted">Days the server only saw part of are excluded from that baseline. An hour
+    counted from halfway through would look half as busy as it was and make a healthy Wikipedia
+    look stalled.</p>
+
+  <h2>When this page says "stalled"</h2>
+  <p>It means no edit at all has reached this server for two minutes, which is far outside
+    anything the feed does normally. Honestly, that has two possible causes: Wikipedia stopped
+    accepting edits, or this server lost its connection to the feed. From here they look
+    identical, so the page says so instead of picking the more dramatic one. Cross-check against
+    <a href="https://www.wikimediastatus.net/" rel="noopener">Wikimedia's own status page</a>,
+    which reports on the infrastructure rather than on the result.</p>
+
+  <h2>Questions</h2>
+  <h3>Is it down for everyone or just me?</h3>
+  <p>The check runs server-side, in Europe, so your own network, DNS or office captive portal has
+    no effect on it. If this page says Wikipedia is reachable and your browser disagrees, the
+    problem is on your side of the connection.</p>
+  <h3>Why can I read Wikipedia but not edit it?</h3>
+  <p>Almost always a read-only window: planned maintenance, a datacentre switchover, or a database
+    problem. Reading is served from caches and replicas and carries on; writing stops. It usually
+    lasts minutes. The edit rate above is the quickest public way to see it start and end.</p>
+  <h3>Does this cover every language edition?</h3>
+  <p>The edit rate counts article edits across every Wikipedia language edition at once, so a
+    problem affecting only one small edition will not move it. The page check asks for the English
+    Wikipedia's main page.</p>
+  <h3>Is there an API?</h3>
+  <p>Yes — the same answer as JSON at
+    <a href="https://api.theplanetthinks.com/status.json">status.json</a>, including the raw rate,
+    the baseline for the hour and how long it has been since the last edit arrived. Free to use,
+    under <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener">CC0</a>.</p>
+
+  <p class="muted">Related: <a href="/stats">how often Wikipedia is updated</a>,
+    <a href="/how-accurate-is-wikipedia">how accurate it is</a>,
+    <a href="/how-many-articles">how many articles it has</a>, and
+    <a href="/facts">yesterday counted in full</a>.</p>
+
+  <p><a class="cta" href="/">Watch the edits arrive on a globe →</a></p>
+</main>
+<script>
+  var API = 'https://api.theplanetthinks.com/status.json';
+  var WORDS = {
+    up: 'Wikipedia is up',
+    quiet: 'Wikipedia is up, but quiet',
+    stalled: 'No edits are getting through',
+    unknown: 'Wikipedia is up'
+  };
+  var $ = function (id) { return document.getElementById(id); };
+
+  function ago(sec) {
+    if (sec < 90) return sec + 's';
+    if (sec < 5400) return Math.round(sec / 60) + ' min';
+    return Math.round(sec / 3600) + ' h';
+  }
+
+  function draw(d) {
+    $('dot').className = 'dot ' + d.verdict;
+    $('verdict').textContent = WORDS[d.verdict] || 'Wikipedia is up';
+    $('summary').textContent = d.summary;
+    $('site').textContent = d.site.reachable === null ? '—'
+      : d.site.reachable ? (d.site.ms === null ? 'yes' : 'yes · ' + d.site.ms + 'ms') : 'no';
+    $('rate').textContent = d.edits.per_minute;
+    $('usual').textContent = d.edits.usual_per_minute === null ? 'not yet known' : d.edits.usual_per_minute;
+    $('gap').textContent = ago(d.edits.last_event_seconds_ago);
+    $('stamp').textContent = 'Checked ' + d.checked_at.slice(11, 19) + ' UTC. This page rechecks itself every 15 seconds.';
+  }
+
+  function poll() {
+    fetch(API, { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(draw)
+      .catch(function () {
+        // Our own server being unreachable says nothing about Wikipedia, and claiming
+        // otherwise would be the exact mistake this page exists to avoid.
+        $('dot').className = 'dot';
+        $('verdict').textContent = 'No answer from this checker';
+        $('summary').textContent = 'The status service could not be reached, which is a fact about ' +
+          'this site and not about Wikipedia. Try again in a moment.';
+        $('stamp').textContent = '';
+      });
+  }
+
+  poll();
+  setInterval(poll, 15000);
+</script>
+</body>
+</html>
