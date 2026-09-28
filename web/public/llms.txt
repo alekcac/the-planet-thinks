@@ -83,9 +83,12 @@ Key facts:
   (via the /?cinematic full-screen mode).
 - [Press & media kit](https://theplanetthinks.com/press): fact sheet, screenshots, logo, and the
   demo video.
-- [Embedding](https://theplanetthinks.com/screensaver#embed): the globe embeds anywhere via a
-  plain iframe (responsive snippet on that page); URL options ?lang=, ?view=, ?follow=off tune
-  the scene, and /photos?cinematic embeds the photo globe.
+- [Embed the globe](https://theplanetthinks.com/embed): a builder that assembles the iframe from
+  checkboxes — which globe (Wikipedia edits, Commons photos, OpenStreetMap changes), which language
+  edition, where to park the camera — with a live preview of the result and a copy button. Free, no
+  account, no API key, no quota, MIT-licensed. Tools that speak oEmbed (Notion, WordPress, Ghost,
+  Discourse, most wikis) need only the plain URL pasted on its own line; the oEmbed endpoint is
+  https://api.theplanetthinks.com/oembed?url=... and honours maxwidth/maxheight.
 - [Source code](https://github.com/alekcac/the-planet-thinks): MIT-licensed repository.
 
 ## Video

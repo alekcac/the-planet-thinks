@@ -55,7 +55,7 @@ export function initEmbedPanel() {
     '<span class="embed-said" role="status"></span></p>' +
     '<p class="muted">Tune the scene with URL options: <code>&amp;lang=de</code> for one language, ' +
     '<code>&amp;view=51,10,1.6</code> to park the camera, <code>&amp;follow=off</code> to stop it ' +
-    'chasing edits. <a href="/screensaver#embed">More options and a TV-sized version</a>.</p>' +
+    'chasing edits. <a href="/embed">Build it with a live preview</a>, or run it <a href="/screensaver">full screen on a TV</a>.</p>' +
     '</div>';
   (modal.querySelector('code') as HTMLElement).textContent = snippet;
   document.body.appendChild(modal);
