@@ -114,6 +114,8 @@
   <p>Every entry here happened in public: each place links to the real Wikipedia article, each
     photo to its Wikimedia Commons file page.</p>
   <p><a class="cta" href="/">Watch the planet think, live →</a></p>
+  <p class="muted">Every finished day also has <a href="/day">a page of its own</a>, with the
+    hour-by-hour shape of the day, who wrote it and which countries it was about.</p>
   <p class="muted">Looking for a longer view? <a href="/week">The same digest by week</a>,
     where each week keeps a permanent address — or <a href="/facts">yesterday in figures</a>,
     <a href="/places">today by country</a>, and
@@ -189,7 +191,7 @@
       s.id = day.date;
       var h = el('h2');
       var link = el('a', 'self', day.date);
-      link.href = '/moments?day=' + day.date;
+      link.href = '/day/' + day.date;
       link.title = 'Permanent link to ' + day.date;
       h.appendChild(link);
       s.appendChild(h);

@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wikipedia, One Day Measured</title>
+  <meta name="description" content="Everything one day of Wikipedia carried, counted from the live feed rather than estimated: edits, new articles, who wrote them, which places drew the most, and the hour-by-hour shape of the day." />
+  <link rel="canonical" href="https://theplanetthinks.com/day" />
+  <meta name="theme-color" content="#01020a" />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://theplanetthinks.com/day" />
+  <meta property="og:site_name" content="The Planet Thinks" />
+  <meta property="og:title" content="Wikipedia, one day measured" />
+  <meta property="og:description" content="One UTC day of Wikipedia, counted end to end from the live feed." />
+  <meta property="og:image" content="https://theplanetthinks.com/og.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://theplanetthinks.com/og.jpg" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": "Wikipedia, one day measured",
+    "description": "A single UTC day of Wikipedia activity counted from the Wikimedia EventStreams feed: edits across every language edition, articles created, the split between people and bots, edits to articles about places, geotagged photographs reaching Wikimedia Commons, and the busiest articles and countries of the day.",
+    "url": "https://theplanetthinks.com/day",
+    "distribution": [
+      { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://api.theplanetthinks.com/moments" },
+      { "@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": "https://api.theplanetthinks.com/history.csv" }
+    ],
+    "keywords": ["Wikipedia", "edits per day", "daily activity", "EventStreams", "open data"],
+    "creator": { "@type": "Organization", "name": "The Planet Thinks", "url": "https://theplanetthinks.com/" },
+    "isBasedOn": "https://stream.wikimedia.org/v2/stream/recentchange",
+    "measurementTechnique": "One open connection to the public EventStreams feed, counting events as they arrive. Days are UTC calendar days and only days counted from their first minute are published.",
+    "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "The Planet Thinks", "item": "https://theplanetthinks.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Daily moments", "item": "https://theplanetthinks.com/moments" },
+      { "@type": "ListItem", "position": 3, "name": "One day measured", "item": "https://theplanetthinks.com/day" }
+    ]
+  }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #01020a; color: #cfd8ff; font: 16px/1.65 system-ui, sans-serif; }
+    main { max-width: 760px; margin: 0 auto; padding: 48px 20px 64px; }
+    h1 { font-size: 28px; font-weight: 600; letter-spacing: 0.02em; margin: 0 0 4px; }
+    .sub { opacity: 0.6; margin: 0 0 24px; font-size: 15px; }
+    h2 { font-size: 19px; font-weight: 600; margin: 38px 0 10px; }
+    p { margin: 10px 0; }
+    a { color: #9fc4ff; }
+    .muted { opacity: 0.55; font-size: 14px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 22px 0 6px; }
+    .card { background: rgba(120,150,255,0.07); border: 1px solid rgba(120,150,255,0.15); border-radius: 10px; padding: 14px; min-width: 0; }
+    .card .v { font-size: 20px; font-weight: 600; color: #eef2ff; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .card .l { font-size: 12.5px; opacity: 0.6; margin-top: 2px; }
+    table { width: 100%; border-collapse: collapse; margin: 10px 0 4px; font-variant-numeric: tabular-nums; }
+    td, th { text-align: left; padding: 6px 8px; border-bottom: 1px solid rgba(120,150,255,0.12); font-size: 14.5px; }
+    th { opacity: 0.6; font-weight: 500; font-size: 12.5px; }
+    td.n, th.n { text-align: right; }
+    .bar { display: inline-block; height: 7px; background: rgba(120,150,255,0.5); border-radius: 3px; vertical-align: middle; }
+    .hours { display: flex; align-items: flex-end; gap: 2px; height: 96px; margin: 14px 0 4px; }
+    .hours i { flex: 1; background: rgba(120,150,255,0.45); border-radius: 2px 2px 0 0; min-height: 2px; }
+    .hours i.peak { background: rgba(159,196,255,0.9); }
+    .axis { display: flex; justify-content: space-between; font-size: 11.5px; opacity: 0.45; }
+    .photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; margin: 12px 0; }
+    .photos a { display: block; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: rgba(120,150,255,0.08); }
+    .photos img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .nav { display: flex; justify-content: space-between; gap: 12px; margin: 30px 0 0; font-size: 14px; }
+    .cta { display: inline-block; margin-top: 8px; padding: 10px 16px; border: 1px solid rgba(120,150,255,0.35); border-radius: 8px; text-decoration: none; }
+  </style>
+</head>
+<body>
+<main>
+  <h1 id="heading">Wikipedia, one day measured</h1>
+  <p class="sub" id="sub">Counted from the live feed, midnight to midnight UTC.</p>
+
+  <div id="body">
+    <p class="muted" id="loading">loading the day…</p>
+  </div>
+
+  <div class="nav">
+    <span id="prev"></span>
+    <span id="next"></span>
+  </div>
+  <p class="muted"><a href="/moments">← every day in the digest</a> ·
+    <a href="/week">the same rolled up by week</a> ·
+    <a href="/facts">yesterday as quotable sentences</a> ·
+    <a href="https://api.theplanetthinks.com/history.csv">the whole history as CSV</a></p>
+  <p><a class="cta" href="/">Watch today happen on the globe →</a></p>
+</main>
+<script>
+  var API = 'https://api.theplanetthinks.com/moments';
+  var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var fmt = function (n) { return n.toLocaleString('en-US'); };
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  function longDate(iso) { var p = iso.split('-'); return Number(p[2]) + ' ' + MONTHS[Number(p[1]) - 1] + ' ' + p[0]; }
+  function pct(n, d) { return d > 0 ? Math.round((n / d) * 1000) / 10 : 0; }
+
+  // Each day owns an address; the older ?day= form is kept alive by sending it there.
+  var asked = (location.search.match(/[?&]day=(\d{4}-\d{2}-\d{2})/) || [])[1];
+  var want = window.__DAY__ || asked;
+  if (!window.__DAY__ && asked) location.replace('/day/' + asked);
+
+  function covered(d, field) {
+    if (!d || !d[field]) return false;
+    var began = Date.parse(d[field]) - Date.parse(d.date + 'T00:00:00Z');
+    return began >= 0 && began <= 120000;
+  }
+
+  function hours(day) {
+    if (!Array.isArray(day.by_hour) || day.by_hour.length !== 24) return '';
+    var max = Math.max.apply(null, day.by_hour);
+    if (!max) return '';
+    var peak = day.by_hour.indexOf(max);
+    var bars = day.by_hour.map(function (n, h) {
+      return '<i class="' + (h === peak ? 'peak' : '') + '" style="height:' +
+        Math.max(2, Math.round((n / max) * 96)) + 'px" title="' + h + ':00 UTC — ' + fmt(n) + ' edits"></i>';
+    }).join('');
+    return '<h2>The shape of the day</h2>' +
+      '<div class="hours">' + bars + '</div>' +
+      '<div class="axis"><span>00:00 UTC</span><span>12:00</span><span>23:00</span></div>' +
+      '<p class="muted">Busiest hour: ' + peak + ':00 UTC, with ' + fmt(max) + ' edits. The pace ' +
+      'follows daylight across the planet rather than any editorial schedule.</p>';
+  }
+
+  function rows(obj, limit, label) {
+    var list = Object.keys(obj || {}).map(function (k) { return [k, obj[k]]; })
+      .sort(function (a, b) { return b[1] - a[1]; }).slice(0, limit);
+    if (!list.length) return '';
+    var max = list[0][1];
+    return '<table><thead><tr><th>' + label + '</th><th class="n">edits</th><th></th></tr></thead><tbody>' +
+      list.map(function (r) {
+        return '<tr><td>' + esc(r[0]) + '</td><td class="n">' + fmt(r[1]) + '</td>' +
+          '<td><span class="bar" style="width:' + Math.max(2, Math.round((r[1] / max) * 110)) + 'px"></span></td></tr>';
+      }).join('') + '</tbody></table>';
+  }
+
+  function render(day, all) {
+    var when = longDate(day.date);
+    // Generated pages arrive with a title written for the day, including whether its
+    // totals can be quoted; only set one when there is none to keep.
+    if (!window.__DAY__) document.title = 'Wikipedia on ' + when + ' — The Planet Thinks';
+    document.getElementById('heading').textContent = 'Wikipedia on ' + when;
+    document.getElementById('sub').textContent =
+      'One UTC day counted from the live feed, midnight to midnight.';
+
+    var whole = covered(day, 'measured_from');
+    var split = covered(day, 'split_from');
+    var html = '';
+
+    html += '<div class="cards">';
+    if (whole && day.all_edits) {
+      html += '<div class="card"><div class="v">' + fmt(day.all_edits) + '</div><div class="l">edits, all editions</div></div>';
+      html += '<div class="card"><div class="v">' + fmt(Math.round(day.all_edits / 1440)) + '</div><div class="l">edits a minute, averaged</div></div>';
+    }
+    if (day.new_articles) html += '<div class="card"><div class="v">' + fmt(day.new_articles) + '</div><div class="l">new articles created</div></div>';
+    html += '<div class="card"><div class="v">' + fmt(day.edits) + '</div><div class="l">edits about places</div></div>';
+    if (day.photos) html += '<div class="card"><div class="v">' + fmt(day.photos) + '</div><div class="l">geotagged photos to Commons</div></div>';
+    html += '</div>';
+
+    if (!whole) {
+      // Two different absences, and saying which is which matters: a day counted from
+      // 16:30 is known to be short, while an early day simply never recorded whether it
+      // was complete. Asserting the first about the second would be inventing a fact.
+      html += day.measured_from
+        ? '<p class="muted">Counting began at ' + day.measured_from.slice(11, 16) + ' UTC rather ' +
+          'than at midnight, so the whole-day totals are withheld here instead of being shown ' +
+          'short. Everything below was counted for as much of the day as was watched.</p>'
+        : '<p class="muted">This day predates the record of when counting began, so there is no ' +
+          'way to know whether it was watched from its first minute. Rather than present totals ' +
+          'that might be partial, they are withheld; the figures below stand on their own.</p>';
+    }
+
+    if (day.new_articles && typeof day.new_by_human === 'number') {
+      html += '<h2>Who wrote it</h2><p>' + fmt(day.new_by_human) + ' of the ' + fmt(day.new_articles) +
+        ' articles created on ' + when + ' were written by people, and ' +
+        fmt(day.new_articles - day.new_by_human) + ' by bots.';
+      if (split && day.edits_by_editor) {
+        var by = day.edits_by_editor, tot = by.user + by.anon + by.bot;
+        html += ' Across every edit that day, ' + pct(by.user + by.anon, tot) + '% came from people — ' +
+          pct(by.anon, tot) + '% of the total from editors who were not signed in — and ' +
+          pct(by.bot, tot) + '% from bots.';
+      }
+      html += '</p>';
+    }
+
+    if (split && day.en_edits && typeof day.en_reverts === 'number') {
+      html += '<p>The English Wikipedia took ' + fmt(day.en_edits) + ' edits, of which ' +
+        fmt(day.en_reverts) + ' undid an earlier edit — ' + pct(day.en_reverts, day.en_edits) +
+        '%, or about one in ' + fmt(Math.round(day.en_edits / Math.max(1, day.en_reverts))) + '. ' +
+        '<a href="/how-accurate-is-wikipedia">What that rate means</a>.</p>';
+    }
+
+    html += hours(day);
+
+    if (day.top_articles && day.top_articles.length) {
+      html += '<h2>The places that drew the most</h2><table><thead><tr><th>Article</th><th>Edition</th><th class="n">edits</th></tr></thead><tbody>' +
+        day.top_articles.map(function (a) {
+          return '<tr><td><a href="' + esc(a.url) + '" rel="noopener">' + esc(a.title) + '</a></td>' +
+                 '<td>' + esc(a.lang) + '</td><td class="n">' + fmt(a.count) + '</td></tr>';
+        }).join('') + '</tbody></table>' +
+        '<p class="muted">Counted among edits to articles carrying coordinates, which is the ' +
+        'fifth of Wikipedia that can be placed on a map.</p>';
+    }
+
+    var countries = rows(day.by_country, 10, 'Country');
+    if (countries) html += '<h2>Countries written about</h2>' + countries +
+      '<p class="muted">Each country has <a href="/places">its own page</a> with four weeks of daily counts.</p>';
+
+    var langs = rows(day.new_by_lang, 10, 'Language edition');
+    if (langs) html += '<h2>Where the new articles appeared</h2>' +
+      langs.replace('<th class="n">edits</th>', '<th class="n">new articles</th>');
+
+    if (day.day_photos && day.day_photos.length) {
+      html += '<h2>Photographed that day</h2><div class="photos">' +
+        day.day_photos.filter(function (p) { return p.img; }).map(function (p) {
+          return '<a href="' + esc(p.url) + '" rel="noopener" title="' + esc(p.title) + '">' +
+            '<img src="' + esc(p.img) + '" alt="' + esc(p.title) + '" loading="lazy" /></a>';
+        }).join('') + '</div>' +
+        '<p class="muted">A fair sample of the day’s geotagged uploads to Wikimedia Commons, ' +
+        'drawn so that every photo of the day had an equal chance of appearing.</p>';
+    }
+
+    html += '<h2>How this was measured</h2>' +
+      '<p>One open connection to the public ' +
+      '<a href="https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams" rel="noopener">Wikimedia EventStreams</a> ' +
+      'feed, counting events as they arrived on ' + when + '. Days are UTC calendar days. Edits are ' +
+      'saved changes to articles in any language edition, bots included. Nothing is sampled, ' +
+      'estimated or back-filled: a figure that was not counted is absent rather than guessed. ' +
+      'Released under <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener">CC0</a>.</p>';
+
+    document.getElementById('body').innerHTML = html;
+
+    // Neighbours, so the archive can be walked rather than only searched.
+    var i = all.map(function (d) { return d.date; }).indexOf(day.date);
+    if (i > 0) document.getElementById('next').innerHTML =
+      '<a href="/day/' + all[i - 1].date + '">' + longDate(all[i - 1].date) + ' →</a>';
+    if (i >= 0 && i + 1 < all.length) document.getElementById('prev').innerHTML =
+      '<a href="/day/' + all[i + 1].date + '">← ' + longDate(all[i + 1].date) + '</a>';
+  }
+
+  fetch(API).then(function (r) { return r.json(); }).then(function (d) {
+    var all = (d.days || []).slice();
+    if (!want) {
+      // No day named: this is the archive's front door.
+      document.getElementById('body').innerHTML =
+        '<p>Every finished day keeps its own address. Pick one:</p><table><thead><tr>' +
+        '<th>Day</th><th class="n">edits</th><th class="n">new articles</th></tr></thead><tbody>' +
+        all.map(function (x) {
+          return '<tr><td><a href="/day/' + x.date + '">' + longDate(x.date) + '</a></td>' +
+            '<td class="n">' + (x.all_edits ? fmt(x.all_edits) : '—') + '</td>' +
+            '<td class="n">' + (x.new_articles ? fmt(x.new_articles) : '—') + '</td></tr>';
+        }).join('') + '</tbody></table>';
+      return;
+    }
+    var day = all.filter(function (x) { return x.date === want; })[0];
+    if (!day) {
+      document.getElementById('heading').textContent = 'No record for ' + want;
+      document.getElementById('body').innerHTML =
+        '<p>The digest keeps the last 90 days. If that date is older, it was never recorded here ' +
+        'rather than lost. <a href="/day">See the days that are kept</a>.</p>';
+      return;
+    }
+    render(day, all);
+  }).catch(function () {
+    document.getElementById('loading').textContent = 'The day could not be loaded just now.';
+  });
+</script>
+</body>
+</html>

@@ -81,6 +81,14 @@ Key facts:
   explicitly stated to have two indistinguishable causes — Wikipedia, or this server's own
   connection. JSON at https://api.theplanetthinks.com/status.json under CC0. The official
   Wikimedia infrastructure status lives separately at https://www.wikimediastatus.net/.
+- [A day measured](https://theplanetthinks.com/day): every finished UTC day keeps its own
+  address, for example https://theplanetthinks.com/day/2026-09-27 — edits across all editions,
+  articles created and how many people rather than bots wrote them, edits to articles about
+  places, geotagged photos reaching Commons, the busiest articles and countries, the hour-by-hour
+  shape of the day, and the English revert rate. A day counted from partway through has its
+  whole-day totals withheld rather than shown short, and days recorded before coverage was
+  tracked say so instead of claiming to be partial. Index of kept days at
+  https://theplanetthinks.com/day; the archive holds 90 days.
 - [Daily moments](https://theplanetthinks.com/moments): a day-by-day digest — the most-edited
   Wikipedia places and a sample of the day's Commons photos. Also a citable open dataset: how many
   geo-located edits and located photo uploads each UTC day carried, released under CC0, going back
