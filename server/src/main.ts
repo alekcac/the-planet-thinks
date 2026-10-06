@@ -16,6 +16,7 @@ import { buildWeeks } from './weeks.js';
 import { historyCsv } from './csv.js';
 import { diffUrl, parseSequence, parseOsmChange } from './osm.js';
 import { loadCountries, countryAt, countryCentre } from './countries.js';
+import { DwellTracker } from './dwell.js';
 import type { Pulse, ServerMessage } from './protocol.js';
 
 // Streams a client can subscribe to via /ws?stream=…; the default stays the Wikipedia
@@ -72,22 +73,11 @@ try {
 } catch { /* start empty */ }
 setInterval(() => fs.writeFile(REF_FILE, JSON.stringify(Object.fromEntries(referrers)), () => {}), 5 * 60_000);
 
-// Time on site: a client holds a WebSocket open for as long as the tab is open, so the lifetime
-// of each connection is a good proxy for dwell time. We keep an aggregate histogram (no per-user
-// data) plus a running sum, persisted across restarts. Reconnects can split one visit into a few
-// sessions, so the median is more trustworthy than the mean.
+// Time on site, overall, per referrer and per day (see dwell.ts).
 const DWELL_FILE = path.join(DATA_DIR, 'dwell.json');
-const DWELL_LOWER = [0, 10, 30, 60, 180, 600, 1800]; // bucket lower bounds (seconds)
-const DWELL_UPPER = [10, 30, 60, 180, 600, 1800, 3600]; // upper bounds (last is a 30m+ estimate cap)
-const DWELL_LABELS = ['<10s', '10-30s', '30-60s', '1-3m', '3-10m', '10-30m', '30m+'];
-const dwell = { sessions: 0, sumSec: 0, buckets: new Array(DWELL_LABELS.length).fill(0) as number[] };
-try {
-  const s = JSON.parse(fs.readFileSync(DWELL_FILE, 'utf8'));
-  if (typeof s.sessions === 'number') dwell.sessions = s.sessions;
-  if (typeof s.sumSec === 'number') dwell.sumSec = s.sumSec;
-  if (Array.isArray(s.buckets) && s.buckets.length === DWELL_LABELS.length) dwell.buckets = s.buckets;
-} catch { /* start empty */ }
-setInterval(() => fs.writeFile(DWELL_FILE, JSON.stringify(dwell), () => {}), 5 * 60_000);
+const dwell = new DwellTracker();
+try { dwell.load(JSON.parse(fs.readFileSync(DWELL_FILE, 'utf8'))); } catch { /* start empty */ }
+setInterval(() => fs.writeFile(DWELL_FILE, JSON.stringify(dwell.dump()), () => {}), 5 * 60_000);
 
 // Daily digest for the /moments page and RSS feed.
 const RSS_ITEMS = 14;
@@ -101,32 +91,6 @@ try {
 } catch { /* start empty */ }
 setInterval(() => fs.writeFile(MOMENTS_FILE, JSON.stringify(moments.dump()), () => {}), 5 * 60_000);
 
-function recordDwell(ms: number) {
-  const sec = ms / 1000;
-  if (!(sec >= 0) || sec > 86_400) return; // ignore negative / absurd (>24h)
-  dwell.sessions++;
-  dwell.sumSec += sec;
-  let bi = DWELL_LOWER.length - 1;
-  for (let i = 0; i < DWELL_UPPER.length; i++) { if (sec < DWELL_UPPER[i]) { bi = i; break; } }
-  dwell.buckets[bi]++;
-}
-
-function dwellSnapshot() {
-  const n = dwell.sessions;
-  const mean = n ? dwell.sumSec / n : 0;
-  let cum = 0, median = 0; const half = n / 2;
-  for (let i = 0; i < dwell.buckets.length; i++) {
-    if (cum + dwell.buckets[i] >= half) {
-      const into = dwell.buckets[i] ? (half - cum) / dwell.buckets[i] : 0;
-      median = DWELL_LOWER[i] + into * (DWELL_UPPER[i] - DWELL_LOWER[i]);
-      break;
-    }
-    cum += dwell.buckets[i];
-  }
-  const histogram: Record<string, number> = {};
-  DWELL_LABELS.forEach((l, i) => { histogram[l] = dwell.buckets[i]; });
-  return { sessions: n, mean_sec: Math.round(mean), median_sec: Math.round(median), histogram };
-}
 
 const server = http.createServer((req, res) => {
   // Route on the path alone: feed readers and link shorteners append query strings
@@ -230,7 +194,7 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify(Object.fromEntries(sorted)));
   } else if (route === '/dwell') {
     res.setHeader('content-type', 'application/json');
-    res.end(JSON.stringify({ live: wss.clients.size, ...dwellSnapshot() }));
+    res.end(JSON.stringify({ live: wss.clients.size, ...dwell.snapshot() }));
   } else {
     res.statusCode = 404;
     res.end();
@@ -243,13 +207,14 @@ const wss = new WebSocketServer({ server, path: '/ws' });
 wss.on('connection', (ws: StreamSocket, req) => {
   if (wss.clients.size > MAX_CLIENTS) { ws.close(1013, 'at capacity'); return; }
   const t0 = Date.now();
-  ws.on('close', () => recordDwell(Date.now() - t0));
+  let ref = '';
+  ws.on('close', () => dwell.record(Date.now() - t0, ref));
   ws.stream = 'wiki';
   try {
     const params = new URL(req.url ?? '/', 'http://x').searchParams;
     const stream = params.get('stream');
     if (stream === 'commons' || stream === 'osm') ws.stream = stream;
-    const ref = (params.get('ref') ?? '').slice(0, 80);
+    ref = (params.get('ref') ?? '').slice(0, 80);
     if (ref && (referrers.has(ref) || referrers.size < 1000)) {
       referrers.set(ref, (referrers.get(ref) ?? 0) + 1);
     }
