@@ -57,10 +57,14 @@ async function days() {
   }
 }
 
-function pageFor(template, day) {
+function pageFor(template, day, prev, next) {
   const when = longDate(day.date);
   const url = `https://theplanetthinks.com/day/${day.date}`;
   const counted = whole(day);
+  // One named event makes the day's page distinguishable in a result list that is otherwise
+  // all numbers of the same shape.
+  const top = Array.isArray(day.top_articles) && day.top_articles[0] && day.top_articles[0].title
+    ? day.top_articles[0] : null;
   // The title carries the figure only when the day was counted end to end. A partial day
   // with a number in its title would be a wrong number in the most quotable place there is.
   const title = counted
@@ -69,7 +73,9 @@ function pageFor(template, day) {
   const desc = counted
     ? `On ${when} Wikipedia took ${num(day.all_edits)} edits across every language edition` +
       (day.new_articles ? `, gained ${num(day.new_articles)} new articles` : '') +
-      `, and ${num(day.edits)} of those edits were to articles about places. Counted from the live feed, not estimated.`
+      `, and ${num(day.edits)} of those edits were to articles about places.` +
+      (top ? ` The most-edited place was ${top.title} (${top.lang}), ${num(top.count)} edits.` : '') +
+      ` Counted from the live feed, not estimated.`
     : `What was measured of ${when} on Wikipedia: ${num(day.edits)} edits to articles about places` +
       (day.photos ? ` and ${num(day.photos)} geotagged photographs` : '') +
       (day.measured_from
@@ -98,6 +104,12 @@ function pageFor(template, day) {
   swap(/"name": "One day measured", "item": "https:\/\/theplanetthinks\.com\/day"/,
     `"name": ${JSON.stringify(when)}, "item": "${url}"`);
   swap(/<h1 id="heading">[^<]*<\/h1>/, `<h1 id="heading">Wikipedia on ${esc(when)}</h1>`);
+  // Neighbours as static links: the page's own script fills these too, but a crawler
+  // walking the archive should not need to run it.
+  swap(/<span id="prev"><\/span>/, prev
+    ? `<span id="prev"><a href="/day/${prev.date}">← ${esc(longDate(prev.date))}</a></span>` : '<span id="prev"></span>');
+  swap(/<span id="next"><\/span>/, next
+    ? `<span id="next"><a href="/day/${next.date}">${esc(longDate(next.date))} →</a></span>` : '<span id="next"></span>');
   swap(/<script>\n {2}var API =/,
     `<script>window.__DAY__ = ${JSON.stringify(day.date)};</script>\n<script>\n  var API =`);
   return out;
@@ -107,8 +119,9 @@ const template = await readFile(TEMPLATE, 'utf8');
 const list = await days();
 await mkdir(OUT_DIR, { recursive: true });
 
-for (const day of list) {
-  await writeFile(new URL(`${day.date}.html`, OUT_DIR), pageFor(template, day));
+// The feed lists newest first, so the previous day is the next element.
+for (const [i, day] of list.entries()) {
+  await writeFile(new URL(`${day.date}.html`, OUT_DIR), pageFor(template, day, list[i + 1], list[i - 1]));
 }
 
 if (list.length) {

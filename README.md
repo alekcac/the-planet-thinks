@@ -38,6 +38,11 @@ Tune the scene with URL options: `?lang=de,fr` shows only those language edition
 and `/photos?cinematic` embeds the photo globe instead. Keeping the credit line under
 the iframe is appreciated.
 
+The same scene runs full screen as a
+[free screensaver website](https://theplanetthinks.com/screensaver) on a TV or second
+monitor, and [is Wikipedia down?](https://theplanetthinks.com/is-wikipedia-down) answers
+from the edit stream itself when the globe goes quiet.
+
 ## Develop
 
 Requires Node ≥ 22.
